@@ -8,15 +8,17 @@ import { useDrawingTools } from "../Context/DrawingToolsContext";
 import toolsList from "../Assets/ToolsItemList";
 import { useCallback } from "react";
 
+
 export default function Tools() {
 
-  const { lineWidth, setLineWidth , setSelectedTool, selectedTool} = useDrawingTools();
+  const { lineWidth, setLineWidth, selectedTool,setSelectedTool} = useDrawingTools();
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [min, setMin] = useState(1);
   const [max,setMax] = useState(10);
 
   const handleOpen = (event) => {
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
     setOpen(true);
   };
@@ -28,7 +30,6 @@ export default function Tools() {
   
   const handleSelection = useCallback((e,tool) =>{
     e.preventDefault();
-    console.log(tool)
     if(tool==="Pen" || tool==="Brush"){
         setMin(5);
         if(selectedTool!==tool)
@@ -42,7 +43,7 @@ export default function Tools() {
         setMax(10);
     }
     setSelectedTool(tool);
-  },[setSelectedTool,setLineWidth,selectedTool])
+  },[setLineWidth,selectedTool,setSelectedTool])
 
   return (
     <div>
@@ -60,7 +61,6 @@ export default function Tools() {
             onClick={action.name==="Thickness" ? handleOpen :(e) => handleSelection(e,action.name)}
             sx={{ backgroundColor: selectedTool === action.name ? 'gray' : 'transparent' }}
           >
-            {action.child}
           </SpeedDialAction>
         ))}
       </SpeedDial>

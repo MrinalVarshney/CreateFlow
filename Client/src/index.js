@@ -4,13 +4,16 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { DrawingToolsProvider } from "./Context/DrawingToolsContext";
+import { HistoryProvider } from "./Context/History";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <DrawingToolsProvider>
-      <App />
-    </DrawingToolsProvider>
+    <HistoryProvider>
+      <DrawingToolsProvider>
+        <App />
+      </DrawingToolsProvider>
+    </HistoryProvider>
   </React.StrictMode>
 );
 

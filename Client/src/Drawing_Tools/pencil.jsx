@@ -1,5 +1,6 @@
 import React from "react";
 import { useDrawingTools } from "../Context/DrawingToolsContext";
+import CreateIcon from "@mui/icons-material/Create";
 
 const Pencil = () => {
   const { setSelectedTool } = useDrawingTools();
@@ -7,8 +8,8 @@ const Pencil = () => {
     setSelectedTool("pencil");
   }
   return (
-    <div>
-      <button onClick={handlePencil}>Pencil</button>
+    <div style={{display:"grid", justifyContent:"center"}}>
+      <CreateIcon onClick={handlePencil} />
     </div>
   );
 };
