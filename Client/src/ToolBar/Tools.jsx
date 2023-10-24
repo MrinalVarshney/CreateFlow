@@ -49,7 +49,7 @@ export default function Tools() {
     <div>
       <SpeedDial
         ariaLabel="SpeedDial basic example"
-        sx={{ position: "absolute", paddingTop: 0.5, paddingLeft: 0.5 }}
+        sx={{ position:"absolute", paddingTop: 0.5, paddingLeft: 0.5, display:"inline-block" }}
         icon={<GestureIcon />}
         direction="down"
       >

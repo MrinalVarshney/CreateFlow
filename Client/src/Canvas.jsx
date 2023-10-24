@@ -5,74 +5,137 @@ import "./Cursors.css";
 import ColorPalette from "./ToolBar/ColorPalette";
 import Tools from "./ToolBar/Tools";
 import UndoRedo from "./utils/UndoRedo";
+import ShapesMenu from "./ToolBar/ShapesMenu";
+import { Box } from "@mui/system";
 
 function DrawingCanvas() {
   const canvasRef = useRef(null);
-  const { selectedTool, selectedColor, lineWidth, eraserWidth } = useDrawingTools();
+  const { selectedTool, selectedColor, lineWidth, eraserWidth } =
+    useDrawingTools();
   const { addToHistory } = useHistory();
   const [drawing, setDrawing] = useState(false);
   const [context, setContext] = useState(null);
+  const [startX, setStartX] = useState(0);
+  const [startY, setStartY] = useState(0);
 
   useEffect(() => {
-    saveCanvasState()
-  },[])
+    saveCanvasState();
+  }, []);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (selectedTool === "Eraser") {
-      ctx.strokeStyle = "white";
-      ctx.lineWidth = eraserWidth;
+    if (
+      selectedTool === "Pencil" ||
+      selectedTool === "Eraser" ||
+      selectedTool === "Brush" ||
+      selectedTool === "Pen"
+    ) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+
+      if (selectedTool === "Eraser") {
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = eraserWidth;
+      } else {
+        ctx.strokeStyle = selectedColor;
+        ctx.lineWidth = lineWidth;
+      }
+      setContext(ctx);
     }
-    else{
-      ctx.strokeStyle = selectedColor;
-      ctx.lineWidth = lineWidth;
-    }
-    
-    setContext(ctx);
-  }, [selectedColor, lineWidth, selectedTool,eraserWidth]);
+  }, [selectedColor, lineWidth, selectedTool, eraserWidth]);
 
   const handleMouseDown = (e) => {
+    console.log(selectedTool);
+    if (
+      selectedTool === "Pencil" ||
+      selectedTool === "Eraser" ||
+      selectedTool === "Brush" ||
+      selectedTool === "Pen"
+    ) {
     setDrawing(true);
     context.beginPath();
     context.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+    }
+    else{
+      setDrawing(true);
+      setStartX(e.nativeEvent.offsetX);
+      setStartY(e.nativeEvent.offsetY);
+    }
   };
 
   const handleMouseMove = (e) => {
+    if (
+      selectedTool === "Pencil" ||
+      selectedTool === "Eraser" ||
+      selectedTool === "Brush" ||
+      selectedTool === "Pen"
+    ) {
     if (!drawing) return;
     context.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
     context.stroke();
+    }
+    else{
+      if(!drawing) return;
+      const endX = e.nativeEvent.offsetX; 
+      const endY = e.nativeEvent.offsetY; 
+      const width = endX - startX;
+      const height = endY - startY;
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      ctx.fillRect(startX, startY, width, height);
+    }
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (e) => {
+    if (
+      selectedTool === "Pencil" ||
+      selectedTool === "Eraser" ||
+      selectedTool === "Brush" ||
+      selectedTool === "Pen"
+    ) {
     setDrawing(false);
     context.closePath();
     saveCanvasState();
+    }
+    else{
+      setDrawing(false);
+      const endX = e.nativeEvent.offsetX;
+      const endY = e.nativeEvent.offsetY;
+      const width = endX - startX;
+      const height = endY - startY;
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      ctx.fillRect(startX, startY, width, height);
+      saveCanvasState();
+    }
   };
 
   const saveCanvasState = () => {
     const canvas = canvasRef.current;
     const snapShot = canvas.toDataURL();
-    console.log("State saved")
-    addToHistory(snapShot)
-  }
+    console.log("State saved");
+    addToHistory(snapShot);
+  };
 
   const redrawCanvas = (imageData) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     const img = new Image();
-    img.src = imageData
+    img.src = imageData;
     img.onload = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0);
     };
-  }
+  };
 
   return (
     <>
-      <Tools />
-      <ColorPalette />
-      <UndoRedo redrawCanvas= {redrawCanvas}/>
+      <Box sx={{ position: "absolute", display: "flex", flexDirection: "row" }}>
+        <Tools />
+        <ShapesMenu canvasRef={canvasRef} saveCanvasState={saveCanvasState} />
+        <ColorPalette />
+      </Box>
+      <UndoRedo redrawCanvas={redrawCanvas} />
+
       <canvas
         ref={canvasRef}
         onMouseDown={handleMouseDown}

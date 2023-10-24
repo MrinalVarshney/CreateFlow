@@ -14,7 +14,7 @@ function ColorPalette() {
   return (
     <Box
       sx={{
-        position: "absolute",
+        position: "relative",
         top: "3px",
         left: "50px",
       }}
