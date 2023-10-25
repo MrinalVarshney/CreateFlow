@@ -7,6 +7,7 @@ import Tools from "./ToolBar/Tools";
 import UndoRedo from "./utils/UndoRedo";
 import ShapesMenu from "./ToolBar/ShapesMenu";
 import { Box } from "@mui/system";
+import FloodFill from "q-floodfill";
 
 function DrawingCanvas() {
   const canvasRef = useRef(null);
@@ -27,7 +28,8 @@ function DrawingCanvas() {
       selectedTool === "Pencil" ||
       selectedTool === "Eraser" ||
       selectedTool === "Brush" ||
-      selectedTool === "Pen"
+      selectedTool === "Pen" ||
+      selectedTool === "PaintBucket"
     ) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
@@ -45,17 +47,26 @@ function DrawingCanvas() {
 
   const handleMouseDown = (e) => {
     console.log(selectedTool);
-    if (
+    if (selectedTool === "PaintBucket") {
+      const imgData = context.getImageData(
+        0,
+        0,
+        canvasRef.current.width,
+        canvasRef.current.height
+      );
+      const floodFill = new FloodFill(imgData);
+      floodFill.fill(context.strokeStyle, e.clientX, e.clientY, 0);
+      context.putImageData(floodFill.imageData, 0, 0);
+    } else if (
       selectedTool === "Pencil" ||
       selectedTool === "Eraser" ||
       selectedTool === "Brush" ||
       selectedTool === "Pen"
     ) {
-    setDrawing(true);
-    context.beginPath();
-    context.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-    }
-    else{
+      setDrawing(true);
+      context.beginPath();
+      context.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+    } else {
       setDrawing(true);
       setStartX(e.nativeEvent.offsetX);
       setStartY(e.nativeEvent.offsetY);
@@ -69,14 +80,13 @@ function DrawingCanvas() {
       selectedTool === "Brush" ||
       selectedTool === "Pen"
     ) {
-    if (!drawing) return;
-    context.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-    context.stroke();
-    }
-    else{
-      if(!drawing) return;
-      const endX = e.nativeEvent.offsetX; 
-      const endY = e.nativeEvent.offsetY; 
+      if (!drawing) return;
+      context.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+      context.stroke();
+    } else {
+      if (!drawing) return;
+      const endX = e.nativeEvent.offsetX;
+      const endY = e.nativeEvent.offsetY;
       const width = endX - startX;
       const height = endY - startY;
       const canvas = canvasRef.current;
@@ -86,17 +96,18 @@ function DrawingCanvas() {
   };
 
   const handleMouseUp = (e) => {
-    if (
+    if (selectedTool === "PaintBucket") {
+      saveCanvasState();
+    } else if (
       selectedTool === "Pencil" ||
       selectedTool === "Eraser" ||
       selectedTool === "Brush" ||
       selectedTool === "Pen"
     ) {
-    setDrawing(false);
-    context.closePath();
-    saveCanvasState();
-    }
-    else{
+      setDrawing(false);
+      context.closePath();
+      saveCanvasState();
+    } else {
       setDrawing(false);
       const endX = e.nativeEvent.offsetX;
       const endY = e.nativeEvent.offsetY;
@@ -141,8 +152,8 @@ function DrawingCanvas() {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        width={1200}
-        height={800}
+        width={window.innerWidth}
+        height={window.innerHeight}
       />
     </>
   );
