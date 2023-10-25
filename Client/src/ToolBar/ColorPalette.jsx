@@ -1,13 +1,14 @@
 import React from "react";
 import { Box, Paper, Grid } from "@mui/material";
 import { useDrawingTools } from "../Context/DrawingToolsContext";
-import colors from "../Assets/Colors"
-
+import colors from "../Assets/Colors";
+import ColorSelector from "../Assets/ColorSelecter";
 
 function ColorPalette() {
-  const { selectedColor,setSelectedColor } = useDrawingTools();
-  
+  const { selectedColor, setSelectedColor } = useDrawingTools();
+
   const handleColorClick = (color) => {
+    console.log(color);
     setSelectedColor(color);
   };
 
@@ -36,6 +37,8 @@ function ColorPalette() {
             />
           </Grid>
         ))}
+
+        <ColorSelector />
       </Grid>
     </Box>
   );

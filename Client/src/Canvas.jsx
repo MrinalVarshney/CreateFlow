@@ -8,6 +8,7 @@ import UndoRedo from "./utils/UndoRedo";
 import ShapesMenu from "./ToolBar/ShapesMenu";
 import { Box } from "@mui/system";
 import FloodFill from "q-floodfill";
+import ColorSelector from "./Assets/ColorSelecter";
 
 function DrawingCanvas() {
   const canvasRef = useRef(null);
