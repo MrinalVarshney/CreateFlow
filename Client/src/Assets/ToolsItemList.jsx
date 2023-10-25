@@ -3,16 +3,19 @@ import Pen from "../Drawing_Tools/pen";
 import Brush from "../Drawing_Tools/brush";
 import Eraser from "../Drawing_Tools/Eraser";
 import LineWeightIcon from "@mui/icons-material/LineWeight";
+import PaintBucket from "../Drawing_Tools/PaintBucket";
 
 const toolsList = [
-    { icon: <Pencil />, name: "Pencil", child: <Pencil /> },
-    { icon: <Pen/>, name: "Pen", child: <Pen /> },
-    { icon: <Brush />, name: "Brush", child: <Brush /> },
+    { icon: <Pencil />, name: "Pencil",},
+    { icon: <Pen/>, name: "Pen"},
+    { icon: <Brush />, name: "Brush"},
     {
       icon: <Eraser />,
       name: "Eraser",
     },
+    { icon: <PaintBucket />, name: "PaintBucket"},
     { icon: <LineWeightIcon />, name: "Thickness"},
+    
   ];
 
 export default toolsList;
