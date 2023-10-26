@@ -8,7 +8,7 @@ import UndoRedo from "./utils/UndoRedo";
 import ShapesMenu from "./ToolBar/ShapesMenu";
 import { Box } from "@mui/system";
 import FloodFill from "q-floodfill";
-import ColorSelector from "./Assets/ColorSelecter";
+import { useStyles } from "./Assets/CursorStyles";
 
 function DrawingCanvas() {
   const canvasRef = useRef(null);
@@ -139,8 +139,9 @@ function DrawingCanvas() {
     };
   };
 
+  const classes = useStyles();
   return (
-    <>
+    <div style={{ cursor: "./Assets/cursor/eraser.jpg" }}>
       <Box sx={{ position: "absolute", display: "flex", flexDirection: "row" }}>
         <Tools />
         <ShapesMenu canvasRef={canvasRef} saveCanvasState={saveCanvasState} />
@@ -149,6 +150,7 @@ function DrawingCanvas() {
       <UndoRedo redrawCanvas={redrawCanvas} />
 
       <canvas
+        className={classes[selectedTool]}
         ref={canvasRef}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -156,7 +158,7 @@ function DrawingCanvas() {
         width={window.innerWidth}
         height={window.innerHeight}
       />
-    </>
+    </div>
   );
 }
 

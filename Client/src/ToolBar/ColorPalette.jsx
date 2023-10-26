@@ -8,7 +8,6 @@ function ColorPalette() {
   const { selectedColor, setSelectedColor } = useDrawingTools();
 
   const handleColorClick = (color) => {
-    console.log(color);
     setSelectedColor(color);
   };
 
