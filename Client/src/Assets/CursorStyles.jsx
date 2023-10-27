@@ -1,9 +1,9 @@
 import { makeStyles } from "@mui/styles";
-import eraserImage from "./cursor/eraser.jpg";
-import pencilImage from "./cursor/pencil.png";
-import penImage from "./cursor/pen.png";
-import brushImage from "./cursor/brush.jpg";
-import paintBucketImage from "./cursor/paintBucket.jpg";
+import eraserImage from "./cursor/eraser.svg";
+import pencilImage from "./cursor/pencil.svg";
+import penImage from "./cursor/pen.svg";
+import brushImage from "./cursor/brush.svg";
+import paintBucketImage from "./cursor/paintBucket.svg";
 
 export const useStyles = makeStyles({
   Pencil: {
