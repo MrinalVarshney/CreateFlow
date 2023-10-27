@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDrawingTools } from "./Context/DrawingToolsContext";
 import { useHistory } from "./Context/History";
-import "./Cursors.css";
 import ColorPalette from "./ToolBar/ColorPalette";
 import Tools from "./ToolBar/Tools";
 import UndoRedo from "./utils/UndoRedo";
@@ -138,16 +137,16 @@ function DrawingCanvas() {
       ctx.drawImage(img, 0, 0);
     };
   };
-
+  const [isOpen, setIsOpen] = useState(false);
   const classes = useStyles();
   return (
     <div>
       <Box sx={{ position: "absolute", display: "flex", flexDirection: "row" }}>
-        <Tools />
+        <Tools setIsOpen={setIsOpen} />
         <ShapesMenu canvasRef={canvasRef} saveCanvasState={saveCanvasState} />
         <ColorPalette />
       </Box>
-      <UndoRedo redrawCanvas={redrawCanvas} />
+      <UndoRedo isOpen={isOpen} redrawCanvas={redrawCanvas} />
 
       <canvas
         className={classes[selectedTool]}
