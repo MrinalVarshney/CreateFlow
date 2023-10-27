@@ -9,12 +9,20 @@ function ColorSelector() {
 
   const handleColorChange = (newColor) => {
     setSelectedColor(newColor.hex);
-    setShowColorPicker(!showColorPicker);
   };
 
   const toggleColorPicker = () => {
     setShowColorPicker(!showColorPicker);
   };
+
+  const openColorPicker = () => {
+    setShowColorPicker(true);
+  };
+
+  const closeColorPicker = () => {
+    setShowColorPicker(false);
+  };
+
   const multicolor =
     "linear-gradient(to bottom, red, orange, yellow, green, blue, indigo, violet)";
 
@@ -35,7 +43,9 @@ function ColorSelector() {
       />
 
       {showColorPicker && (
-        <SketchPicker color={selectedColor} onChange={handleColorChange} />
+        <div onMouseEnter={openColorPicker} onMouseLeave={closeColorPicker}>
+          <SketchPicker color={selectedColor} onChange={handleColorChange} />
+        </div>
       )}
     </div>
   );

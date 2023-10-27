@@ -141,7 +141,7 @@ function DrawingCanvas() {
 
   const classes = useStyles();
   return (
-    <div style={{ cursor: "./Assets/cursor/eraser.jpg" }}>
+    <div>
       <Box sx={{ position: "absolute", display: "flex", flexDirection: "row" }}>
         <Tools />
         <ShapesMenu canvasRef={canvasRef} saveCanvasState={saveCanvasState} />
