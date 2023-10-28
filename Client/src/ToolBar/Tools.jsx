@@ -8,7 +8,7 @@ import { useDrawingTools } from "../Context/DrawingToolsContext";
 import toolsList from "../Assets/ToolsItemList";
 import { useCallback } from "react";
 
-export default function Tools({ setIsOpen }) {
+export default function Tools({ setIsOpen, selectFile }) {
   const { lineWidth, setLineWidth, selectedTool, setSelectedTool } =
     useDrawingTools();
   const [open, setOpen] = useState(false);
@@ -30,7 +30,9 @@ export default function Tools({ setIsOpen }) {
   const handleSelection = useCallback(
     (e, tool) => {
       e.preventDefault();
-      if (tool === "Pen" || tool === "Brush") {
+      if (tool === "UploadFiles") {
+        selectFile();
+      } else if (tool === "Pen" || tool === "Brush") {
         setMin(5);
         if (selectedTool !== tool) setLineWidth(5);
         setMax(20);
@@ -39,6 +41,7 @@ export default function Tools({ setIsOpen }) {
         if (selectedTool !== tool) setLineWidth(1);
         setMax(10);
       }
+
       setSelectedTool(tool);
     },
     [setLineWidth, selectedTool, setSelectedTool]

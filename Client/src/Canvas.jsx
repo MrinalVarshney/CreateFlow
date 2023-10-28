@@ -11,8 +11,13 @@ import { useStyles } from "./Assets/CursorStyles";
 
 function DrawingCanvas() {
   const canvasRef = useRef(null);
-  const { selectedTool, selectedColor, lineWidth, eraserWidth } =
-    useDrawingTools();
+  const {
+    selectedTool,
+    setSelectedTool,
+    selectedColor,
+    lineWidth,
+    eraserWidth,
+  } = useDrawingTools();
   const { addToHistory } = useHistory();
   const [drawing, setDrawing] = useState(false);
   const [context, setContext] = useState(null);
@@ -118,6 +123,7 @@ function DrawingCanvas() {
       ctx.fillRect(startX, startY, width, height);
       saveCanvasState();
     }
+    saveCanvasState();
   };
 
   const saveCanvasState = () => {
@@ -139,10 +145,47 @@ function DrawingCanvas() {
   };
   const [isOpen, setIsOpen] = useState(false);
   const classes = useStyles();
+
+  //  <------ File selection functionality ------>
+
+  const selectFile = () => {
+    const fileInput = document.getElementById("fileInput");
+    fileInput.click();
+  };
+
+  const handleFileSelect = async (event) => {
+    const file = event.target.files[0];
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    console.log("ongoing");
+    if (file) {
+      const reader = new FileReader();
+      console.log("infile");
+      reader.onload = function (e) {
+        const image = new Image();
+        image.src = e.target.result;
+
+        image.onload = function () {
+          ctx.drawImage(
+            image,
+            150,
+            150,
+            canvas.width - 300,
+            canvas.height - 300
+          );
+        };
+      };
+      await reader.readAsDataURL(file);
+      setSelectedTool("Pencil");
+      saveCanvasState();
+      console.log("completed");
+    }
+  };
+
   return (
     <div>
       <Box sx={{ position: "absolute", display: "flex", flexDirection: "row" }}>
-        <Tools setIsOpen={setIsOpen} />
+        <Tools setIsOpen={setIsOpen} selectFile={() => selectFile()} />
         <ShapesMenu canvasRef={canvasRef} saveCanvasState={saveCanvasState} />
         <ColorPalette />
       </Box>
@@ -156,6 +199,12 @@ function DrawingCanvas() {
         onMouseUp={handleMouseUp}
         width={window.innerWidth}
         height={window.innerHeight}
+      />
+      <input
+        type="file"
+        id="fileInput"
+        style={{ display: "none" }}
+        onChange={handleFileSelect}
       />
     </div>
   );
