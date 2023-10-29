@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDrawingTools } from "./Context/DrawingToolsContext";
 import { useHistory } from "./Context/History";
-import "./Cursors.css";
 import ColorPalette from "./ToolBar/ColorPalette";
 import Tools from "./ToolBar/Tools";
 import UndoRedo from "./utils/UndoRedo";
@@ -9,117 +8,106 @@ import ShapesMenu from "./ToolBar/ShapesMenu";
 import { Box } from "@mui/system";
 import FloodFill from "q-floodfill";
 import { useStyles } from "./Assets/CursorStyles";
+import {
+  drawRectangle,
+  drawCircle,
+  drawLine,
+  drawTriangle,
+  drawEllipse,
+  drawNSidePolygon,
+  drawDashedRectangle,
+} from "./utils/ShapesLogic.jsx";
 
 function DrawingCanvas() {
   const canvasRef = useRef(null);
+  const offCanvasRef = useRef(null);
   const { selectedTool, selectedColor, lineWidth, eraserWidth } =
-    useDrawingTools();
+  useDrawingTools();
   const { addToHistory } = useHistory();
   const [drawing, setDrawing] = useState(false);
   const [context, setContext] = useState(null);
-  const [startX, setStartX] = useState(0);
-  const [startY, setStartY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const isCustomizable = useRef(false);
+  const StartRef = useRef({ startX: 0, startY: 0 });   
+  const CurrentRef = useRef({ x: -1, y: -1 });
+  const ExtremumRef = useRef({ x1: 0, y1: 0, x2: 0, y2: 0 });
+  const EndRef = useRef({ endX: 0, endY: 0 });
+  const pointRef = useRef({ pt3X: -1 });
 
   useEffect(() => {
     saveCanvasState();
   }, []);
 
-  useEffect(() => {
-    if (
-      selectedTool === "Pencil" ||
-      selectedTool === "Eraser" ||
-      selectedTool === "Brush" ||
-      selectedTool === "Pen" ||
-      selectedTool === "PaintBucket"
-    ) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d");
-
-      if (selectedTool === "Eraser") {
-        ctx.strokeStyle = "white";
-        ctx.lineWidth = eraserWidth;
-      } else {
-        ctx.strokeStyle = selectedColor;
-        ctx.lineWidth = lineWidth;
-      }
-      setContext(ctx);
-    }
-  }, [selectedColor, lineWidth, selectedTool, eraserWidth]);
-
-  const handleMouseDown = (e) => {
-    console.log(selectedTool);
-    if (selectedTool === "PaintBucket") {
-      const imgData = context.getImageData(
-        0,
-        0,
-        canvasRef.current.width,
-        canvasRef.current.height
-      );
-      const floodFill = new FloodFill(imgData);
-      floodFill.fill(context.strokeStyle, e.clientX, e.clientY, 0);
-      context.putImageData(floodFill.imageData, 0, 0);
-    } else if (
-      selectedTool === "Pencil" ||
-      selectedTool === "Eraser" ||
-      selectedTool === "Brush" ||
-      selectedTool === "Pen"
-    ) {
-      setDrawing(true);
-      context.beginPath();
-      context.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-    } else {
-      setDrawing(true);
-      setStartX(e.nativeEvent.offsetX);
-      setStartY(e.nativeEvent.offsetY);
-    }
+  const SwitchToVirtual = () => {
+    offCanvasRef.current.style.zIndex = "1";
   };
 
-  const handleMouseMove = (e) => {
-    if (
-      selectedTool === "Pencil" ||
-      selectedTool === "Eraser" ||
-      selectedTool === "Brush" ||
-      selectedTool === "Pen"
-    ) {
-      if (!drawing) return;
-      context.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-      context.stroke();
-    } else {
-      if (!drawing) return;
-      const endX = e.nativeEvent.offsetX;
-      const endY = e.nativeEvent.offsetY;
-      const width = endX - startX;
-      const height = endY - startY;
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d");
-      ctx.fillRect(startX, startY, width, height);
-    }
+  const switchToMainCanvas = () => {
+    offCanvasRef.current.style.zIndex = "-1";
   };
 
-  const handleMouseUp = (e) => {
-    if (selectedTool === "PaintBucket") {
-      saveCanvasState();
-    } else if (
-      selectedTool === "Pencil" ||
-      selectedTool === "Eraser" ||
-      selectedTool === "Brush" ||
-      selectedTool === "Pen"
-    ) {
-      setDrawing(false);
-      context.closePath();
-      saveCanvasState();
-    } else {
-      setDrawing(false);
-      const endX = e.nativeEvent.offsetX;
-      const endY = e.nativeEvent.offsetY;
-      const width = endX - startX;
-      const height = endY - startY;
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d");
-      ctx.fillRect(startX, startY, width, height);
-      saveCanvasState();
-    }
+  /*******************Functions for Adding Customizability and Checking if user Customizing*****************/
+
+  const addCustomizability = (virtualCtx) => {
+    const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
+    isCustomizable.current = true;
+    virtualCtx.strokeStyle = selectedColor;
+    drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
   };
+
+  const isUnderCustomization = (x, y) => {
+    const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
+    if (x >= e1X && x <= e2X && y >= e1Y && y <= e2Y){
+      return true;
+    } 
+    else if(x<=e1X && x>=e2X && y>=e1Y && y<=e2Y) return true;
+    else return false;
+  };
+
+                      /*********************  Dragging Feature *************************/
+
+  const MakeDraggable = (currX, currY) => {
+    clearVirtualCanvas()
+    const { x, y } = CurrentRef.current;
+    const offsetX = currX - x;
+    const offsetY = currY - y;
+    const { startX, startY } = StartRef.current;
+    StartRef.current = { startX: startX + offsetX, startY: startY + offsetY };
+    const { endX, endY } = EndRef.current;
+    EndRef.current = { endX: endX + offsetX, endY: endY + offsetY };
+    const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
+    ExtremumRef.current = {
+      e1X: e1X + offsetX,
+      e1Y: e1Y + offsetY,
+      e2X: e2X + offsetX,
+      e2Y: e2Y + offsetY,
+    };
+    pointRef.current = { pt3X: pointRef.current.pt3X + offsetX };
+    const virtualCtx = offCanvasRef.current.getContext("2d");
+    chooseAndDrawShape(endX + offsetX, endY + offsetY, virtualCtx);
+    CurrentRef.current = { x: currX, y: currY };
+  };
+
+                      /************************ Mini features *************************/
+  const DoCursorStyling = (x,y) => {
+    if(isUnderCustomization(x,y)){
+      offCanvasRef.current.style.cursor = "move";
+    }
+    else offCanvasRef.current.style.cursor = "crosshair";
+  }
+
+  const clearVirtualCanvas = () => { 
+    const offCanvas = offCanvasRef.current;
+    const virtualCtx = offCanvas.getContext("2d");
+    virtualCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
+  }
+
+  const checkAndDrawOnMainCanvas = () => {
+    if(isCustomizable.current){
+      const { endX, endY } = EndRef.current;
+      drawOnMainCanvas(endX, endY);
+    }
+  }
 
   const saveCanvasState = () => {
     const canvas = canvasRef.current;
@@ -139,15 +127,185 @@ function DrawingCanvas() {
     };
   };
 
+                      /********************* Drawing on Main Canvas *************************/
+  const drawOnMainCanvas = (endX, endY) => {
+    clearVirtualCanvas();
+    EndRef.current = { endX: -1, endY: -1 };
+    isCustomizable.current = false;                 
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    ctx.strokeStyle = selectedColor;
+    chooseAndDrawShape(endX, endY, ctx);    
+    pointRef.current = { pt3X: -1 };
+    CurrentRef.current = { x: -1, y: -1 };
+    saveCanvasState();
+  };
+                    /************************ Feature: Drawing  shape on chosen canvas */
+  const chooseAndDrawShape = (endX, endY, ctx) => {
+    ctx.beginPath();
+    const { startX, startY } = StartRef.current;
+    if (selectedTool === "Rectangle") {
+      const { e1X, e1Y, e2X, e2Y } = drawRectangle(startX,startY,endX,endY,ctx);
+      ExtremumRef.current = { e1X, e1Y, e2X, e2Y };
+    } else if (selectedTool === "Circle") {
+      const {e1X,e2X,e1Y,e2Y} = drawCircle(startX, startY, endX, endY, ctx);
+      ExtremumRef.current = { e1X, e1Y, e2X, e2Y };
+    } else if (selectedTool === "Line") {
+      const { e1X, e1Y, e2X, e2Y } = drawLine(startX, startY, endX, endY, ctx);
+      ExtremumRef.current = { e1X, e1Y, e2X, e2Y };
+    } else if (selectedTool === "Triangle") {
+      const { pt3X } = pointRef.current;
+      if (pt3X === -1) pointRef.current = { pt3X: startX - (endX - startX) };
+      else{
+        const {e1X,e1Y,e2X,e2Y} = drawTriangle(startX, startY, endX, endY, ctx, pt3X);
+        ExtremumRef.current = { e1X, e1Y, e2X, e2Y };
+        console.log(ExtremumRef.current);
+      }
+    } else if (selectedTool === "Ellipse") {
+      const {e1X,e1Y,e2X,e2Y} = drawEllipse(startX, startY, endX, endY, ctx);
+      ExtremumRef.current = { e1X, e1Y, e2X, e2Y };
+    } else if (selectedTool === "Pentagon") {
+      const {e1X,e1Y,e2X,e2Y} = drawNSidePolygon(startX, endX, startY, endY, 5, ctx);
+      ExtremumRef.current = { e1X, e1Y, e2X, e2Y };
+    }
+  };
+        /******************* UseEffect : For deciding current working canvas and some canvas styling setup *****************/
+  useEffect(() => {
+    if (
+      selectedTool === "Pencil" ||
+      selectedTool === "Eraser" ||
+      selectedTool === "Brush" ||
+      selectedTool === "Pen" ||
+      selectedTool === "PaintBucket"
+    ) {
+      switchToMainCanvas();
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+
+      if (selectedTool === "Eraser") {
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = eraserWidth;
+      } else {
+        ctx.strokeStyle = selectedColor;
+        ctx.lineWidth = lineWidth;
+      }
+      setContext(ctx);
+    } else SwitchToVirtual();
+  }, [selectedColor, lineWidth, selectedTool, eraserWidth]);
+
+             /************************** Main Canvas Events *****************************/
+  const handleMouseDown = (e) => {
+    if (selectedTool === "PaintBucket") {
+      const imgData = context.getImageData(
+        0,
+        0,
+        canvasRef.current.width,
+        canvasRef.current.height
+      );
+      const floodFill = new FloodFill(imgData);
+      floodFill.fill(context.strokeStyle, e.clientX, e.clientY, 0);
+      context.putImageData(floodFill.imageData, 0, 0);
+    } else {
+      setDrawing(true);
+      context.beginPath();
+      context.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (!drawing) return;
+    context.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+    context.stroke();
+  };
+
+  const handleMouseUp = (e) => {
+    setDrawing(false);
+    context.closePath();
+    saveCanvasState();
+  };
+
+                    /************************** Virtual Canvas Events *****************************/ 
+
+  const handleVirtualMouseDown = (e) => {
+    console.log(isCustomizable.current);
+    const x = e.nativeEvent.offsetX;
+    const y = e.nativeEvent.offsetY;
+    if (isCustomizable.current) {
+      const { endX, endY } = EndRef.current;
+      console.log("Customizing");
+      if (isUnderCustomization(x, y)) {
+        DoCursorStyling(x,y);
+        CurrentRef.current = { x, y };
+        return;
+      } else {
+        console.log("Drawing on main Canvas");
+        drawOnMainCanvas(endX, endY);
+      }
+    }
+    setDrawing(true);
+    StartRef.current = { startX: x, startY: y };
+  };
+
+  const handleVirtualMouseMove = (e) => {
+    const offCanvas = offCanvasRef.current;
+    const ctx = offCanvas.getContext("2d");
+    ctx.strokeStyle = selectedColor;
+    const endX = e.nativeEvent.offsetX;
+    const endY = e.nativeEvent.offsetY;
+    if (isCustomizable.current) {
+      DoCursorStyling(endX,endY)
+      if (CurrentRef.current.x !== -1){
+        setIsDragging(true);
+        MakeDraggable(endX, endY);
+        return;
+      }
+    }
+    if (!drawing || isCustomizable.current) return;
+    ctx.clearRect(0, 0, offCanvas.width, offCanvas.height);
+    chooseAndDrawShape(endX, endY, ctx);
+  };
+
+  const handleVirtualMouseUp = (e) => {
+    setDrawing(false);
+    console.log("Drawing ", drawing);
+    console.log("Mouse Up", isCustomizable.current);
+    const offCanvas = offCanvasRef.current;
+    const virtualCtx = offCanvas.getContext("2d");
+    if (isDragging) {
+      setIsDragging(false);
+      CurrentRef.current = { x: -1, y: -1 };
+      const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
+      drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+    }
+    if (isCustomizable.current) return;
+    else if (drawing) {
+      const endX = e.nativeEvent.offsetX;
+      const endY = e.nativeEvent.offsetY;
+      EndRef.current = { endX, endY };
+      chooseAndDrawShape(endX, endY, virtualCtx);
+      addCustomizability(virtualCtx);
+    }
+  };
+
+
+
   const classes = useStyles();
   return (
     <div style={{ cursor: "./Assets/cursor/eraser.jpg" }}>
-      <Box sx={{ position: "absolute", display: "flex", flexDirection: "row" }}>
+      <Box
+        sx={{
+          position: "absolute",
+          display: "flex",
+          flexDirection: "row",
+          zIndex: 3,
+        }}
+        onClick = {()=>{checkAndDrawOnMainCanvas()}}
+      >
         <Tools />
-        <ShapesMenu canvasRef={canvasRef} saveCanvasState={saveCanvasState} />
+        <ShapesMenu SwitchToVirtual={SwitchToVirtual} />
         <ColorPalette />
+        <UndoRedo redrawCanvas={redrawCanvas} />
       </Box>
-      <UndoRedo redrawCanvas={redrawCanvas} />
 
       <canvas
         className={classes[selectedTool]}
@@ -157,6 +315,22 @@ function DrawingCanvas() {
         onMouseUp={handleMouseUp}
         width={window.innerWidth}
         height={window.innerHeight}
+      />
+      <canvas
+        ref={offCanvasRef}
+        width={window.innerWidth}
+        height={window.innerHeight}
+        id="offCanvas"
+        style={{
+          cursor: "crosshair" ,
+          backgroundColor: "transparent",
+          position: "absolute",
+          top: 0,
+          zIndex: -1,
+        }}
+        onMouseDown={handleVirtualMouseDown}
+        onMouseMove={handleVirtualMouseMove}
+        onMouseUp={handleVirtualMouseUp}
       />
     </div>
   );

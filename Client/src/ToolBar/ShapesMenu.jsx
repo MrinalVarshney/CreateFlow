@@ -6,8 +6,10 @@ import Circle from "../Shape_Box/Circle";
 import Rectangle from "../Shape_Box/Recatangle";
 import Triangle from "../Shape_Box/Triangle";
 import Line from "../Shape_Box/Line";
+import Ellipse from "../Shape_Box/Ellipse";
+import Pentagon from "../Shape_Box/Pentagon";
 
-const ShapesMenu = ({canvasRef,saveCanvasState}) => {
+const ShapesMenu = ({SwitchToVirtual}) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -38,17 +40,23 @@ const ShapesMenu = ({canvasRef,saveCanvasState}) => {
         sx={{justifyContent:"center",padding:"2px"}}
       >
         <Grid container spacing={1} >
-          <Grid item xs={4}>
+          <Grid item xs={2}>
             <Circle />
           </Grid>
-          <Grid item xs={4}>
-            <Rectangle canvasRef={canvasRef} saveCanvasState={saveCanvasState}/>
+          <Grid item xs={2}>
+            <Rectangle />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={2}>
             <Triangle />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={2}>
             <Line />
+          </Grid>
+          <Grid item xs={2}>
+            <Ellipse />
+          </Grid>
+          <Grid item xs={2}>
+            <Pentagon />
           </Grid>
         </Grid>
       </Popover>

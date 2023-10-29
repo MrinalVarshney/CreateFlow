@@ -1,9 +1,8 @@
 import Crop75SharpIcon from "@mui/icons-material/Crop75Sharp";
 import "./Styles.css";
 import { useDrawingTools } from "../Context/DrawingToolsContext";
-import { useState } from "react";
 
-const Rectangle = ({ canvasRef, saveCanvasState }) => {
+const Rectangle = () => {
   const { setSelectedTool } = useDrawingTools();
 
   const handleClick = (e) => {
