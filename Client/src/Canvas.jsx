@@ -21,18 +21,25 @@ import {
 function DrawingCanvas() {
   const canvasRef = useRef(null);
   const offCanvasRef = useRef(null);
-  const { selectedTool, selectedColor, lineWidth, eraserWidth } =
-  useDrawingTools();
+  const {
+    selectedTool,
+    selectedColor,
+    setSelectedTool,
+    lineWidth,
+    eraserWidth,
+  } = useDrawingTools();
   const { addToHistory } = useHistory();
   const [drawing, setDrawing] = useState(false);
   const [context, setContext] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const isCustomizable = useRef(false);
-  const StartRef = useRef({ startX: 0, startY: 0 });   
+  const StartRef = useRef({ startX: 0, startY: 0 });
   const CurrentRef = useRef({ x: -1, y: -1 });
   const ExtremumRef = useRef({ x1: 0, y1: 0, x2: 0, y2: 0 });
   const EndRef = useRef({ endX: 0, endY: 0 });
   const pointRef = useRef({ pt3X: -1 });
+  const classes = useStyles();
 
   useEffect(() => {
     saveCanvasState();
@@ -57,17 +64,46 @@ function DrawingCanvas() {
 
   const isUnderCustomization = (x, y) => {
     const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
-    if (x >= e1X && x <= e2X && y >= e1Y && y <= e2Y){
+    if (x >= e1X && x <= e2X && y >= e1Y && y <= e2Y) {
       return true;
-    } 
-    else if(x<=e1X && x>=e2X && y>=e1Y && y<=e2Y) return true;
+    } else if (x <= e1X && x >= e2X && y >= e1Y && y <= e2Y) return true;
     else return false;
   };
 
-                      /*********************  Dragging Feature *************************/
+  const isUserDragging = (endX, endY) => {
+    const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
+    const dx=5, dy=5;
+    const p1 = { x: e1X, y: e1Y };
+    const p2 = { x: e2X, y: e1Y };
+    const p3 = { x: e2X, y: e2Y };
+    const p4 = { x: e1X, y: e2Y };
+    const points = { p1, p2, p3, p4 };
+   
+    for (let i = 0; i < 4; i++){
+      if ((endX <= points[i].x + dx || endX>= points[i]-dx) && (endY <= points[i].y+dy && endY>= points[i]-dy)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const MakeResizable = (endX, endY) => {};
+
+  const chooseAndRunCustomizingEvent = (endX, endY) => {
+    if (isUserDragging) {
+      setIsDragging(true);
+      MakeDraggable(endX, endY);
+      DoCursorStyling();
+    } else{
+      console.log("NO drag")
+      MakeResizable(endX, endY);
+    } 
+  };
+
+  /*********************  Dragging Feature *************************/
 
   const MakeDraggable = (currX, currY) => {
-    clearVirtualCanvas()
+    clearVirtualCanvas();
     const { x, y } = CurrentRef.current;
     const offsetX = currX - x;
     const offsetY = currY - y;
@@ -88,26 +124,25 @@ function DrawingCanvas() {
     CurrentRef.current = { x: currX, y: currY };
   };
 
-                      /************************ Mini features *************************/
-  const DoCursorStyling = (x,y) => {
-    if(isUnderCustomization(x,y)){
+  /************************ Mini features *************************/
+  const DoCursorStyling = (x, y) => {
+    if (isUnderCustomization(x, y)) {
       offCanvasRef.current.style.cursor = "move";
-    }
-    else offCanvasRef.current.style.cursor = "crosshair";
-  }
+    } else offCanvasRef.current.style.cursor = "crosshair";
+  };
 
-  const clearVirtualCanvas = () => { 
+  const clearVirtualCanvas = () => {
     const offCanvas = offCanvasRef.current;
     const virtualCtx = offCanvas.getContext("2d");
     virtualCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
-  }
+  };
 
   const checkAndDrawOnMainCanvas = () => {
-    if(isCustomizable.current){
+    if (isCustomizable.current) {
       const { endX, endY } = EndRef.current;
       drawOnMainCanvas(endX, endY);
     }
-  }
+  };
 
   const saveCanvasState = () => {
     const canvas = canvasRef.current;
@@ -127,28 +162,40 @@ function DrawingCanvas() {
     };
   };
 
-                      /********************* Drawing on Main Canvas *************************/
+  /********************* Drawing on Main Canvas *************************/
   const drawOnMainCanvas = (endX, endY) => {
     clearVirtualCanvas();
     EndRef.current = { endX: -1, endY: -1 };
-    isCustomizable.current = false;                 
+    isCustomizable.current = false;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     ctx.strokeStyle = selectedColor;
-    chooseAndDrawShape(endX, endY, ctx);    
+    chooseAndDrawShape(endX, endY, ctx);
     pointRef.current = { pt3X: -1 };
     CurrentRef.current = { x: -1, y: -1 };
     saveCanvasState();
   };
-                    /************************ Feature: Drawing  shape on chosen canvas */
+  /************************ Feature: Drawing  shape on chosen canvas **************************************/
   const chooseAndDrawShape = (endX, endY, ctx) => {
     ctx.beginPath();
     const { startX, startY } = StartRef.current;
     if (selectedTool === "Rectangle") {
-      const { e1X, e1Y, e2X, e2Y } = drawRectangle(startX,startY,endX,endY,ctx);
+      const { e1X, e1Y, e2X, e2Y } = drawRectangle(
+        startX,
+        startY,
+        endX,
+        endY,
+        ctx
+      );
       ExtremumRef.current = { e1X, e1Y, e2X, e2Y };
     } else if (selectedTool === "Circle") {
-      const {e1X,e2X,e1Y,e2Y} = drawCircle(startX, startY, endX, endY, ctx);
+      const { e1X, e2X, e1Y, e2Y } = drawCircle(
+        startX,
+        startY,
+        endX,
+        endY,
+        ctx
+      );
       ExtremumRef.current = { e1X, e1Y, e2X, e2Y };
     } else if (selectedTool === "Line") {
       const { e1X, e1Y, e2X, e2Y } = drawLine(startX, startY, endX, endY, ctx);
@@ -156,20 +203,40 @@ function DrawingCanvas() {
     } else if (selectedTool === "Triangle") {
       const { pt3X } = pointRef.current;
       if (pt3X === -1) pointRef.current = { pt3X: startX - (endX - startX) };
-      else{
-        const {e1X,e1Y,e2X,e2Y} = drawTriangle(startX, startY, endX, endY, ctx, pt3X);
+      else {
+        const { e1X, e1Y, e2X, e2Y } = drawTriangle(
+          startX,
+          startY,
+          endX,
+          endY,
+          ctx,
+          pt3X
+        );
         ExtremumRef.current = { e1X, e1Y, e2X, e2Y };
         console.log(ExtremumRef.current);
       }
     } else if (selectedTool === "Ellipse") {
-      const {e1X,e1Y,e2X,e2Y} = drawEllipse(startX, startY, endX, endY, ctx);
+      const { e1X, e1Y, e2X, e2Y } = drawEllipse(
+        startX,
+        startY,
+        endX,
+        endY,
+        ctx
+      );
       ExtremumRef.current = { e1X, e1Y, e2X, e2Y };
     } else if (selectedTool === "Pentagon") {
-      const {e1X,e1Y,e2X,e2Y} = drawNSidePolygon(startX, endX, startY, endY, 5, ctx);
+      const { e1X, e1Y, e2X, e2Y } = drawNSidePolygon(
+        startX,
+        endX,
+        startY,
+        endY,
+        5,
+        ctx
+      );
       ExtremumRef.current = { e1X, e1Y, e2X, e2Y };
     }
   };
-        /******************* UseEffect : For deciding current working canvas and some canvas styling setup *****************/
+  /******************* UseEffect : For deciding current working canvas and some canvas styling setup *****************/
   useEffect(() => {
     if (
       selectedTool === "Pencil" ||
@@ -193,7 +260,7 @@ function DrawingCanvas() {
     } else SwitchToVirtual();
   }, [selectedColor, lineWidth, selectedTool, eraserWidth]);
 
-             /************************** Main Canvas Events *****************************/
+  /************************** Main Canvas Events *****************************/
   const handleMouseDown = (e) => {
     if (selectedTool === "PaintBucket") {
       const imgData = context.getImageData(
@@ -224,7 +291,7 @@ function DrawingCanvas() {
     saveCanvasState();
   };
 
-                    /************************** Virtual Canvas Events *****************************/ 
+  /************************** Virtual Canvas Events *****************************/
 
   const handleVirtualMouseDown = (e) => {
     console.log(isCustomizable.current);
@@ -234,7 +301,7 @@ function DrawingCanvas() {
       const { endX, endY } = EndRef.current;
       console.log("Customizing");
       if (isUnderCustomization(x, y)) {
-        DoCursorStyling(x,y);
+        DoCursorStyling(x, y);
         CurrentRef.current = { x, y };
         return;
       } else {
@@ -253,10 +320,9 @@ function DrawingCanvas() {
     const endX = e.nativeEvent.offsetX;
     const endY = e.nativeEvent.offsetY;
     if (isCustomizable.current) {
-      DoCursorStyling(endX,endY)
-      if (CurrentRef.current.x !== -1){
-        setIsDragging(true);
-        MakeDraggable(endX, endY);
+      DoCursorStyling(endX, endY);
+      if (CurrentRef.current.x !== -1) {
+        chooseAndRunCustomizingEvent(endX, endY);
         return;
       }
     }
@@ -287,9 +353,41 @@ function DrawingCanvas() {
     }
   };
 
+  //  <------ File selection functionality ------>
+  const selectFile = () => {
+    const fileInput = document.getElementById("fileInput");
+    fileInput.click();
+  };
 
+  const handleFileSelect = async (event) => {
+    const file = event.target.files[0];
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    console.log("ongoing");
+    if (file) {
+      const reader = new FileReader();
+      console.log("infile");
+      reader.onload = function (e) {
+        const image = new Image();
+        image.src = e.target.result;
 
-  const classes = useStyles();
+        image.onload = function () {
+          ctx.drawImage(
+            image,
+            150,
+            150,
+            canvas.width - 300,
+            canvas.height - 300
+          );
+        };
+      };
+      await reader.readAsDataURL(file);
+      setSelectedTool("Pencil");
+      saveCanvasState();
+      console.log("completed");
+    }
+  };
+
   return (
     <div style={{ cursor: "./Assets/cursor/eraser.jpg" }}>
       <Box
@@ -299,12 +397,14 @@ function DrawingCanvas() {
           flexDirection: "row",
           zIndex: 3,
         }}
-        onClick = {()=>{checkAndDrawOnMainCanvas()}}
+        onClick={() => {
+          checkAndDrawOnMainCanvas();
+        }}
       >
-        <Tools />
+        <Tools setIsOpen={setIsOpen} selectFile={selectFile} />
         <ShapesMenu SwitchToVirtual={SwitchToVirtual} />
         <ColorPalette />
-        <UndoRedo redrawCanvas={redrawCanvas} />
+        <UndoRedo isOpen={isOpen} redrawCanvas={redrawCanvas} />
       </Box>
 
       <canvas
@@ -316,13 +416,19 @@ function DrawingCanvas() {
         width={window.innerWidth}
         height={window.innerHeight}
       />
+      <input
+        type="file"
+        id="fileInput"
+        style={{ display: "none" }}
+        onChange={handleFileSelect}
+      />
       <canvas
         ref={offCanvasRef}
         width={window.innerWidth}
         height={window.innerHeight}
         id="offCanvas"
         style={{
-          cursor: "crosshair" ,
+          cursor: "crosshair",
           backgroundColor: "transparent",
           position: "absolute",
           top: 0,

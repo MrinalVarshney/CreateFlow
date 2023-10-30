@@ -8,14 +8,13 @@ import { useDrawingTools } from "../Context/DrawingToolsContext";
 import toolsList from "../Assets/ToolsItemList";
 import { useCallback } from "react";
 
-
-export default function Tools() {
-
-  const { lineWidth, setLineWidth, selectedTool,setSelectedTool} = useDrawingTools();
+export default function Tools({ setIsOpen, selectFile }) {
+  const { lineWidth, setLineWidth, selectedTool, setSelectedTool } =
+    useDrawingTools();
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [min, setMin] = useState(1);
-  const [max,setMax] = useState(10);
+  const [max, setMax] = useState(10);
 
   const handleOpen = (event) => {
     event.stopPropagation();
@@ -27,29 +26,40 @@ export default function Tools() {
     setAnchorEl(null);
     setOpen(false);
   };
-  
-  const handleSelection = useCallback((e,tool) =>{
-    e.preventDefault();
-    if(tool==="Pen" || tool==="Brush"){
+
+  const handleSelection = useCallback(
+    (e, tool) => {
+      e.preventDefault();
+      if (tool === "UploadFiles") {
+        selectFile();
+      } else if (tool === "Pen" || tool === "Brush") {
         setMin(5);
-        if(selectedTool!==tool)
-            setLineWidth(5)
+        if (selectedTool !== tool) setLineWidth(5);
         setMax(20);
-    }
-    else{
+      } else {
         setMin(1);
-        if(selectedTool!==tool)
-            setLineWidth(1)
+        if (selectedTool !== tool) setLineWidth(1);
         setMax(10);
-    }
-    setSelectedTool(tool);
-  },[setLineWidth,selectedTool,setSelectedTool])
+      }
+
+      setSelectedTool(tool);
+    },
+    [setLineWidth, selectedTool, setSelectedTool]
+  );
 
   return (
-    <div>
+    <div
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+    >
       <SpeedDial
         ariaLabel="SpeedDial basic example"
-        sx={{ position:"absolute", paddingTop: 0.5, paddingLeft: 0.5, display:"inline-block" }}
+        sx={{
+          position: "absolute",
+          paddingTop: 0.5,
+          paddingLeft: 0.5,
+          display: "inline-block",
+        }}
         icon={<GestureIcon />}
         direction="down"
       >
@@ -58,10 +68,16 @@ export default function Tools() {
             key={action.name}
             icon={action.icon}
             tooltipTitle={action.name}
-            onClick={action.name==="Thickness" ? handleOpen :(e) => handleSelection(e,action.name)}
-            sx={{ backgroundColor: selectedTool === action.name ? 'gray' : 'transparent' }}
-          >
-          </SpeedDialAction>
+            onClick={
+              action.name === "Thickness"
+                ? handleOpen
+                : (e) => handleSelection(e, action.name)
+            }
+            sx={{
+              backgroundColor:
+                selectedTool === action.name ? "gray" : "transparent",
+            }}
+          ></SpeedDialAction>
         ))}
       </SpeedDial>
       <Popover

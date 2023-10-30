@@ -78,6 +78,7 @@ const drawNSidePolygon = (startX, endX, startY, endY, n, ctx) => {
   return {e1X:startX,e1Y:startY,e2X:endX,e2Y:endY}
 };
 
+
 const drawDashedRectangle = (startX, startY, endX, endY, ctx) => {
   ctx.setLineDash([5, 20]);
   ctx.strokeStyle = "blue";

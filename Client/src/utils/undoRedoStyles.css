@@ -1,20 +1,23 @@
 .undo-redo-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    position: absolute;
-    top: 10vh;
-    margin-left: 5px;
-  }
-  
-  .undo-redo-button {
-    width: 100px;
-    height: 100px;
-    cursor: pointer;
-    border-radius: 50%
-  }
-  
-  .undo-redo-button:hover {
-    background-color: #e0e0e0; /* Add your desired hover background color */
-  }
-  
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: absolute;
+  top: 10vh;
+  margin-left: 5px;
+}
+
+.undo-redo-button {
+  width: 100px;
+  height: 100px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.undo-redo-button:hover {
+  background-color: #e0e0e0; /* Add your desired hover background color */
+}
+
+.toolOpen {
+  opacity: 0;
+}
