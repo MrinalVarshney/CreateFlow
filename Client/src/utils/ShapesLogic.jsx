@@ -88,7 +88,7 @@ const drawDashedRectangle = (startX, startY, endX, endY, ctx) => {
 };
 
  const drawResizingDots = (startX, startY, endX, endY, ctx) => {
-  console.log("Drawing resizing dots")
+  console.log("Drawing resizing dots",startX,startY,endX,endY)
   ctx.moveTo(startX, startY);
   ctx.arc(startX, startY, 2, 0, 2 * Math.PI);
   ctx.moveTo(startX, endY);

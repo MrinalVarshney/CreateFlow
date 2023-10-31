@@ -33,6 +33,7 @@ function DrawingCanvas() {
   const [context, setContext] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [uploadFile,setUploadFile] = useState(null)
   const isCustomizable = useRef(false);
   const StartRef = useRef({ startX: 0, startY: 0 });
   const CurrentRef = useRef({ x: -1, y: -1 });
@@ -40,6 +41,7 @@ function DrawingCanvas() {
   const EndRef = useRef({ endX: 0, endY: 0 });
   const pointRef = useRef({ pt3X: -1 });
   const classes = useStyles();
+
 
   useEffect(() => {
     saveCanvasState();
@@ -50,6 +52,7 @@ function DrawingCanvas() {
   };
 
   const switchToMainCanvas = () => {
+    if(selectedTool === "UploadFiles") setSelectedTool("Pencil")
     offCanvasRef.current.style.zIndex = "-1";
   };
 
@@ -57,6 +60,7 @@ function DrawingCanvas() {
 
   const addCustomizability = (virtualCtx) => {
     const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
+    console.log("Adding Customizability", e1X, e1Y, e2X, e2Y);
     isCustomizable.current = true;
     virtualCtx.strokeStyle = selectedColor;
     drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
@@ -72,15 +76,20 @@ function DrawingCanvas() {
 
   const isUserDragging = (endX, endY) => {
     const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
-    const dx=5, dy=5;
+    const dx = 5,
+      dy = 5;
     const p1 = { x: e1X, y: e1Y };
     const p2 = { x: e2X, y: e1Y };
     const p3 = { x: e2X, y: e2Y };
     const p4 = { x: e1X, y: e2Y };
     const points = { p1, p2, p3, p4 };
-   
-    for (let i = 0; i < 4; i++){
-      if ((endX <= points[i].x + dx || endX>= points[i]-dx) && (endY <= points[i].y+dy && endY>= points[i]-dy)) {
+
+    for (let i = 0; i < 4; i++) {
+      if (
+        (endX <= points[i].x + dx || endX >= points[i] - dx) &&
+        endY <= points[i].y + dy &&
+        endY >= points[i] - dy
+      ) {
         return true;
       }
     }
@@ -94,16 +103,16 @@ function DrawingCanvas() {
       setIsDragging(true);
       MakeDraggable(endX, endY);
       DoCursorStyling();
-    } else{
-      console.log("NO drag")
+    } else {
+      console.log("NO drag");
       MakeResizable(endX, endY);
-    } 
+    }
   };
 
   /*********************  Dragging Feature *************************/
 
   const MakeDraggable = (currX, currY) => {
-    clearVirtualCanvas();
+    
     const { x, y } = CurrentRef.current;
     const offsetX = currX - x;
     const offsetY = currY - y;
@@ -120,7 +129,13 @@ function DrawingCanvas() {
     };
     pointRef.current = { pt3X: pointRef.current.pt3X + offsetX };
     const virtualCtx = offCanvasRef.current.getContext("2d");
-    chooseAndDrawShape(endX + offsetX, endY + offsetY, virtualCtx);
+    if (selectedTool === "UploadFiles") {
+      console.log("Uploading files", e1X + offsetX, e1Y + offsetY);
+      renderImage(uploadFile,virtualCtx);
+    } else{
+      clearVirtualCanvas();
+      chooseAndDrawShape(endX + offsetX, endY + offsetY, virtualCtx);
+    }
     CurrentRef.current = { x: currX, y: currY };
   };
 
@@ -164,13 +179,19 @@ function DrawingCanvas() {
 
   /********************* Drawing on Main Canvas *************************/
   const drawOnMainCanvas = (endX, endY) => {
-    clearVirtualCanvas();
     EndRef.current = { endX: -1, endY: -1 };
     isCustomizable.current = false;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     ctx.strokeStyle = selectedColor;
-    chooseAndDrawShape(endX, endY, ctx);
+    if(selectedTool === "UploadFiles"){
+      renderImage(uploadFile,ctx)
+      drawLine(0,0,0,0,ctx)
+      switchToMainCanvas()
+    }
+    else{
+      chooseAndDrawShape(endX, endY, ctx);
+    }
     pointRef.current = { pt3X: -1 };
     CurrentRef.current = { x: -1, y: -1 };
     saveCanvasState();
@@ -309,8 +330,10 @@ function DrawingCanvas() {
         drawOnMainCanvas(endX, endY);
       }
     }
-    setDrawing(true);
-    StartRef.current = { startX: x, startY: y };
+    if (selectedTool !== "UploadFiles") {
+      setDrawing(true);
+      StartRef.current = { startX: x, startY: y };
+    }
   };
 
   const handleVirtualMouseMove = (e) => {
@@ -353,40 +376,52 @@ function DrawingCanvas() {
     }
   };
 
-  //  <------ File selection functionality ------>
+  //  <------ File selection and Image Rendering functionality ------>
   const selectFile = () => {
     const fileInput = document.getElementById("fileInput");
     fileInput.click();
+    fileInput.value = null
   };
 
   const handleFileSelect = async (event) => {
     const file = event.target.files[0];
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    console.log("ongoing");
-    if (file) {
-      const reader = new FileReader();
-      console.log("infile");
-      reader.onload = function (e) {
-        const image = new Image();
-        image.src = e.target.result;
-
-        image.onload = function () {
-          ctx.drawImage(
-            image,
-            150,
-            150,
-            canvas.width - 300,
-            canvas.height - 300
-          );
-        };
+    console.log("selected file ", file)
+    if(file){
+      setUploadFile(file)
+      ExtremumRef.current = {
+        e1X: 150,
+        e1Y: 150,
+        e2X: 150 + 200,
+        e2Y: 150 + 200,
       };
-      await reader.readAsDataURL(file);
-      setSelectedTool("Pencil");
-      saveCanvasState();
-      console.log("completed");
+      StartRef.current = {startX:150,startY:150}
+      SwitchToVirtual();
+      const offCanvas = offCanvasRef.current;
+      const virtualCtx = offCanvas.getContext("2d");
+      renderImage(file,virtualCtx);
+      addCustomizability(virtualCtx);
+    }
+    else{
+      switchToMainCanvas()
     }
   };
+
+  const renderImage =  (file,ctx) => {
+    if (file) {
+        clearVirtualCanvas()
+        const reader = new FileReader();
+        const {startX,startY} = StartRef.current;
+        reader.onload = function (e) {
+          const image = new Image();
+          image.src = e.target.result;
+          image.onload = function () {
+            ctx.drawImage(image, startX, startY, 200, 200);
+          };
+        };
+        reader.readAsDataURL(file);
+    } 
+  };
+
 
   return (
     <div style={{ cursor: "./Assets/cursor/eraser.jpg" }}>
