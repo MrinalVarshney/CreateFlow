@@ -45,6 +45,8 @@ function DrawingCanvas() {
     saveCanvasState();
   }, []);
 
+  /*********************Functionality to toggle between main and virtual canvas*****************************/
+
   const SwitchToVirtual = () => {
     offCanvasRef.current.style.zIndex = "1";
   };
@@ -72,19 +74,25 @@ function DrawingCanvas() {
 
   const isUserDragging = (endX, endY) => {
     const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
-    const dx=5, dy=5;
+    const dx = 5,
+      dy = 5;
     const p1 = { x: e1X, y: e1Y };
     const p2 = { x: e2X, y: e1Y };
     const p3 = { x: e2X, y: e2Y };
     const p4 = { x: e1X, y: e2Y };
     const points = { p1, p2, p3, p4 };
-   
-    for (let i = 0; i < 4; i++){
-      if ((endX <= points[i].x + dx || endX>= points[i]-dx) && (endY <= points[i].y+dy && endY>= points[i]-dy)) {
-        return true;
+
+    for (let i = 0; i < 4; i++) {
+      if (
+        endX <= points[i].x + dx &&
+        endX >= points[i] - dx &&
+        endY <= points[i].y + dy &&
+        endY >= points[i] - dy
+      ) {
+        return false;
       }
     }
-    return false;
+    return true;
   };
 
   const MakeResizable = (endX, endY) => {};
@@ -94,10 +102,10 @@ function DrawingCanvas() {
       setIsDragging(true);
       MakeDraggable(endX, endY);
       DoCursorStyling();
-    } else{
-      console.log("NO drag")
+    } else {
+      console.log("NO drag");
       MakeResizable(endX, endY);
-    } 
+    }
   };
 
   /*********************  Dragging Feature *************************/
