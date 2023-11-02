@@ -16,6 +16,7 @@ import {
   drawEllipse,
   drawNSidePolygon,
   drawDashedRectangle,
+  drawLineDashedRectangle,
 } from "./utils/ShapesLogic.jsx";
 
 function DrawingCanvas() {
@@ -39,6 +40,8 @@ function DrawingCanvas() {
   const ExtremumRef = useRef({ x1: 0, y1: 0, x2: 0, y2: 0 });
   const EndRef = useRef({ endX: 0, endY: 0 });
   const pointRef = useRef({ pt3X: -1 });
+  const isResizing = useRef(false);
+  const stillResizing = useRef(false);
   const classes = useStyles();
 
   useEffect(() => {
@@ -61,7 +64,9 @@ function DrawingCanvas() {
     const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
     isCustomizable.current = true;
     virtualCtx.strokeStyle = selectedColor;
-    drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+    if (selectedTool === "Line")
+      drawLineDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+    else drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
   };
 
   const isUnderCustomization = (x, y) => {
@@ -73,37 +78,97 @@ function DrawingCanvas() {
   };
 
   const isUserDragging = (endX, endY) => {
+    console.log(endX, endY);
     const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
-    const dx = 5,
-      dy = 5;
+    const dx = 10,
+      dy = 10;
     const p1 = { x: e1X, y: e1Y };
     const p2 = { x: e2X, y: e1Y };
     const p3 = { x: e2X, y: e2Y };
     const p4 = { x: e1X, y: e2Y };
-    const points = { p1, p2, p3, p4 };
+    const points = [p1, p2, p3, p4];
 
     for (let i = 0; i < 4; i++) {
       if (
         endX <= points[i].x + dx &&
-        endX >= points[i] - dx &&
+        endX >= points[i].x - dx &&
         endY <= points[i].y + dy &&
-        endY >= points[i] - dy
+        endY >= points[i].y - dy
       ) {
         return false;
       }
     }
     return true;
   };
+  /************************ Making resizable shapes functionality ************************************/
 
-  const MakeResizable = (endX, endY) => {};
+  const MakeResizable = (currX, currY) => {
+    console.log("Resizing shape");
+    const { x, y } = CurrentRef.current;
+    let { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
+    const dx = 10,
+      dy = 10;
+    if (e1X > e2X) {
+      let t = e1X;
+      e1X = e2X;
+      e2X = t;
+    }
+    if (e1Y > e2Y) {
+      let t = e1Y;
+      e1Y = e2Y;
+      e2Y = t;
+    }
+    const p1 = { x: e1X, y: e1Y };
+    const p2 = { x: e2X, y: e1Y };
+    const p3 = { x: e2X, y: e2Y };
+    const p4 = { x: e1X, y: e2Y };
+
+    const points = [p1, p2, p3, p4];
+    if (isResizing.current === false) {
+      for (let i = 0; i < 4; i++) {
+        if (
+          currX <= points[i].x + dx &&
+          currX >= points[i].x - dx &&
+          currY <= points[i].y + dy &&
+          currY >= points[i].y - dy
+        ) {
+          isResizing.current = true;
+
+          if (i === 0) StartRef.current = { startX: e2X, startY: e2Y };
+          else if (i === 1) StartRef.current = { startX: e1X, startY: e2Y };
+          else if (i === 2) StartRef.current = { startX: e1X, startY: e1Y };
+          else StartRef.current = { startX: e2X, startY: e1Y };
+        }
+      }
+    }
+    clearVirtualCanvas();
+    const { startX, startY } = StartRef.current;
+
+    EndRef.current = { endX: x, endY: y };
+    ExtremumRef.current = {
+      x1: startX,
+      x2: x,
+      y1: startY,
+      y2: y,
+    };
+
+    const virtualCtx = offCanvasRef.current.getContext("2d");
+    chooseAndDrawShape(x, y, virtualCtx);
+    CurrentRef.current = { x: currX, y: currY };
+  };
+
+  /************************* Customising Events ****************************/
 
   const chooseAndRunCustomizingEvent = (endX, endY) => {
-    if (isUserDragging) {
+    console.log("choosing event");
+    if (!stillResizing.current && isUserDragging(endX, endY)) {
       setIsDragging(true);
       MakeDraggable(endX, endY);
       DoCursorStyling();
+      console.log("Drag");
     } else {
       console.log("NO drag");
+      stillResizing.current = true;
       MakeResizable(endX, endY);
     }
   };
@@ -184,6 +249,7 @@ function DrawingCanvas() {
     saveCanvasState();
   };
   /************************ Feature: Drawing  shape on chosen canvas **************************************/
+
   const chooseAndDrawShape = (endX, endY, ctx) => {
     ctx.beginPath();
     const { startX, startY } = StartRef.current;
@@ -345,11 +411,21 @@ function DrawingCanvas() {
     console.log("Mouse Up", isCustomizable.current);
     const offCanvas = offCanvasRef.current;
     const virtualCtx = offCanvas.getContext("2d");
+    const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
+    if (isResizing.current) {
+      CurrentRef.current = { x: -1, y: -1 };
+      isResizing.current = false;
+      stillResizing.current = false;
+      if (selectedTool === "Line")
+        drawLineDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+      else drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+    }
     if (isDragging) {
       setIsDragging(false);
       CurrentRef.current = { x: -1, y: -1 };
-      const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
-      drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+      if (selectedTool === "Line")
+        drawLineDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+      else drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
     }
     if (isCustomizable.current) return;
     else if (drawing) {

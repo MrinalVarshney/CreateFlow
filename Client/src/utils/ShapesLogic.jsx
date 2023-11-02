@@ -31,10 +31,12 @@ const drawLine = (startX, startY, endX, endY, ctx) => {
 };
 
 const drawEllipse = (startX, startY, endX, endY, ctx) => {
-  const radiusX = Math.abs(endX - startX);
+  const radiusX = Math.abs(endX - startX) / 2;
   const radiusY = Math.abs(endY - startY) / 2;
-  const centreX = startX;
+  var centreX;
   var centreY;
+  if (startX <= endX) centreX = startX + radiusX;
+  else centreX = startX - radiusX;
   if (endY > startY) {
     centreY = startY + radiusY;
   } else {
@@ -42,12 +44,23 @@ const drawEllipse = (startX, startY, endX, endY, ctx) => {
   }
   ctx.ellipse(centreX, centreY, radiusX, radiusY, 0, 0, 2 * Math.PI);
   ctx.stroke();
-  return {e1X:centreX-radiusX,e1Y:centreY-radiusY,e2X:centreX+radiusX,e2Y:centreY+radiusY}
+  return {
+    e1X: centreX - radiusX,
+    e1Y: centreY - radiusY,
+    e2X: centreX + radiusX,
+    e2Y: centreY + radiusY,
+  };
 };
 
 const drawCircle = (startX, startY, endX, endY, ctx) => {
   const radius = Math.abs(endY - startY) / 2;
-  const centreX = startX;
+  var centreX;
+  if (startX <= endX) {
+    centreX = startX + radius;
+  } else {
+    centreX = startX - radius;
+  }
+
   var centreY;
   if (endY > startY) {
     centreY = startY + radius;
@@ -56,7 +69,12 @@ const drawCircle = (startX, startY, endX, endY, ctx) => {
   }
   ctx.arc(centreX, centreY, radius, 0, 2 * Math.PI);
   ctx.stroke();
-  return {e1X:centreX-radius,e1Y:centreY-radius,e2X:centreX+radius,e2Y:centreY+radius}
+  return {
+    e1X: centreX - radius,
+    e1Y: centreY - radius,
+    e2X: centreX + radius,
+    e2Y: centreY + radius,
+  };
 };
 
 const drawNSidePolygon = (startX, endX, startY, endY, n, ctx) => {
@@ -75,30 +93,60 @@ const drawNSidePolygon = (startX, endX, startY, endY, n, ctx) => {
   }
   ctx.lineTo(points[0].x, points[0].y);
   ctx.stroke();
-  return {e1X:startX,e1Y:startY,e2X:endX,e2Y:endY}
+  return { e1X: startX, e1Y: startY, e2X: endX, e2Y: endY };
 };
-
 
 const drawDashedRectangle = (startX, startY, endX, endY, ctx) => {
-  ctx.setLineDash([5, 20]);
-  ctx.strokeStyle = "blue";
+  ctx.setLineDash([10, 20]);
+  ctx.strokeStyle = "red";
   ctx.strokeRect(startX, startY, endX - startX, endY - startY);
   ctx.setLineDash([]);
-  drawResizingDots(startX, startY, endX, endY, ctx)
+  drawResizingDots(startX, startY, endX, endY, ctx);
 };
 
- const drawResizingDots = (startX, startY, endX, endY, ctx) => {
-  console.log("Drawing resizing dots")
+const drawLineDashedRectangle = (startX, startY, endX, endY, ctx) => {
+  ctx.setLineDash([10, 20]);
+  ctx.strokeStyle = "red";
+  ctx.strokeRect(startX, startY, endX - startX, endY - startY);
+  ctx.setLineDash([]);
+  drawLineResizingDots(startX, startY, endX, endY, ctx);
+};
+
+const drawResizingDots = (startX, startY, endX, endY, ctx) => {
+  console.log("Drawing resizing dots");
+  ctx.fillStyle = "white";
+  ctx.strokeStyle = "black";
   ctx.moveTo(startX, startY);
-  ctx.arc(startX, startY, 2, 0, 2 * Math.PI);
-  ctx.moveTo(startX, endY);
-  ctx.arc(startX, endY, 2, 0, 2 * Math.PI);
-  ctx.moveTo(endX, startY);
-  ctx.arc(endX, startY, 2, 0, 2 * Math.PI);
+  ctx.arc(startX, startY, 3, 0, 2 * Math.PI);
   ctx.moveTo(endX, endY);
-  ctx.arc(endX, endY, 2, 0, 2 * Math.PI);
+  ctx.arc(endX, endY, 3, 0, 2 * Math.PI);
+  ctx.moveTo(startX, endY);
+  ctx.arc(startX, endY, 3, 0, 2 * Math.PI);
+  ctx.moveTo(endX, startY);
+  ctx.arc(endX, startY, 3, 0, 2 * Math.PI);
+
+  ctx.moveTo(startX, (endY + startY) / 2);
+  ctx.arc(startX, (endY + startY) / 2, 3, 0, 2 * Math.PI);
+  ctx.moveTo((startX + endX) / 2, startY);
+  ctx.arc((startX + endX) / 2, startY, 3, 0, 2 * Math.PI);
+  ctx.moveTo(endX, (startY + endY) / 2);
+  ctx.arc(endX, (startY + endY) / 2, 3, 0, 2 * Math.PI);
+  ctx.moveTo((startX + endX) / 2, endY);
+  ctx.arc((startX + endX) / 2, endY, 3, 0, 2 * Math.PI);
+
   ctx.stroke();
- }
+};
+
+const drawLineResizingDots = (startX, startY, endX, endY, ctx) => {
+  console.log("Drawing Line resizing dots");
+  ctx.fillStyle = "white";
+  ctx.strokeStyle = "black";
+  ctx.moveTo(startX, startY);
+  ctx.arc(startX, startY, 3, 0, 2 * Math.PI);
+  ctx.moveTo(endX, endY);
+  ctx.arc(endX, endY, 3, 0, 2 * Math.PI);
+  ctx.stroke();
+};
 
 export {
   drawTriangle,
@@ -108,4 +156,5 @@ export {
   drawCircle,
   drawNSidePolygon,
   drawDashedRectangle,
+  drawLineDashedRectangle,
 };
