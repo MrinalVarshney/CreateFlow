@@ -1,18 +1,20 @@
 const User = require("../../models/userSchema");
-const generateToken = require("../../utils/generateToken");
+const {generateToken} = require("../../utils/generateToken");
 
 const postRegister = async (req, res) => {
-  const { email, password, username } = req.body;
-
+  const { mail, password, username } = req.body;
+  console.log(req.body)
   try {
     //Check if email already exists
-    const user = await User.findOne({ email: email.toLowerCase() });
+    console.log(mail)
+    const user = await User.findOne({ email: mail.toLowerCase() });
     if (user) {
       res.status(400).send("Email already exists !");
     } else {
+      console.log(req.body);
       const user = await User.create({
         username,
-        email: email.toLowerCase(),
+        email: mail.toLowerCase(),
         password,
       });
       if (user) {
@@ -27,7 +29,8 @@ const postRegister = async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(400).send("Server Error");
+    console.log(error.message)
+    res.status(500).send("Server Error");
   }
 };
 

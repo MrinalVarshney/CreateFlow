@@ -1,5 +1,5 @@
 const User = require("../../models/userSchema");
-const generateToken = require("../../utils/generateToken");
+const {generateToken} = require("../../utils/generateToken");
 
 const postLogin = async (req, res) => {
   const { email, password } = req.body;

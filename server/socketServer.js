@@ -1,3 +1,5 @@
+const authSocket = require("./middlewares/authSocket")
+
 const registerSocketServer = (server) => {
     server.listen(5002,()=>{
         console.log("Socket server is listening on port 5002")
@@ -8,6 +10,9 @@ const registerSocketServer = (server) => {
             origin:"*",
             methods:["GET","POST"]
         }
+    })
+    io.use((socket,next)=>{
+        authSocket(socket,next)
     })
 
     io.on("connection",(socket)=>{
