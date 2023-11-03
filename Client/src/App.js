@@ -5,12 +5,14 @@ import Login from './authPages/LoginPage/login.jsx';
 import Register from './authPages/RegisterPage/register';
 import {Routes, Route} from "react-router-dom"
 
+
 function App() {
+
   return (
     <Routes>
       <Route exact path="/canvas" Component={Canvas} />
       <Route exact path="/selectionBoard" Component={SelectionBoard} />
-      <Route exact path="/login" Component={Login} />
+      <Route exact path="/" Component={Login} />
       <Route exact path="/register" Component={Register} />
     </Routes>
   );

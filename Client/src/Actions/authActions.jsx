@@ -1,12 +1,13 @@
 import * as api from "../api";
 
 export const register = async (user, navigate) => {
-    console.log(user)
   const response = await api.registerUser(user);
+  console.log(response)
   if (response.error) {
     console.log(response.errorMessage);
   } else {
-    const {userDetails} = response.data;
+    const userDetails = response.data;
+    console.log(userDetails)
     localStorage.setItem("user", JSON.stringify(userDetails));
     navigate("/selectionBoard");
   }
@@ -17,10 +18,10 @@ export const login = async (user, navigate) => {
     if (response.error) {
         console.log(response.errorMessage);
     } else {
-        const {userDetails} = response.data;
+        const userDetails = response.data;
         localStorage.setItem("user", JSON.stringify(userDetails));
         navigate("/selectionBoard");
     }
-    }
+  }
 
 

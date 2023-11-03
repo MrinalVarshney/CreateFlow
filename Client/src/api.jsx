@@ -1,25 +1,25 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "http://localhost:8000",
   timeout: 100000,
 });
 
-apiClient.interceptors.request.use(
-  (config) => {
-    const userDetails = localStorage.getItem("user");
+// apiClient.interceptors.request.use(
+//   (config) => {
+//     const userDetails = localStorage.getItem("user");
 
-    if (userDetails) {
-      const token = JSON.parse(userDetails).token;
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+//     if (userDetails) {
+//       const token = JSON.parse(userDetails).token;
+//       config.headers.Authorization = `Bearer ${token}`;
+//     }
 
-    return config;
-  },
-  (err) => {
-    return Promise.reject(err);
-  }
-);
+//     return config;
+//   },
+//   (err) => {
+//     return Promise.reject(err);
+//   }
+// );
 
 export const login = async (data) => {
     try {
@@ -27,7 +27,7 @@ export const login = async (data) => {
     } catch (error) {
       return {
         error: true,
-        errorMessage: error.response.data.message,
+        errorMessage: error,
       };
     }
   };
@@ -36,10 +36,10 @@ export const registerUser = async(data)=>{
     try{
         return await apiClient.post("/auth/register",data)
     }
-    catch(err){
+    catch(error){
         return {
             error:true,
-            errorMessage:err.response.message
+            errorMessage:error
         }
     }
 }

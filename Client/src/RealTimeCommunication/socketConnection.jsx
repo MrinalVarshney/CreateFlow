@@ -1,8 +1,17 @@
+
 import io from "socket.io-client"
+import { useUser } from "../Context/userProvider";
 
 let socket = null;
-export const connectWithSocketServer = ()=>{
-    socket = io("http://localhost:5002",[])
+
+
+
+export const connectWithSocketServer = (user)=>{
+    socket = io("http://localhost:5002",{
+        auth: {
+            token: user.token,
+          },
+    })
     socket.on("connect",()=>{
         console.log("Successfully connected with socket server")
     })

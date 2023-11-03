@@ -6,15 +6,18 @@ import reportWebVitals from "./reportWebVitals";
 import { DrawingToolsProvider } from "./Context/DrawingToolsContext";
 import { HistoryProvider } from "./Context/History";
 import { BrowserRouter } from "react-router-dom";
+import { UserProvider } from "./Context/userProvider";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <BrowserRouter>
-    <HistoryProvider>
-      <DrawingToolsProvider>
-        <App />
-      </DrawingToolsProvider>
-    </HistoryProvider>
+    <UserProvider>
+      <HistoryProvider>
+        <DrawingToolsProvider>
+          <App />
+        </DrawingToolsProvider>
+      </HistoryProvider>
+    </UserProvider>
   </BrowserRouter>
 );
 
