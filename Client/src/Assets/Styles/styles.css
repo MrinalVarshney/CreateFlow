@@ -1,0 +1,8 @@
+.backGround {
+    /* background: linear-gradient(135deg, #3498db, #c0392b); */
+    background-image: url('https://i.pinimg.com/736x/7e/09/5c/7e095c48db563dc0219a04a7bfec5e84.jpg'); 
+    background-size: cover; /* Adjust the background size as needed */
+    background-repeat: no-repeat; /* Prevent the image from repeating */
+    width: 100%; /* Set the width of your div */
+    height: 100%;
+}

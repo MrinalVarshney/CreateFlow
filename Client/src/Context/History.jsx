@@ -11,9 +11,14 @@ export const HistoryProvider = ({ children }) => {
   const [redoHistory, setRedoHistory] = useState([]);
   const [blankStage, setBlankStage] = useState(null); 
   const addToHistory = (data) => {
-    if (undoHistory.length > 0 && data === undoHistory[undoHistory.length - 1])
+    // console.log(data)
+    if (undoHistory.length > 0 && data === undoHistory[undoHistory.length - 1]){
+      console.log("Duplicate")
       return;
+    }
+
     if(undoHistory.length===0) setBlankStage(data);
+    console.log("Added to history")
     setUndoHistory([...undoHistory, data]);
     setRedoHistory([]);
   };

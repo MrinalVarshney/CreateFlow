@@ -16,6 +16,7 @@ import {
   drawEllipse,
   drawNSidePolygon,
   drawDashedRectangle,
+  drawLineDashedRectangle,
 } from "./utils/ShapesLogic.jsx";
 
 function DrawingCanvas() {
@@ -33,26 +34,28 @@ function DrawingCanvas() {
   const [context, setContext] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [uploadFile,setUploadFile] = useState(null)
+  const [uploadFile, setUploadFile] = useState(null);
   const isCustomizable = useRef(false);
   const StartRef = useRef({ startX: 0, startY: 0 });
   const CurrentRef = useRef({ x: -1, y: -1 });
   const ExtremumRef = useRef({ x1: 0, y1: 0, x2: 0, y2: 0 });
   const EndRef = useRef({ endX: 0, endY: 0 });
   const pointRef = useRef({ pt3X: -1 });
+  const isResizing = useRef(false);
+  const stillResizing = useRef(false);
   const classes = useStyles();
-
 
   useEffect(() => {
     saveCanvasState();
   }, []);
+
+  /*********************Functionality to toggle between main and virtual canvas*****************************/
 
   const SwitchToVirtual = () => {
     offCanvasRef.current.style.zIndex = "1";
   };
 
   const switchToMainCanvas = () => {
-    if(selectedTool === "UploadFiles") setSelectedTool("Pencil")
     offCanvasRef.current.style.zIndex = "-1";
   };
 
@@ -60,10 +63,11 @@ function DrawingCanvas() {
 
   const addCustomizability = (virtualCtx) => {
     const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
-    console.log("Adding Customizability", e1X, e1Y, e2X, e2Y);
     isCustomizable.current = true;
     virtualCtx.strokeStyle = selectedColor;
-    drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+    if (selectedTool === "Line")
+      drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+    else drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
   };
 
   const isUnderCustomization = (x, y) => {
@@ -75,36 +79,102 @@ function DrawingCanvas() {
   };
 
   const isUserDragging = (endX, endY) => {
+    console.log(endX, endY);
     const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
-    const dx = 5,
-      dy = 5;
+    const dx = 10,
+      dy = 10;
     const p1 = { x: e1X, y: e1Y };
     const p2 = { x: e2X, y: e1Y };
     const p3 = { x: e2X, y: e2Y };
     const p4 = { x: e1X, y: e2Y };
-    const points = { p1, p2, p3, p4 };
+    const points = [p1, p2, p3, p4];
 
     for (let i = 0; i < 4; i++) {
       if (
-        (endX <= points[i].x + dx || endX >= points[i] - dx) &&
+        endX <= points[i].x + dx &&
+        endX >= points[i].x - dx &&
         endY <= points[i].y + dy &&
-        endY >= points[i] - dy
+        endY >= points[i].y - dy
       ) {
-        return true;
+        return false;
       }
     }
-    return false;
+    return true;
+  };
+  /************************ Making resizable shapes functionality ************************************/
+
+  const MakeResizable = (currX, currY) => {
+    console.log("Resizing shape");
+    const { x, y } = CurrentRef.current;
+    let { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
+    const dx = 10,
+      dy = 10;
+    if (e1X > e2X) {
+      let t = e1X;
+      e1X = e2X;
+      e2X = t;
+    }
+    if (e1Y > e2Y) {
+      let t = e1Y;
+      e1Y = e2Y;
+      e2Y = t;
+    }
+    const p1 = { x: e1X, y: e1Y };
+    const p2 = { x: e2X, y: e1Y };
+    const p3 = { x: e2X, y: e2Y };
+    const p4 = { x: e1X, y: e2Y };
+
+    const points = [p1, p2, p3, p4];
+    if (isResizing.current === false) {
+      for (let i = 0; i < 4; i++) {
+        if (
+          currX <= points[i].x + dx &&
+          currX >= points[i].x - dx &&
+          currY <= points[i].y + dy &&
+          currY >= points[i].y - dy
+        ) {
+          isResizing.current = true;
+
+          if (i === 0) StartRef.current = { startX: e2X, startY: e2Y };
+          else if (i === 1) StartRef.current = { startX: e1X, startY: e2Y };
+          else if (i === 2) StartRef.current = { startX: e1X, startY: e1Y };
+          else StartRef.current = { startX: e2X, startY: e1Y };
+        }
+      }
+    }
+    clearVirtualCanvas();
+    const { startX, startY } = StartRef.current;
+    console.log("Start ", startX, startY);
+    EndRef.current = { endX: x, endY: y };
+    console.log(x,y)
+    ExtremumRef.current = {
+      e1X: startX,
+      e1Y: x,
+      e2X: startY,
+      e2Y: y,
+    };
+
+    const virtualCtx = offCanvasRef.current.getContext("2d");
+    if (selectedTool === "UploadFiles") {
+      renderImage(uploadFile, virtualCtx)
+    } else {
+      chooseAndDrawShape(x, y, virtualCtx);
+      CurrentRef.current = { x: currX, y: currY };
+    }
   };
 
-  const MakeResizable = (endX, endY) => {};
+  /************************* Customising Events ****************************/
 
   const chooseAndRunCustomizingEvent = (endX, endY) => {
-    if (isUserDragging) {
+    console.log("choosing event");
+    if (!stillResizing.current && isUserDragging(endX, endY)) {
       setIsDragging(true);
       MakeDraggable(endX, endY);
       DoCursorStyling();
+      console.log("Drag");
     } else {
       console.log("NO drag");
+      stillResizing.current = true;
       MakeResizable(endX, endY);
     }
   };
@@ -112,7 +182,7 @@ function DrawingCanvas() {
   /*********************  Dragging Feature *************************/
 
   const MakeDraggable = (currX, currY) => {
-    
+    clearVirtualCanvas();
     const { x, y } = CurrentRef.current;
     const offsetX = currX - x;
     const offsetY = currY - y;
@@ -130,12 +200,11 @@ function DrawingCanvas() {
     pointRef.current = { pt3X: pointRef.current.pt3X + offsetX };
     const virtualCtx = offCanvasRef.current.getContext("2d");
     if (selectedTool === "UploadFiles") {
-      console.log("Uploading files", e1X + offsetX, e1Y + offsetY);
-      renderImage(uploadFile,virtualCtx);
-    } else{
-      clearVirtualCanvas();
+      renderImage(uploadFile, virtualCtx);
+    } else {
       chooseAndDrawShape(endX + offsetX, endY + offsetY, virtualCtx);
     }
+
     CurrentRef.current = { x: currX, y: currY };
   };
 
@@ -178,25 +247,28 @@ function DrawingCanvas() {
   };
 
   /********************* Drawing on Main Canvas *************************/
-  const drawOnMainCanvas = (endX, endY) => {
+  const drawOnMainCanvas = async (endX, endY) => {
+    clearVirtualCanvas();
     EndRef.current = { endX: -1, endY: -1 };
     isCustomizable.current = false;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    ctx.strokeStyle = selectedColor;
-    if(selectedTool === "UploadFiles"){
-      renderImage(uploadFile,ctx)
-      drawLine(0,0,0,0,ctx)
-      switchToMainCanvas()
-    }
-    else{
+    if (selectedTool === "UploadFiles") {
+      console.log("Drawing on main canvas");
+      await renderImageOnMainCanvas(uploadFile, ctx);
+      switchToMainCanvas();
+      setSelectedTool("Pencil")
+    } else {
+      ctx.strokeStyle = selectedColor;
       chooseAndDrawShape(endX, endY, ctx);
+      saveCanvasState();
     }
+
     pointRef.current = { pt3X: -1 };
     CurrentRef.current = { x: -1, y: -1 };
-    saveCanvasState();
   };
   /************************ Feature: Drawing  shape on chosen canvas **************************************/
+
   const chooseAndDrawShape = (endX, endY, ctx) => {
     ctx.beginPath();
     const { startX, startY } = StartRef.current;
@@ -360,11 +432,21 @@ function DrawingCanvas() {
     console.log("Mouse Up", isCustomizable.current);
     const offCanvas = offCanvasRef.current;
     const virtualCtx = offCanvas.getContext("2d");
+    const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
+    if (isResizing.current) {
+      CurrentRef.current = { x: -1, y: -1 };
+      isResizing.current = false;
+      stillResizing.current = false;
+      if (selectedTool === "Line")
+        drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+      else drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+    }
     if (isDragging) {
       setIsDragging(false);
       CurrentRef.current = { x: -1, y: -1 };
-      const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
-      drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+      if (selectedTool === "Line")
+        drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+      else drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
     }
     if (isCustomizable.current) return;
     else if (drawing) {
@@ -376,52 +458,81 @@ function DrawingCanvas() {
     }
   };
 
-  //  <------ File selection and Image Rendering functionality ------>
+  //  <------ File selection functionality ------>
   const selectFile = () => {
     const fileInput = document.getElementById("fileInput");
     fileInput.click();
-    fileInput.value = null
+    fileInput.value = null;
   };
 
   const handleFileSelect = async (event) => {
     const file = event.target.files[0];
-    console.log("selected file ", file)
-    if(file){
-      setUploadFile(file)
+    console.log("selected file ", file);
+    if (file) {
+      setUploadFile(file);
       ExtremumRef.current = {
         e1X: 150,
         e1Y: 150,
         e2X: 150 + 200,
         e2Y: 150 + 200,
       };
-      StartRef.current = {startX:150,startY:150}
+      StartRef.current = { startX: 150, startY: 150 };
+      EndRef.current = {endX: 150 + 200, endY: 150 + 200}
       SwitchToVirtual();
       const offCanvas = offCanvasRef.current;
       const virtualCtx = offCanvas.getContext("2d");
-      renderImage(file,virtualCtx);
+      renderImage(file, virtualCtx);
       addCustomizability(virtualCtx);
-    }
-    else{
-      switchToMainCanvas()
+    } else {
+      switchToMainCanvas();
     }
   };
 
-  const renderImage =  (file,ctx) => {
+  const renderImage = async (file, ctx) => {
     if (file) {
-        clearVirtualCanvas()
-        const reader = new FileReader();
-        const {startX,startY} = StartRef.current;
+      clearVirtualCanvas();
+      const reader = new FileReader();
+      const { startX, startY } = StartRef.current;
+      const {endX,endY} = EndRef.current;
+      const width = Math.abs(endX - startX);
+      const height = Math.abs(endY-startY);
+      reader.onload = function (e) {
+        const image = new Image();
+        image.src = e.target.result;
+        image.onload = function () {
+          ctx.drawImage(image, startX, startY, width, height);
+        };
+      };
+      ctx.stroke();
+      await reader.readAsDataURL(file);
+    }
+  };
+
+  const renderImageOnMainCanvas = async (file, ctx) => {
+    if (file) {
+      clearVirtualCanvas();
+
+      const reader = new FileReader();
+      const { startX, startY } = StartRef.current;
+
+      await new Promise((resolve, reject) => {
         reader.onload = function (e) {
           const image = new Image();
           image.src = e.target.result;
+
           image.onload = function () {
             ctx.drawImage(image, startX, startY, 200, 200);
+            resolve(); // Resolve the Promise when the image has loaded
           };
         };
-        reader.readAsDataURL(file);
-    } 
-  };
 
+        reader.readAsDataURL(file);
+      });
+
+      // After the image has been loaded and drawn, you can save the canvas state
+      saveCanvasState();
+    }
+  };
 
   return (
     <div style={{ cursor: "./Assets/cursor/eraser.jpg" }}>

@@ -5,14 +5,17 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { DrawingToolsProvider } from "./Context/DrawingToolsContext";
 import { HistoryProvider } from "./Context/History";
+import { BrowserRouter } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
+  <BrowserRouter>
     <HistoryProvider>
       <DrawingToolsProvider>
         <App />
       </DrawingToolsProvider>
     </HistoryProvider>
+  </BrowserRouter>
 );
 
 // If you want to start measuring performance in your app, pass a function
