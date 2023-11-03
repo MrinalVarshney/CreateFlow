@@ -1,0 +1,30 @@
+{
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-router": "^0.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.0",
+    "socket.io": "^4.7.2"
+  },
+  "name": "server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrinalVarshney/CreateFlow.git"
+  },
+  "author": "Mrinal",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MrinalVarshney/CreateFlow/issues"
+  },
+  "homepage": "https://github.com/MrinalVarshney/CreateFlow#readme",
+  "description": ""
+}
