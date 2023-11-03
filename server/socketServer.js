@@ -17,8 +17,7 @@ const registerSocketServer = (server) => {
 
     io.on("connection",(socket)=>{
         console.log("New client connected with id: "+socket.id)
-        socket.on("create",(data)=>{
-            console.log("New room created with name: "+data)
+        socket.on("room-create",(data)=>{
             
         })
     })
