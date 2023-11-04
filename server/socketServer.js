@@ -32,13 +32,12 @@ const registerSocketServer = (server) => {
       roomLeaveHandler(socket, data);
     });
 
-    socket.on("start-game",()=>{
-        startGameHandler(socket)
-    })
-    socket.on("end-game",()=>{
-        endGameHandler(socket)
-    })
-    
+    socket.on("start-game", () => {
+      startGameHandler(socket);
+    });
+    socket.on("end-game", () => {
+      endGameHandler(socket);
+    });
   });
 };
 

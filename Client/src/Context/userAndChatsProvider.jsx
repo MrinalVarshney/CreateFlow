@@ -11,7 +11,7 @@ export const UserAndChatsProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [chats, setChats] = useState([]);
   const navigate = useNavigate();
-
+  const [roomDetails, setRoomDetails] = useState({});
   useEffect(() => {
     const userDetails = JSON.parse(localStorage.getItem("user"));
     const currentPath = window.location.pathname;
@@ -35,6 +35,8 @@ export const UserAndChatsProvider = ({ children }) => {
     setUser,
     chats,
     setChats,
+    roomDetails,
+    setRoomDetails,
   };
 
   return (

@@ -40,11 +40,13 @@ const getActiveRoom = (roomCode) => {
   return null;
 };
 
-const removeActiveRoom = (roomCode)=>{
-  const updatedActiveRooms = activeRooms.filter((room)=>room.roomCode !== roomCode)
-  activeRooms = updatedActiveRooms
-  return updatedActiveRooms
-}
+const removeActiveRoom = (roomCode) => {
+  const updatedActiveRooms = activeRooms.filter(
+    (room) => room.roomCode !== roomCode
+  );
+  activeRooms = updatedActiveRooms;
+  return updatedActiveRooms;
+};
 
 const joinActiveRoom = ({ roomCode, socketId, data }) => {
   if (isValidRoom(roomCode)) {
@@ -72,10 +74,9 @@ const leaveActiveRoom = ({ socketId, roomCode }) => {
 const getRoomCodeFromSocketId = (socketId) => {
   const room = activeRooms.find((room) => {
     room.roomCreator.socketId === socketId;
-  })
-  if(room) return room.roomCode
-}
-
+  });
+  if (room) return room.roomCode;
+};
 
 module.exports = {
   addNewActiveRoom,
@@ -84,5 +85,5 @@ module.exports = {
   getActiveRoom,
   leaveActiveRoom,
   getRoomCodeFromSocketId,
-  removeActiveRoom
+  removeActiveRoom,
 };

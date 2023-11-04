@@ -16,7 +16,11 @@ const roomJoinHandler = (socket, data) => {
   roomDetails.participants.forEach((participant) => {
     socket
       .to(participant.socketId)
-      .emit("user-joined", { userId: data.userId, userName: data.userName,socketId });
+      .emit("user-joined", {
+        userId: data.userId,
+        userName: data.userName,
+        socketId,
+      });
   });
 };
 
