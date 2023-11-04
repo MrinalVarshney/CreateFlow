@@ -66,7 +66,7 @@ function DrawingCanvas() {
     isCustomizable.current = true;
     virtualCtx.strokeStyle = selectedColor;
     if (selectedTool === "Line")
-      drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+      drawLineDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
     else drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
   };
 
@@ -146,7 +146,7 @@ function DrawingCanvas() {
     const { startX, startY } = StartRef.current;
     console.log("Start ", startX, startY);
     EndRef.current = { endX: x, endY: y };
-    console.log(x,y)
+    console.log(x, y);
     ExtremumRef.current = {
       e1X: startX,
       e1Y: x,
@@ -156,7 +156,7 @@ function DrawingCanvas() {
 
     const virtualCtx = offCanvasRef.current.getContext("2d");
     if (selectedTool === "UploadFiles") {
-      renderImage(uploadFile, virtualCtx)
+      renderImage(uploadFile, virtualCtx);
     } else {
       chooseAndDrawShape(x, y, virtualCtx);
       CurrentRef.current = { x: currX, y: currY };
@@ -257,7 +257,7 @@ function DrawingCanvas() {
       console.log("Drawing on main canvas");
       await renderImageOnMainCanvas(uploadFile, ctx);
       switchToMainCanvas();
-      setSelectedTool("Pencil")
+      setSelectedTool("Pencil");
     } else {
       ctx.strokeStyle = selectedColor;
       chooseAndDrawShape(endX, endY, ctx);
@@ -438,14 +438,14 @@ function DrawingCanvas() {
       isResizing.current = false;
       stillResizing.current = false;
       if (selectedTool === "Line")
-        drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+        drawLineDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
       else drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
     }
     if (isDragging) {
       setIsDragging(false);
       CurrentRef.current = { x: -1, y: -1 };
       if (selectedTool === "Line")
-        drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+        drawLineDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
       else drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
     }
     if (isCustomizable.current) return;
@@ -477,7 +477,7 @@ function DrawingCanvas() {
         e2Y: 150 + 200,
       };
       StartRef.current = { startX: 150, startY: 150 };
-      EndRef.current = {endX: 150 + 200, endY: 150 + 200}
+      EndRef.current = { endX: 150 + 200, endY: 150 + 200 };
       SwitchToVirtual();
       const offCanvas = offCanvasRef.current;
       const virtualCtx = offCanvas.getContext("2d");
@@ -493,9 +493,9 @@ function DrawingCanvas() {
       clearVirtualCanvas();
       const reader = new FileReader();
       const { startX, startY } = StartRef.current;
-      const {endX,endY} = EndRef.current;
+      const { endX, endY } = EndRef.current;
       const width = Math.abs(endX - startX);
-      const height = Math.abs(endY-startY);
+      const height = Math.abs(endY - startY);
       reader.onload = function (e) {
         const image = new Image();
         image.src = e.target.result;
