@@ -1,6 +1,8 @@
 const authSocket = require("./middlewares/authSocket");
 const roomCreateHandler = require("./socketHandlers/roomCreateHandler");
 const roomJoinHandler = require("./socketHandlers/roomJoinHandler");
+const startGameHandler = require("./socketHandlers/startGameHandler")
+const serverStore= require("./serverStore")
 
 const registerSocketServer = (server) => {
   server.listen(5002, () => {
@@ -16,6 +18,8 @@ const registerSocketServer = (server) => {
   io.use((socket, next) => {
     authSocket(socket, next);
   });
+
+  serverStore.setSocketServerInstance(io)
 
   io.on("connection", (socket) => {
     console.log("New client connected with id: " + socket.id);

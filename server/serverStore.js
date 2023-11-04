@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require("uuid");
 
 let activeRooms = [];
+let io =null
 
 const addNewActiveRoom = ({ socketId, data }) => {
   const roomCode = uuidv4();
@@ -27,6 +28,14 @@ const addNewActiveRoom = ({ socketId, data }) => {
   activeRooms = [...activeRooms, newActiveRoom];
   return newActiveRoom;
 };
+
+const setSocketServerInstance = (ioInstance)=>{
+  io=ioInstance
+}
+
+const getSocketServerInstance = ()=>{
+  return io;
+}
 
 const isValidRoom = (roomCode) => {
   const room = activeRooms.find((room) => room.roomCode === roomCode);
@@ -72,11 +81,16 @@ const leaveActiveRoom = ({ socketId, roomCode }) => {
 };
 
 const getRoomCodeFromSocketId = (socketId) => {
+  console.log(activeRooms, socketId);
   const room = activeRooms.find((room) => {
-    room.roomCreator.socketId === socketId;
+    console.log(room.roomCreator.socketId);
+    return room.roomCreator.socketId === socketId; // Add the 'return' statement
   });
+
+  console.log("room", room);
   if (room) return room.roomCode;
 };
+
 
 module.exports = {
   addNewActiveRoom,
@@ -86,4 +100,6 @@ module.exports = {
   leaveActiveRoom,
   getRoomCodeFromSocketId,
   removeActiveRoom,
+  setSocketServerInstance,
+  getSocketServerInstance
 };
