@@ -4,6 +4,7 @@ import { makeStyles } from "@mui/styles";
 import {
   createNewRoom,
   joinRoom,
+  startGame,
 } from "../../RealTimeCommunication/socketConnection";
 import { useNavigate } from "react-router-dom";
 import { useUserAndChats } from "../../Context/userAndChatsProvider";
@@ -66,7 +67,6 @@ const useStyles = makeStyles({
 function PlayOnline() {
   const classes = useStyles();
   const { user, roomDetails, setRoomDetails } = useUserAndChats();
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
   const [HostroomCode, setHostRoomCode] = useState({ host: "", roomCode: "" });
@@ -96,8 +96,14 @@ function PlayOnline() {
   const join = () => {
     console.log("joining", joinRoomCode);
     const data = { userId: user._id, userName: user.username };
-    joinRoom(joinRoomCode, data, setIsUserJoined, setRoomDetails, roomDetails);
-    setIsUserJoined(true);
+    joinRoom(
+      joinRoomCode,
+      data,
+      setIsUserJoined,
+      setRoomDetails,
+      roomDetails,
+      navigate
+    );
   };
 
   const Openjoin = () => {
@@ -108,14 +114,13 @@ function PlayOnline() {
     setModalContent("host");
     const data = { userId: user._id, userName: user.username };
 
-    createNewRoom(data, setHostRoomCode);
+    createNewRoom(data, setHostRoomCode, setRoomDetails);
     console.log("hosting", data);
   };
 
   const start = () => {
     setIsModalOpen(false);
-
-    navigate("/skribble");
+    startGame(navigate);
   };
   return (
     <div>
