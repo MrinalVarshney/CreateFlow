@@ -31,14 +31,19 @@ const drawLine = (startX, startY, endX, endY, ctx) => {
 };
 
 const drawEllipse = (startX, startY, endX, endY, ctx) => {
-  const radiusX = Math.abs(endX - startX);
+  const radiusX = Math.abs(endX - startX) / 2;
   const radiusY = Math.abs(endY - startY) / 2;
-  const centreX = startX;
+  var centreX;
   var centreY;
   if (endY > startY) {
     centreY = startY + radiusY;
   } else {
     centreY = startY - radiusY;
+  }
+  if (endX > startX) {
+    centreX = startX + radiusX;
+  } else {
+    centreX = startX - radiusX;
   }
   ctx.ellipse(centreX, centreY, radiusX, radiusY, 0, 0, 2 * Math.PI);
   ctx.stroke();
@@ -52,12 +57,17 @@ const drawEllipse = (startX, startY, endX, endY, ctx) => {
 
 const drawCircle = (startX, startY, endX, endY, ctx) => {
   const radius = Math.abs(endY - startY) / 2;
-  const centreX = startX;
+  var centreX;
   var centreY;
   if (endY > startY) {
     centreY = startY + radius;
   } else {
     centreY = startY - radius;
+  }
+  if (endX > startX) {
+    centreX = startX + radius;
+  } else {
+    centreX = startX - radius;
   }
   ctx.arc(centreX, centreY, radius, 0, 2 * Math.PI);
   ctx.stroke();
@@ -95,20 +105,35 @@ const drawDashedRectangle = (startX, startY, endX, endY, ctx) => {
   ctx.setLineDash([]);
   drawResizingDots(startX, startY, endX, endY, ctx);
 };
+const drawLineDashedRectangle = (startX, startY, endX, endY, ctx) => {
+  ctx.setLineDash([5, 20]);
+  ctx.strokeStyle = "blue";
+  ctx.strokeRect(startX, startY, endX - startX, endY - startY);
+  ctx.setLineDash([]);
+  drawLineResizingDots(startX, startY, endX, endY, ctx);
+};
 
 const drawResizingDots = (startX, startY, endX, endY, ctx) => {
   console.log("Drawing resizing dots", startX, startY, endX, endY);
   ctx.moveTo(startX, startY);
-  ctx.arc(startX, startY, 2, 0, 2 * Math.PI);
+  ctx.arc(startX, startY, 3, 0, 2 * Math.PI);
   ctx.moveTo(startX, endY);
-  ctx.arc(startX, endY, 2, 0, 2 * Math.PI);
+  ctx.arc(startX, endY, 3, 0, 2 * Math.PI);
   ctx.moveTo(endX, startY);
-  ctx.arc(endX, startY, 2, 0, 2 * Math.PI);
+  ctx.arc(endX, startY, 3, 0, 2 * Math.PI);
   ctx.moveTo(endX, endY);
-  ctx.arc(endX, endY, 2, 0, 2 * Math.PI);
+  ctx.arc(endX, endY, 3, 0, 2 * Math.PI);
   ctx.stroke();
 };
 
+const drawLineResizingDots = (startX, startY, endX, endY, ctx) => {
+  console.log("Drawing resizing dots", startX, startY, endX, endY);
+  ctx.moveTo(startX, startY);
+  ctx.arc(startX, startY, 3, 0, 2 * Math.PI);
+  ctx.moveTo(endX, endY);
+  ctx.arc(endX, endY, 3, 0, 2 * Math.PI);
+  ctx.stroke();
+};
 export {
   drawTriangle,
   drawRectangle,
@@ -117,4 +142,5 @@ export {
   drawCircle,
   drawNSidePolygon,
   drawDashedRectangle,
+  drawLineDashedRectangle,
 };
