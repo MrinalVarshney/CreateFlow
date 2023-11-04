@@ -11,7 +11,7 @@ export const UserAndChatsProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [chats, setChats] = useState([]);
   const navigate = useNavigate();
-  const [roomDetails, setRoomDetails] = useState({});
+  const [roomDetails, setRoomDetails] = useState(null);
   useEffect(() => {
     const userDetails = JSON.parse(localStorage.getItem("user"));
     const currentPath = window.location.pathname;

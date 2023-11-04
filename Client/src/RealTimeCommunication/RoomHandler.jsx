@@ -1,24 +1,26 @@
 import { joinRoom } from "./socketConnection";
 
-const onHostingRoom = (userData, room, setHostRoomCode, setRoomDetails) => {
+export const onHostingRoom = ( room, setHostRoomCode, setRoomDetails,navigate,roomDetails,setIsUserJoined) => {
   setRoomDetails(room);
   const { roomCode, roomCreator } = room;
   //   console.log("Hosting room with roomCode: " + roomCode, roomCreator);
   setHostRoomCode({ host: roomCreator.userName, roomCode: roomCode });
-  joinRoom(room.roomCode, userData, setIsUser);
+  joinRoom(roomCode,roomCreator,setIsUserJoined,setRoomDetails,roomDetails,navigate)
 };
 
-const onJoiningRoom = (userData, roomDetails, setRoomDetails) => {
-  console.log("injoinroomhandle", roomDetails);
+export const onJoiningRoom = (userData, roomDetails, setRoomDetails) => {
+  console.log("injoinroomhandle", userData);
+  console.log(roomDetails)
+  if(roomDetails){
+    const updatedRoom = roomDetails.participants.push(userData)
+    console.log(updatedRoom)
+    setRoomDetails(updatedRoom)
+  }
 
-  setRoomDetails({
-    ...roomDetails,
-    participants: [...roomDetails.participants, userData],
-  });
 };
 
-const sendRoomMessage = (message, chats, setChats) => {
+export const sendRoomMessage = (message, chats, setChats) => {
   setChats([...chats, message]);
 };
 
-module.exports = { onHostingRoom, onJoiningRoom, sendRoomMessage };
+

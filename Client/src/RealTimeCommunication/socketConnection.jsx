@@ -1,5 +1,5 @@
 import io from "socket.io-client";
-import { onHostingRoom, onJoiningRoom, sendRoomMessage } from "./RoomHandler";
+import { onHostingRoom, onJoiningRoom } from "./RoomHandler";
 
 let socket = null;
 
@@ -14,11 +14,11 @@ export const connectWithSocketServer = (user) => {
   });
 };
 
-export const createNewRoom = (data, setHostRoomCode, setRoomDetails) => {
+export const createNewRoom = (data, setHostRoomCode, setRoomDetails,navigate,roomDetails,setIsUserJoined) => {
   // console.log("Creating new room with name: "+data)
   socket.emit("room-create", data);
   socket.on("room-created", (room) => {
-    onHostingRoom(room, setHostRoomCode, setRoomDetails);
+    onHostingRoom(room, setHostRoomCode, setRoomDetails,navigate,roomDetails,setIsUserJoined);
   });
   socket.on("");
 };
@@ -34,13 +34,13 @@ export const joinRoom = (
   console.log("joined the room");
   socket.emit("join-room", roomCode, data);
   socket.on("user-joined", (userData) => {
-    onJoiningRoom(userData, setIsUserJoined, roomDetails, setRoomDetails);
+    onJoiningRoom(userData, roomDetails, setRoomDetails);
   });
   socket.on("room-joined", (room) => {
     console.log("join-room", room);
     setRoomDetails(room);
     setIsUserJoined(true);
-    navigate("/skribble");
+    // navigate("/skribble");
   });
 };
 
@@ -49,13 +49,14 @@ export const leaveRoom = (data, chats, setChats) => {
   socket.emit("leave-room", data);
   socket.on("user-left", (userData) => {
     const message = `${userData.userName} is left the room.`;
-    sendRoomMessage(message, chats, setChats);
+    // sendRoomMessage(message, chats, setChats);
   });
 };
 
 export const startGame = (navigate) => {
   socket.emit("start-game");
   socket.on("game-started", () => {
+    console.log("Game")
     navigate("/skribble");
   });
 };

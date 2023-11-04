@@ -114,7 +114,7 @@ function PlayOnline() {
     setModalContent("host");
     const data = { userId: user._id, userName: user.username };
 
-    createNewRoom(data, setHostRoomCode, setRoomDetails);
+    createNewRoom(data, setHostRoomCode, setRoomDetails,navigate,roomDetails,setIsUserJoined);
     console.log("hosting", data);
   };
 
