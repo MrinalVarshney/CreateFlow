@@ -25,8 +25,18 @@ const registerSocketServer = (server) => {
     });
 
     socket.on("join-room", (roomCode, data) => {
-      console.log(roomCode, data);
       roomJoinHandler(socket, roomCode, data);
+    });
+
+    socket.on("leave-room", (data) => {
+      roomLeaveHandler(socket, data);
+    });
+
+    socket.on("start-game", () => {
+      startGameHandler(socket);
+    });
+    socket.on("end-game", () => {
+      endGameHandler(socket);
     });
   });
 };

@@ -28,10 +28,30 @@ const addNewActiveRoom = ({ socketId, data }) => {
   return newActiveRoom;
 };
 
+const isValidRoom = (roomCode) => {
+  const room = activeRooms.find((room) => room.roomCode === roomCode);
+  return room ? true : false;
+};
+
+const getActiveRoom = (roomCode) => {
+  const room = activeRooms.find((room) => room.roomCode === roomCode);
+  if (room) return room;
+
+  return null;
+};
+
+const removeActiveRoom = (roomCode) => {
+  const updatedActiveRooms = activeRooms.filter(
+    (room) => room.roomCode !== roomCode
+  );
+  activeRooms = updatedActiveRooms;
+  return updatedActiveRooms;
+};
+
 const joinActiveRoom = ({ roomCode, socketId, data }) => {
-  console.log(activeRooms, roomCode);
-  if (activeRooms[roomCode]) {
-    activeRooms[roomCode].participants.push({
+  if (isValidRoom(roomCode)) {
+    const activeRoom = getActiveRoom(roomCode);
+    activeRoom.participants.push({
       userName: data.userName,
       userId: data.userId,
       socketId,
@@ -41,4 +61,29 @@ const joinActiveRoom = ({ roomCode, socketId, data }) => {
   }
 };
 
-module.exports = { addNewActiveRoom, joinActiveRoom };
+const leaveActiveRoom = ({ socketId, roomCode }) => {
+  const room = getActiveRoom(roomCode);
+  if (room) {
+    const updatedParticipants = room.participants.filter(
+      (participant) => participant.socketId !== socketId
+    );
+    room.participants = updatedParticipants;
+  }
+};
+
+const getRoomCodeFromSocketId = (socketId) => {
+  const room = activeRooms.find((room) => {
+    room.roomCreator.socketId === socketId;
+  });
+  if (room) return room.roomCode;
+};
+
+module.exports = {
+  addNewActiveRoom,
+  joinActiveRoom,
+  isValidRoom,
+  getActiveRoom,
+  leaveActiveRoom,
+  getRoomCodeFromSocketId,
+  removeActiveRoom,
+};
