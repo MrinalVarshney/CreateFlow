@@ -4,6 +4,7 @@ import { useUserAndChats } from "./Context/userAndChatsProvider";
 
 function Skribble() {
   const [message, setMessage] = useState("");
+  const { roomDetails } = useUserAndChats();
 
   const handleSend = () => {
     console.log(message);
@@ -22,7 +23,9 @@ function Skribble() {
         <Grid item xs={2}>
           <Paper style={{ height: "83vh" }}>
             <Box p={2}>
-              <h2>First Part</h2>
+              {roomDetails.participants.map((participants) => (
+                <h2>{participants.userName}</h2>
+              ))}
             </Box>
           </Paper>
         </Grid>

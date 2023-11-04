@@ -1,8 +1,14 @@
 import React, { useState } from "react";
-import { Paper, Button, Modal, Input, Link } from "@mui/material";
+import { Paper, Button, Modal, Input } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { createNewRoom } from "../../RealTimeCommunication/socketConnection";
+import {
+  createNewRoom,
+  joinRoom,
+} from "../../RealTimeCommunication/socketConnection";
 import { useNavigate } from "react-router-dom";
+import { useUserAndChats } from "../../Context/userAndChatsProvider";
+import Table from "../../shared/Components/Table";
+
 const useStyles = makeStyles({
   boxContainer: {
     width: 200,
@@ -59,16 +65,25 @@ const useStyles = makeStyles({
 
 function PlayOnline() {
   const classes = useStyles();
+  const { user, roomDetails, setRoomDetails } = useUserAndChats();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
+  const [HostroomCode, setHostRoomCode] = useState({ host: "", roomCode: "" });
+  const [joinRoomCode, setJoinRoomCode] = useState("");
+  const [isUserJoined, setIsUserJoined] = useState(false);
+
   const [usersJoined, setUsersJoined] = useState([
-    { id: "1234", name: "user1" },
-    { id: "1235", name: "user2" },
-    { id: "1236", name: "user3" },
+    { _id: "1", userName: "user1" },
+    { _id: "2", userName: "user2" },
+    { _id: "3", userName: "user3" },
+    { _id: "4", userName: "user4" },
+    { _id: "5", userName: "user5" },
+    { _id: "6", userName: "user6" },
+    { _id: "7", userName: "user7" },
   ]);
 
   const navigate = useNavigate();
-  let roomId = "1234";
   const openModal = () => {
     setIsModalOpen(true);
     setModalContent("play");
@@ -79,12 +94,22 @@ function PlayOnline() {
 
   const playRandom = () => {};
   const join = () => {
+    console.log("joining", joinRoomCode);
+    const data = { userId: user._id, userName: user.username };
+    joinRoom(joinRoomCode, data, setIsUserJoined, setRoomDetails, roomDetails);
+    setIsUserJoined(true);
+  };
+
+  const Openjoin = () => {
     setModalContent("join");
   };
 
   const host = () => {
     setModalContent("host");
-    console.log("hosting");
+    const data = { userId: user._id, userName: user.username };
+
+    createNewRoom(data, setHostRoomCode);
+    console.log("hosting", data);
   };
 
   const start = () => {
@@ -119,7 +144,7 @@ function PlayOnline() {
                   <Button onClick={host}>Host</Button>
                 </Paper>
                 <Paper className={classes.insideModal}>
-                  <Button onClick={join}>Join</Button>
+                  <Button onClick={Openjoin}>Join</Button>
                 </Paper>
                 <Paper className={classes.insideModal}>
                   <Button onClick={playRandom}>Play Random</Button>
@@ -138,31 +163,10 @@ function PlayOnline() {
                   flexDirection: "column",
                 }}
               >
-                <h1>Host</h1>
-                <h3>roomId : {roomId}</h3>
+                <h1>Host: {HostroomCode.host}</h1>
+                <h3>roomId : {HostroomCode.roomCode}</h3>
                 <h3>Users Joined : {usersJoined.length}</h3>
-                <div
-                  style={{
-                    backgroundColor: "white",
-                    border: "2px solid black",
-                    padding: "10px",
-                    width: "50%",
-                  }}
-                >
-                  {usersJoined.map((user) => (
-                    <h4
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                      key={user.id}
-                    >
-                      {" "}
-                      {user.name}{" "}
-                    </h4>
-                  ))}
-                </div>
+                <Table usersJoined={usersJoined} user={user} />
 
                 <Button
                   style={{ marginTop: "10px", backgroundColor: "lightBlue" }}
@@ -184,9 +188,22 @@ function PlayOnline() {
                   flexDirection: "column",
                 }}
               >
-                <h1>Join</h1>
-                <Input placeholder="Enter Room Id" />
-                <Button>Join</Button>
+                {!isUserJoined && (
+                  <>
+                    <h1>Join</h1>
+                    <Input
+                      placeholder="Enter Room Id"
+                      onChange={(e) => setJoinRoomCode(e.target.value)}
+                    />
+                    <Button onClick={join}>Join</Button>
+                  </>
+                )}
+                {isUserJoined && (
+                  <>
+                    <h1>Joined</h1>
+                    <Table usersJoined={usersJoined} user={user} />
+                  </>
+                )}
               </div>
             )}
           </>

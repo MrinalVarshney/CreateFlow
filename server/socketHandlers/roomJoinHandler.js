@@ -1,8 +1,7 @@
 const serverStore = require("../serverStore");
 
-const roomJoinHandler = (socket, data) => {
+const roomJoinHandler = (socket, roomCode, data) => {
   const socketId = socket.id;
-  const roomCode = data.roomCode;
 
   serverStore.joinActiveRoom({ roomCode, socketId, data });
   socket
