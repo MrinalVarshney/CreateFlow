@@ -42,7 +42,12 @@ const drawEllipse = (startX, startY, endX, endY, ctx) => {
   }
   ctx.ellipse(centreX, centreY, radiusX, radiusY, 0, 0, 2 * Math.PI);
   ctx.stroke();
-  return {e1X:centreX-radiusX,e1Y:centreY-radiusY,e2X:centreX+radiusX,e2Y:centreY+radiusY}
+  return {
+    e1X: centreX - radiusX,
+    e1Y: centreY - radiusY,
+    e2X: centreX + radiusX,
+    e2Y: centreY + radiusY,
+  };
 };
 
 const drawCircle = (startX, startY, endX, endY, ctx) => {
@@ -56,7 +61,12 @@ const drawCircle = (startX, startY, endX, endY, ctx) => {
   }
   ctx.arc(centreX, centreY, radius, 0, 2 * Math.PI);
   ctx.stroke();
-  return {e1X:centreX-radius,e1Y:centreY-radius,e2X:centreX+radius,e2Y:centreY+radius}
+  return {
+    e1X: centreX - radius,
+    e1Y: centreY - radius,
+    e2X: centreX + radius,
+    e2Y: centreY + radius,
+  };
 };
 
 const drawNSidePolygon = (startX, endX, startY, endY, n, ctx) => {
@@ -75,20 +85,19 @@ const drawNSidePolygon = (startX, endX, startY, endY, n, ctx) => {
   }
   ctx.lineTo(points[0].x, points[0].y);
   ctx.stroke();
-  return {e1X:startX,e1Y:startY,e2X:endX,e2Y:endY}
+  return { e1X: startX, e1Y: startY, e2X: endX, e2Y: endY };
 };
-
 
 const drawDashedRectangle = (startX, startY, endX, endY, ctx) => {
   ctx.setLineDash([5, 20]);
   ctx.strokeStyle = "blue";
   ctx.strokeRect(startX, startY, endX - startX, endY - startY);
   ctx.setLineDash([]);
-  drawResizingDots(startX, startY, endX, endY, ctx)
+  drawResizingDots(startX, startY, endX, endY, ctx);
 };
 
- const drawResizingDots = (startX, startY, endX, endY, ctx) => {
-  console.log("Drawing resizing dots",startX,startY,endX,endY)
+const drawResizingDots = (startX, startY, endX, endY, ctx) => {
+  console.log("Drawing resizing dots", startX, startY, endX, endY);
   ctx.moveTo(startX, startY);
   ctx.arc(startX, startY, 2, 0, 2 * Math.PI);
   ctx.moveTo(startX, endY);
@@ -98,7 +107,7 @@ const drawDashedRectangle = (startX, startY, endX, endY, ctx) => {
   ctx.moveTo(endX, endY);
   ctx.arc(endX, endY, 2, 0, 2 * Math.PI);
   ctx.stroke();
- }
+};
 
 export {
   drawTriangle,
