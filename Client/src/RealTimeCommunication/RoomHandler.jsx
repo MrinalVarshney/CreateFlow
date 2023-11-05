@@ -1,11 +1,25 @@
 import { joinRoom } from "./socketConnection";
 
-const onHostingRoom = (userData, room, setHostRoomCode, setRoomDetails) => {
+const onHostingRoom = (
+  room,
+  setHostRoomCode,
+  setRoomDetails,
+  setIsUserJoined,
+  roomDetails,
+  navigate
+) => {
   setRoomDetails(room);
   const { roomCode, roomCreator } = room;
   //   console.log("Hosting room with roomCode: " + roomCode, roomCreator);
   setHostRoomCode({ host: roomCreator.userName, roomCode: roomCode });
-  joinRoom(room.roomCode, userData, setIsUser);
+  joinRoom(
+    roomCode,
+    room.Creater,
+    setIsUserJoined,
+    setRoomDetails,
+    roomDetails,
+    navigate
+  );
 };
 
 const onJoiningRoom = (userData, roomDetails, setRoomDetails) => {

@@ -14,11 +14,25 @@ export const connectWithSocketServer = (user) => {
   });
 };
 
-export const createNewRoom = (data, setHostRoomCode, setRoomDetails) => {
+export const createNewRoom = (
+  data,
+  setHostRoomCode,
+  setRoomDetails,
+  setIsUserJoined,
+  roomDetails,
+  navigate
+) => {
   // console.log("Creating new room with name: "+data)
   socket.emit("room-create", data);
   socket.on("room-created", (room) => {
-    onHostingRoom(room, setHostRoomCode, setRoomDetails);
+    onHostingRoom(
+      room,
+      setHostRoomCode,
+      setRoomDetails,
+      setIsUserJoined,
+      roomDetails,
+      navigate
+    );
   });
   socket.on("");
 };
