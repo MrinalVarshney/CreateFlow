@@ -1,18 +1,16 @@
 import React, { useEffect } from "react";
 import CreateCanvas from "./CreateBox/CreateCanvas";
 import "../Assets/Styles/styles.css";
-import { connectWithSocketServer } from "../RealTimeCommunication/socketConnection";
-// import { useUser } from '../Context/userAndChatsProvider'
 import HostorJoin from "./CreateBox/HostorJoin";
+import { useUserAndChats } from "../Context/userAndChatsProvider";
 
 const SelectionBoard = () => {
-  const user = JSON.parse(localStorage.getItem("user"));
-
+  const { connectWithSocketServer } = useUserAndChats();
+  const user = JSON.parse(localStorage.getItem("user"))
   useEffect(() => {
-    console.log("Hii", user);
-    connectWithSocketServer(user);
-  }, []);
-
+    connectWithSocketServer(user)
+  },[])
+  
   return (
     <div className="backGround" style={{ height: "100vh" }}>
       <CreateCanvas />

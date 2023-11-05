@@ -1,5 +1,6 @@
 import { useContext, useState, createContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import {io} from "socket.io-client"
 
 const userContext = createContext();
 
@@ -12,6 +13,8 @@ export const UserAndChatsProvider = ({ children }) => {
   const [chats, setChats] = useState([]);
   const navigate = useNavigate();
   const [roomDetails, setRoomDetails] = useState(null);
+  const [socket,setSocket] = useState(null)
+
   useEffect(() => {
     const userDetails = JSON.parse(localStorage.getItem("user"));
     const currentPath = window.location.pathname;
@@ -28,6 +31,19 @@ export const UserAndChatsProvider = ({ children }) => {
     }
   }, [navigate]);
 
+ const connectWithSocketServer = () => {
+    const socket = io("http://localhost:5002", {
+      auth: {
+        token: user.token,
+      },
+    });
+    setSocket(socket)
+    socket.on("connect", () => {
+      console.log("Successfully connected with socket server");
+    });
+  };
+
+
   // The state update might not be visible immediately within this render cycle.
 
   const contextValue = {
@@ -37,6 +53,8 @@ export const UserAndChatsProvider = ({ children }) => {
     setChats,
     roomDetails,
     setRoomDetails,
+    connectWithSocketServer,
+    socket
   };
 
   return (
