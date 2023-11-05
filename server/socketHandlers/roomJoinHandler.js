@@ -21,7 +21,7 @@ const roomJoinHandler = (socket, roomCode, data) => {
   });
 
   // Join the room (user who joins)
-  socket.join(roomCode);
+  console.log(roomDetails)
   socket.emit("room-joined", roomDetails);
 };
 

@@ -65,13 +65,12 @@ const useStyles = makeStyles({
 
 function PlayOnline() {
   const classes = useStyles();
-  const { user, socket } = useUserAndChats();
+  const { user, socket,roomDetails,setRoomDetails } = useUserAndChats();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
   const [HostroomCode, setHostRoomCode] = useState({ host: "", roomCode: "" });
   const [joinRoomCode, setJoinRoomCode] = useState("");
   const [isUserJoined, setIsUserJoined] = useState(false);
-  const [roomDetails,setRoomDetails] = useState(null)
 
   const [usersJoined, setUsersJoined] = useState([
     { _id: "1", userName: "user1" },
@@ -107,28 +106,14 @@ function PlayOnline() {
     setModalContent("join");
   };
 
-  const createNewRoom = (
-    data,
-    setHostRoomCode,
-    setRoomDetails,
-    navigate,
-    roomDetails,
-    setIsUserJoined
-  ) => {
+  const createNewRoom = () => {
     console.log("Creating new room with name: " + data);
     if (socket) console.log("socket is there");
     socket.emit("room-create", data);
     socket.on("room-created", (room) => {
       console.log("room created",room)
-      // const roomCode = onHostingRoom(
-      //   room,
-      //   setHostRoomCode,
-      //   setRoomDetails,
-      //   navigate,
-      //   roomDetails,
-      //   setIsUserJoined
-      // );
-      joinRoom(room.roomCode)
+      setRoomDetails(room)
+      // joinRoom(room.roomCode)
     });
     
   };
@@ -137,8 +122,8 @@ function PlayOnline() {
     console.log("in-join-room-handle", userData);
     console.log("Rooooooooom",roomDetails)
     if(roomDetails){
-      const participants = roomDetails.participants.push(userData)
-      console.log("participants",roomDetails.participants)
+      const participants = [...roomDetails.participants,userData]
+      console.log(participants)
       const updatedRoom = {...roomDetails,participants}
 
       setRoomDetails(updatedRoom)
@@ -149,10 +134,14 @@ function PlayOnline() {
     socket?.on("user-joined", (userData) => {
       handleUserJoined(userData);
     });
+    socket?.on("game-started",(data)=>{
+      navigate("/skribble")
+    })
+    
     return ()=>{
       socket?.off("user-joined",handleUserJoined)
     }
-  }, [socket,handleUserJoined]);
+  }, [socket,handleUserJoined,navigate]);
 
   const joinRoom = (
     roomCode,
@@ -165,28 +154,19 @@ function PlayOnline() {
       console.log("join-room", room);
       setRoomDetails(room)
       setIsUserJoined(true);
-      // navigate("/skribble");
     });
   };
 
   const host = () => {
     setModalContent("host");
-    const data = { userId: user._id, userName: user.username };
-    // createNewRoom(data, setHostRoomCode, setRoomDetails,navigate,roo Details,setIsUserJoined);
-    createNewRoom(
-      data,
-      setHostRoomCode,
-      setRoomDetails,
-      navigate,
-      roomDetails,
-      setIsUserJoined
-    );
+    createNewRoom();
     console.log("hosting", data);
   };
 
   const start = () => {
     setIsModalOpen(false);
-    startGame(navigate);
+    socket.emit("start-game")
+
   };
   return (
     <div>

@@ -3,6 +3,7 @@ const roomCreateHandler = require("./socketHandlers/roomCreateHandler");
 const roomJoinHandler = require("./socketHandlers/roomJoinHandler");
 const startGameHandler = require("./socketHandlers/startGameHandler")
 const serverStore= require("./serverStore")
+const { v4: uuidv4 } = require("uuid");
 
 const registerSocketServer = (server) => {
   server.listen(5002, () => {
@@ -25,11 +26,17 @@ const registerSocketServer = (server) => {
     console.log("New client connected with id: " + socket.id);
 
     socket.on("room-create", (data) => {
-      roomCreateHandler(socket, data);
+      // console.log(data)
+      // roomCreateHandler(socket, data);
+      const roomCode = uuidv4()
+      socket.join(roomCode)
+      const activeRoom = serverStore.addNewActiveRoom({socketId:socket.id,data,roomCode})
+      socket.emit("room-created",activeRoom)
     });
 
     socket.on("join-room", (roomCode, data) => {
       roomJoinHandler(socket, roomCode, data);
+      socket.join(roomCode)
     });
 
     socket.on("leave-room", (data) => {
@@ -37,7 +44,7 @@ const registerSocketServer = (server) => {
     });
 
     socket.on("start-game", () => {
-      startGameHandler(socket);
+ 
     });
     socket.on("end-game", () => {
       endGameHandler(socket);

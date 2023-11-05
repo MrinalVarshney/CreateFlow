@@ -3,8 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 let activeRooms = [];
 let io =null
 
-const addNewActiveRoom = ({ socketId, data }) => {
-  const roomCode = uuidv4();
+const addNewActiveRoom = ({ socketId, data,roomCode }) => {
   const userId = data.userId;
   const userName = data.userName;
 
@@ -14,16 +13,15 @@ const addNewActiveRoom = ({ socketId, data }) => {
       userName,
       socketId,
     },
-    participants: [], // Initialize an empty array for participants
+    participants: [{
+      userId,
+      userName,
+      socketId,
+    }], // Initialize an empty array for participants
     roomCode,
   };
 
-  // Add the room creator as the first participant
-  newActiveRoom.participants.push({
-    userName,
-    userId,
-    socketId,
-  });
+  
 
   activeRooms = [...activeRooms, newActiveRoom];
   return newActiveRoom;
@@ -58,6 +56,7 @@ const removeActiveRoom = (roomCode) => {
 };
 
 const joinActiveRoom = ({ roomCode, socketId, data }) => {
+  console.log(data)
   if (isValidRoom(roomCode)) {
     const activeRoom = getActiveRoom(roomCode);
     activeRoom.participants.push({
