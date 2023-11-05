@@ -1,11 +1,11 @@
-const serverStore = require("../serverStore")
-
+const serverStore = require("../serverStore");
 
 const startGameHandler = (socket) => {
-    const roomCode = serverStore.getRoomCodeFromSocketId(socket.id)
-    const io = serverStore.getSocketServerInstance()
-    console.log("game started",roomCode)
-    io.to(roomCode).emit("game-started")
-}
+  console.log("game-started");
+  const io = serverStore.getSocketServerInstance();
+  const socketId = socket.id;
+  const roomCode = serverStore.getRoomCodeFromSocketId(socketId);
+  io.to(roomCode).emit("game-started", { title: "game started" });
+};
 
-module.exports = startGameHandler
+module.exports = startGameHandler;

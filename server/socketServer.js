@@ -1,8 +1,9 @@
 const authSocket = require("./middlewares/authSocket");
 const roomCreateHandler = require("./socketHandlers/roomCreateHandler");
 const roomJoinHandler = require("./socketHandlers/roomJoinHandler");
-const startGameHandler = require("./socketHandlers/startGameHandler")
-const serverStore= require("./serverStore")
+const startGameHandler = require("./socketHandlers/startGameHandler");
+const serverStore = require("./serverStore");
+const { v4: uuidv4 } = require("uuid");
 
 const registerSocketServer = (server) => {
   server.listen(5002, () => {
@@ -19,17 +20,20 @@ const registerSocketServer = (server) => {
     authSocket(socket, next);
   });
 
-  serverStore.setSocketServerInstance(io)
+  serverStore.setSocketServerInstance(io);
 
   io.on("connection", (socket) => {
     console.log("New client connected with id: " + socket.id);
 
     socket.on("room-create", (data) => {
-      roomCreateHandler(socket, data);
+      const roomCode = uuidv4();
+      socket.join(roomCode);
+      roomCreateHandler(socket, data, roomCode);
     });
 
     socket.on("join-room", (roomCode, data) => {
       roomJoinHandler(socket, roomCode, data);
+      socket.join(roomCode);
     });
 
     socket.on("leave-room", (data) => {
@@ -41,6 +45,10 @@ const registerSocketServer = (server) => {
     });
     socket.on("end-game", () => {
       endGameHandler(socket);
+    });
+    socket.on("send-message", (data, roomCode) => {
+      // const roomCode = serverStore.getRoomCodeFromSocketId(socket.id);
+      io.to(roomCode).emit("new-message", data);
     });
   });
 };

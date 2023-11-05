@@ -2,7 +2,7 @@ import React from "react";
 import { Paper, Button } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import AddIcon from "@mui/icons-material/Add";
-import { createNewRoom } from "../../RealTimeCommunication/socketConnection";
+// import { createNewRoom } from "../../RealTimeCommunication/socketConnection";
 
 const useStyles = makeStyles({
   boxContainer: {
@@ -24,20 +24,20 @@ const useStyles = makeStyles({
   },
 });
 
-const createNewCanvas = () =>{
-  const roomData = {
-    canvasName: "New Canvas",
-    userId: "1234"
-  };
-  createNewRoom(roomData)
-}
+// const createNewCanvas = () =>{
+//   const roomData = {
+//     canvasName: "New Canvas",
+//     userId: "1234"
+//   };
+//   createNewRoom(roomData)
+// }
 
 function CreateCanvas({ onBoxClick }) {
   const classes = useStyles();
 
   return (
     <Paper className={classes.boxContainer} onClick={onBoxClick}>
-      <Button onClick={createNewCanvas}>
+      <Button>
         <AddIcon style={{ height: 50, width: 50 }} />
       </Button>
       New 

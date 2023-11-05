@@ -1,75 +1,93 @@
 import io from "socket.io-client";
-import { onHostingRoom, onJoiningRoom, sendRoomMessage } from "./RoomHandler";
+import { onJoiningRoom } from "./RoomHandler";
+import { onHostingRoom } from "./RoomHandler";
+import React from "react";
+import { useUserAndChats } from "../Context/userAndChatsProvider";
+
+const Socket = () => {
+  const { user, roomDetails, setRoomDetails } = useUserAndChats();
+  return <></>;
+};
+
+export default Socket;
 
 let socket = null;
 
-export const connectWithSocketServer = (user) => {
-  socket = io("http://localhost:5002", {
-    auth: {
-      token: user.token,
-    },
-  });
-  socket.on("connect", () => {
-    console.log("Successfully connected with socket server");
-  });
+// export const connectWithSocketServer = (user) => {
+//   socket = io("http://localhost:5002", {
+//     auth: {
+//       token: user.token,
+//     },
+//   });
+//   socket.on("connect", () => {
+//     console.log("Successfully connected with socket server");
+//   });
+// };
+
+export const getSocketInstance = () => {
+  console.log("called");
+  // socket.emit("room-create");
+  if (socket) console.log("Event came socket present");
+  return socket;
 };
 
 export const createNewRoom = (
   data,
   setHostRoomCode,
   setRoomDetails,
-  setIsUserJoined,
+  navigate,
   roomDetails,
-  navigate
+  setIsUserJoined
 ) => {
-  // console.log("Creating new room with name: "+data)
+  console.log(data);
   socket.emit("room-create", data);
   socket.on("room-created", (room) => {
     onHostingRoom(
       room,
       setHostRoomCode,
       setRoomDetails,
-      setIsUserJoined,
+      navigate,
       roomDetails,
-      navigate
+      setIsUserJoined
     );
   });
-  socket.on("");
+  // socket.on("");
 };
 
-export const joinRoom = (
-  roomCode,
-  data,
-  setIsUserJoined,
-  setRoomDetails,
-  roomDetails,
-  navigate
-) => {
-  console.log("joined the room");
-  socket.emit("join-room", roomCode, data);
-  socket.on("user-joined", (userData) => {
-    onJoiningRoom(userData, setIsUserJoined, roomDetails, setRoomDetails);
-  });
-  socket.on("room-joined", (room) => {
-    console.log("join-room", room);
-    setRoomDetails(room);
-    setIsUserJoined(true);
-    navigate("/skribble");
-  });
-};
+// export const joinRoom = (
+//   roomCode,
+//   data,
+//   setIsUserJoined,
+//   setRoomDetails,
+//   roomDetails,
+//   navigate
+// ) => {
+//   console.log("joined the room");
+//   socket.emit("join-room", roomCode, data);
+//   socket.on("user-joined", (userData) => {
+//     onJoiningRoom(userData, roomDetails, setRoomDetails);
+//   });
+//   socket.on("room-joined", (room) => {
+//     console.log("join-room", room);
+//     setRoomDetails(room);
+//     setIsUserJoined(true);
+//     // navigate("/skribble");
+//   });
+// };
 
 export const leaveRoom = (data, chats, setChats) => {
   console.log("leaved the room");
   socket.emit("leave-room", data);
   socket.on("user-left", (userData) => {
     const message = `${userData.userName} is left the room.`;
-    sendRoomMessage(message, chats, setChats);
+    // sendRoomMessage(message, chats, setChats);
   });
 };
 
 export const startGame = (navigate) => {
   socket.emit("start-game");
   socket.on("game-started", () => {
+    console.log("Game");
     navigate("/skribble");
   });
 };

@@ -1,14 +1,13 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Paper, Button, Modal, Input } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import {
-  createNewRoom,
-  joinRoom,
   startGame,
 } from "../../RealTimeCommunication/socketConnection";
 import { useNavigate } from "react-router-dom";
 import { useUserAndChats } from "../../Context/userAndChatsProvider";
 import Table from "../../shared/Components/Table";
+import { onHostingRoom ,onJoiningRoom} from "../../RealTimeCommunication/RoomHandler";
 
 const useStyles = makeStyles({
   boxContainer: {
@@ -66,7 +65,7 @@ const useStyles = makeStyles({
 
 function PlayOnline() {
   const classes = useStyles();
-  const { user, roomDetails, setRoomDetails } = useUserAndChats();
+  const { user, socket,roomDetails,setRoomDetails } = useUserAndChats();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
   const [HostroomCode, setHostRoomCode] = useState({ host: "", roomCode: "" });
@@ -95,32 +94,79 @@ function PlayOnline() {
   const playRandom = () => {};
   const join = () => {
     console.log("joining", joinRoomCode);
-    const data = { userId: user._id, userName: user.username };
     joinRoom(
       joinRoomCode,
-      data,
-      setIsUserJoined,
-      setRoomDetails,
-      roomDetails,
-      navigate
     );
   };
+
+  const data = { userId: user._id, userName: user.username };
+
 
   const Openjoin = () => {
     setModalContent("join");
   };
 
+  const createNewRoom = () => {
+    console.log("Creating new room with name: " + data);
+    if (socket) console.log("socket is there");
+    socket.emit("room-create", data);
+    socket.on("room-created", (room) => {
+      console.log("room created",room)
+      setRoomDetails(room)
+      // joinRoom(room.roomCode)
+    });
+    
+  };
+  console.log("Room Details",roomDetails)
+  const handleUserJoined = useCallback((userData)=>{
+    console.log("in-join-room-handle", userData);
+    console.log("Rooooooooom",roomDetails)
+    if(roomDetails){
+      const participants = [...roomDetails.participants,userData]
+      console.log(participants)
+      const updatedRoom = {...roomDetails,participants}
+
+      setRoomDetails(updatedRoom)
+    }
+  },[roomDetails])
+
+  useEffect(() => {
+    socket?.on("user-joined", (userData) => {
+      handleUserJoined(userData);
+    });
+    socket?.on("game-started",(data)=>{
+      navigate("/skribble")
+    })
+    
+    return ()=>{
+      socket?.off("user-joined",handleUserJoined)
+    }
+  }, [socket,handleUserJoined,navigate]);
+
+  const joinRoom = (
+    roomCode,
+  ) => {
+    console.log("joined the room");
+    socket.emit("join-room", roomCode, data);
+    console.log("roomDetails",roomDetails)
+
+    socket.on("room-joined", (room) => {
+      console.log("join-room", room);
+      setRoomDetails(room)
+      setIsUserJoined(true);
+    });
+  };
+
   const host = () => {
     setModalContent("host");
-    const data = { userId: user._id, userName: user.username };
-
-    createNewRoom(data, setHostRoomCode, setRoomDetails);
+    createNewRoom();
     console.log("hosting", data);
   };
 
   const start = () => {
     setIsModalOpen(false);
-    startGame(navigate);
+    socket.emit("start-game")
+
   };
   return (
     <div>
