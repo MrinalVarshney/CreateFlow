@@ -1,13 +1,11 @@
-const socketServer = require('../socketServer');
+const serverStore = require("../serverStore")
+
 
 const startGameHandler = (socket) => {
-    const roomCode = socketServer.getRoomCodeFromSocketId(socket.id)
-    const activeRoom = socketServer.getActiveRoom(roomCode)
-    if(activeRoom){
-        activeRoom.participants.forEach((participant)=>{
-            socket.to(participant.socketId).emit("game-started")
-        })
-    }
+    const roomCode = serverStore.getRoomCodeFromSocketId(socket.id)
+    const io = serverStore.getSocketServerInstance()
+    console.log("game started",roomCode)
+    io.to(roomCode).emit("game-started")
 }
 
 module.exports = startGameHandler
