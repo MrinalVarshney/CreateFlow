@@ -166,7 +166,7 @@ function PlayOnline() {
   const start = () => {
     setIsModalOpen(false);
     socket.emit("start-game")
-
+    navigate("/skribble")
   };
   return (
     <div>
