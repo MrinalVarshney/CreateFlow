@@ -1,9 +1,10 @@
 const { v4: uuidv4 } = require("uuid");
 
 let activeRooms = [];
-let io =null
+let io = null;
+let chatMessages = {};
 
-const addNewActiveRoom = ({ socketId, data,roomCode }) => {
+const addNewActiveRoom = ({ socketId, data, roomCode }) => {
   const userId = data.userId;
   const userName = data.userName;
 
@@ -13,27 +14,36 @@ const addNewActiveRoom = ({ socketId, data,roomCode }) => {
       userName,
       socketId,
     },
-    participants: [{
-      userId,
-      userName,
-      socketId,
-    }], // Initialize an empty array for participants
+    participants: [
+      {
+        userId,
+        userName,
+        socketId,
+      },
+    ], // Initialize an empty array for participants
     roomCode,
   };
-
-  
 
   activeRooms = [...activeRooms, newActiveRoom];
   return newActiveRoom;
 };
 
-const setSocketServerInstance = (ioInstance)=>{
-  io=ioInstance
-}
+const addMessageToChat = ({ roomCode, message }) => {
+  if (chatMessages[roomCode]) {
+    chatMessages[roomCode].push(message);
+  }
+  else{
+    chatMessages[roomCode] = [message]
+  }
+};
 
-const getSocketServerInstance = ()=>{
+const setSocketServerInstance = (ioInstance) => {
+  io = ioInstance;
+};
+
+const getSocketServerInstance = () => {
   return io;
-}
+};
 
 const isValidRoom = (roomCode) => {
   const room = activeRooms.find((room) => room.roomCode === roomCode);
@@ -56,7 +66,7 @@ const removeActiveRoom = (roomCode) => {
 };
 
 const joinActiveRoom = ({ roomCode, socketId, data }) => {
-  console.log(data)
+  console.log(data);
   if (isValidRoom(roomCode)) {
     const activeRoom = getActiveRoom(roomCode);
     activeRoom.participants.push({
@@ -90,7 +100,6 @@ const getRoomCodeFromSocketId = (socketId) => {
   if (room) return room.roomCode;
 };
 
-
 module.exports = {
   addNewActiveRoom,
   joinActiveRoom,
@@ -100,5 +109,6 @@ module.exports = {
   getRoomCodeFromSocketId,
   removeActiveRoom,
   setSocketServerInstance,
-  getSocketServerInstance
+  getSocketServerInstance,
+  addMessageToChat
 };

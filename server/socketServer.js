@@ -26,12 +26,9 @@ const registerSocketServer = (server) => {
     console.log("New client connected with id: " + socket.id);
 
     socket.on("room-create", (data) => {
-      // console.log(data)
-      // roomCreateHandler(socket, data);
-      const roomCode = uuidv4()
+      const roomCode = uuidv4();
       socket.join(roomCode)
-      const activeRoom = serverStore.addNewActiveRoom({socketId:socket.id,data,roomCode})
-      socket.emit("room-created",activeRoom)
+      roomCreateHandler(socket, data,roomCode);
     });
 
     socket.on("join-room", (roomCode, data) => {
@@ -44,11 +41,17 @@ const registerSocketServer = (server) => {
     });
 
     socket.on("start-game", () => {
- 
+      startGameHandler(socket);
     });
     socket.on("end-game", () => {
       endGameHandler(socket);
     });
+
+    socket.on("send-message",(data,roomCode)=>{
+      // sendMessageHandler(socket,data)
+      io.to(roomCode).emit("new-message",data)
+    })
+
   });
 };
 
