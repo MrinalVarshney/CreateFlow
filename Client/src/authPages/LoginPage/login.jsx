@@ -5,14 +5,18 @@ import LoginPageFooter from "./LoginPageFooter";
 import { validateLoginForm } from "../../shared/utils/FomValidator";
 import { useNavigate } from "react-router-dom";
 import { login } from "../../Actions/authActions";
+import { useUserAndChats } from "../../Context/userAndChatsProvider";
 
 const Login = () => {
+  const { connectWithSocketServer } = useUserAndChats();
+
   const [mail, setMail] = useState("");
   const [password, setPassword] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
   const navigate = useNavigate();
+
   const handleLogin = () => {
-    login({ mail, password }, navigate);
+    login({ mail, password }, navigate, connectWithSocketServer);
   };
 
   useEffect(() => {

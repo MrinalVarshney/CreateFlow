@@ -1,6 +1,6 @@
-import { useContext, useState, createContext, useEffect } from "react";
+import { useContext, useState, createContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import {io} from "socket.io-client"
+import { io } from "socket.io-client";
 
 const userContext = createContext();
 
@@ -13,7 +13,7 @@ export const UserAndChatsProvider = ({ children }) => {
   const [chats, setChats] = useState([]);
   const navigate = useNavigate();
   const [roomDetails, setRoomDetails] = useState(null);
-  const [socket,setSocket] = useState(null)
+  const Socket = useRef(null);
 
   useEffect(() => {
     const userDetails = JSON.parse(localStorage.getItem("user"));
@@ -31,18 +31,17 @@ export const UserAndChatsProvider = ({ children }) => {
     }
   }, [navigate]);
 
- const connectWithSocketServer = () => {
+  const connectWithSocketServer = (user) => {
     const socket = io("http://localhost:5002", {
       auth: {
         token: user.token,
       },
     });
-    setSocket(socket)
+    Socket.current = socket;
     socket.on("connect", () => {
       console.log("Successfully connected with socket server");
     });
   };
-
 
   // The state update might not be visible immediately within this render cycle.
 
@@ -54,7 +53,7 @@ export const UserAndChatsProvider = ({ children }) => {
     roomDetails,
     setRoomDetails,
     connectWithSocketServer,
-    socket
+    socket: Socket.current,
   };
 
   return (
