@@ -9,7 +9,7 @@ import Line from "../Shape_Box/Line";
 import Ellipse from "../Shape_Box/Ellipse";
 import Pentagon from "../Shape_Box/Pentagon";
 
-const ShapesMenu = ({SwitchToVirtual}) => {
+const ShapesMenu = ({ SwitchToVirtual }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -19,9 +19,8 @@ const ShapesMenu = ({SwitchToVirtual}) => {
     setAnchorEl(null);
   };
 
-
   return (
-    <div>
+    <div style={{ zIndex: -1 }}>
       <div className="circular-icon-container" onClick={handleClick}>
         <InterestsIcon className="circular-icon" />
       </div>
@@ -37,9 +36,9 @@ const ShapesMenu = ({SwitchToVirtual}) => {
           vertical: "top",
           horizontal: "center",
         }}
-        sx={{justifyContent:"center",padding:"2px"}}
+        sx={{ justifyContent: "center", padding: "2px" }}
       >
-        <Grid container spacing={1} >
+        <Grid container spacing={1}>
           <Grid item xs={2}>
             <Circle />
           </Grid>
