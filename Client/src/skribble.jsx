@@ -1,17 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Grid, Box, Paper, Input, Button } from "@mui/material";
 import { useUserAndChats } from "./Context/userAndChatsProvider";
 import SendIcon from "@mui/icons-material/Send";
+import { sendRoomMessage } from "./RealTimeCommunication/socketConnection";
 
 function Skribble() {
   const [message, setMessage] = useState("");
-  const { user, chats, setChats, roomDetails } = useUserAndChats();
+  const { user, chats, socket, setChats, roomDetails } = useUserAndChats();
   const handleSend = () => {
     console.log(message, user);
-    setChats([...chats, { user: user.username, message: message }]);
-    console.log(chats);
+    const data = {
+      userId: user._id,
+      userName: user.username,
+      message: message,
+    };
+    sendRoomMessage(data, roomDetails.roomCode);
     setMessage("");
   };
+  const sendRoomMessage = (data, roomCode) => {
+    console.log(data);
+    socket.emit("send-message", data, roomCode);
+  };
+  useEffect(() => {
+    socket?.on("new-message", (data) => {
+      const newChat = { user: data.userName, message: data.message };
+      setChats([...chats, newChat]);
+    });
+    return () => {
+      socket?.off("new-message");
+    };
+  }, [socket, chats, setChats]);
   console.log("rmD", roomDetails);
   return (
     <Box ml={5} mr={5} mt={5} height="94vh">

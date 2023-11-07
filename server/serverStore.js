@@ -1,13 +1,49 @@
-const { v4: uuidv4 } = require("uuid");
 
 let activeRooms = [];
 let io = null;
-let chatMessages = {};
+const userSocketMap = new Map(); // Create a mapping of user IDs to socket IDs
+const roomCodeMap = new Map(); // Create a mapping of user IDs to roomCode
+const gameStartedMap = new Map(); // Create a mapping of room Code to game started
+
+const mapUserToRoomCode = (userId,roomCode)=>{
+  console.log("setting roomCode",roomCode,userId)
+  roomCodeMap.set(userId,roomCode);
+}
+
+const setGameStarted = (roomCode)=>{
+  gameStartedMap.set(roomCode,true);
+}
+
+const isGameStarted = (roomCode)=>{
+  return gameStartedMap.get(roomCode);
+}
+
+const getRoomCode = (userId)=>{
+  return roomCodeMap.get(userId);
+}
+
+const addUserToStore = (socketId, userId) => {
+  if(!userSocketMap.has(userId)){
+    userSocketMap.set(userId, socketId);
+  }
+  return userSocketMap.get(userId);
+}
+
+
+const getSocketId = (socket,userId) => {
+  if(userSocketMap.has(userId)){
+    console.log("user found")
+    return userSocketMap.get(userId);
+  }
+  return socket.id
+}
 
 const addNewActiveRoom = ({ socketId, data, roomCode }) => {
   const userId = data.userId;
   const userName = data.userName;
-
+  if(userSocketMap.has(userId)){
+    socketId = userSocketMap.get(userId);
+  }
   const newActiveRoom = {
     roomCreator: {
       userId,
@@ -28,14 +64,6 @@ const addNewActiveRoom = ({ socketId, data, roomCode }) => {
   return newActiveRoom;
 };
 
-const addMessageToChat = ({ roomCode, message }) => {
-  if (chatMessages[roomCode]) {
-    chatMessages[roomCode].push(message);
-  }
-  else{
-    chatMessages[roomCode] = [message]
-  }
-};
 
 const setSocketServerInstance = (ioInstance) => {
   io = ioInstance;
@@ -79,26 +107,22 @@ const joinActiveRoom = ({ roomCode, socketId, data }) => {
   }
 };
 
-const leaveActiveRoom = ({ socketId, roomCode }) => {
+const leaveActiveRoom = (roomCode,socketId,userId) => {
   const room = getActiveRoom(roomCode);
   if (room) {
     const updatedParticipants = room.participants.filter(
       (participant) => participant.socketId !== socketId
     );
     room.participants = updatedParticipants;
+    if (room.participants.length === 0) {
+      removeActiveRoom(roomCode);
+    }
+  }
+  if(roomCodeMap.has(userId)){
+    roomCodeMap.delete(userId);
   }
 };
 
-const getRoomCodeFromSocketId = (socketId) => {
-  console.log(activeRooms, socketId);
-  const room = activeRooms.find((room) => {
-    console.log(room.roomCreator.socketId);
-    return room.roomCreator.socketId === socketId; // Add the 'return' statement
-  });
-
-  console.log("room", room);
-  if (room) return room.roomCode;
-};
 
 module.exports = {
   addNewActiveRoom,
@@ -106,9 +130,13 @@ module.exports = {
   isValidRoom,
   getActiveRoom,
   leaveActiveRoom,
-  getRoomCodeFromSocketId,
   removeActiveRoom,
   setSocketServerInstance,
   getSocketServerInstance,
-  addMessageToChat
+  addUserToStore,
+  getSocketId,
+  mapUserToRoomCode,
+  getRoomCode,
+  setGameStarted,
+  isGameStarted
 };

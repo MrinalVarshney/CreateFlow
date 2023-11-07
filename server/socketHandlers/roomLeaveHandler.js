@@ -4,9 +4,10 @@ const roomLeaveHandler = (socket, data) => {
   const { roomCode } = data;
   const activeRoom = socketServer.getActiveRoom(roomCode);
   const io = serverStore.getSocketServerInstance()
-  const socketId = socket.id;
+  const userId = data.userId;
+  const socketId = serverStore.getSocketId(socket,userId);
   if (activeRoom) {
-    socketServer.leaveActiveRoom({ roomCode, socketId });
+    socketServer.leaveActiveRoom(roomCode,socketId,userId);
     io.to(roomCode).emit("user-left", {username:data.username});
     }
 };

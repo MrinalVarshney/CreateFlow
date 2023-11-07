@@ -1,25 +1,17 @@
 import io from "socket.io-client";
-import {onJoiningRoom } from "./RoomHandler";
+import { onJoiningRoom } from "./RoomHandler";
 import { onHostingRoom } from "./RoomHandler";
-import React from 'react'
-import {useUserAndChats} from "../Context/userAndChatsProvider";
+import React from "react";
+import { useUserAndChats } from "../Context/userAndChatsProvider";
 
 const Socket = () => {
-  const {user,roomDetails, setRoomDetails} = useUserAndChats()
-  return (
-    <>
+  const { user, roomDetails, setRoomDetails } = useUserAndChats();
+  return <></>;
+};
 
-    </>
-  )
-}
-
-export default Socket
-
-
+export default Socket;
 
 let socket = null;
-
-
 
 // export const connectWithSocketServer = (user) => {
 //   socket = io("http://localhost:5002", {
@@ -32,19 +24,32 @@ let socket = null;
 //   });
 // };
 
-export const getSocketInstance = ()=>{
-  console.log("called")
+export const getSocketInstance = () => {
+  console.log("called");
   // socket.emit("room-create");
-  if(socket) console.log("Event came socket present")
-  return socket
+  if (socket) console.log("Event came socket present");
+  return socket;
+};
 
-}
-
-export const createNewRoom = (data, setHostRoomCode, setRoomDetails,navigate,roomDetails,setIsUserJoined) => {
-  console.log(data)
+export const createNewRoom = (
+  data,
+  setHostRoomCode,
+  setRoomDetails,
+  navigate,
+  roomDetails,
+  setIsUserJoined
+) => {
+  console.log(data);
   socket.emit("room-create", data);
   socket.on("room-created", (room) => {
-    onHostingRoom(room, setHostRoomCode, setRoomDetails,navigate,roomDetails,setIsUserJoined);
+    onHostingRoom(
+      room,
+      setHostRoomCode,
+      setRoomDetails,
+      navigate,
+      roomDetails,
+      setIsUserJoined
+    );
   });
   // socket.on("");
 };
@@ -82,7 +87,7 @@ export const leaveRoom = (data, chats, setChats) => {
 export const startGame = (navigate) => {
   socket.emit("start-game");
   socket.on("game-started", () => {
-    console.log("Game")
+    console.log("Game");
     navigate("/skribble");
   });
 };

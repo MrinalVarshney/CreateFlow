@@ -6,6 +6,7 @@ const socketServer = require("./socketServer")
 const http = require("http")
 const authRoutes = require("./routes/authRoutes");
 
+
 dotenv.config();
 const PORT = process.env.PORT;
 
@@ -16,6 +17,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use("/auth",authRoutes)
 
 app.get("/", (req, res) => {
