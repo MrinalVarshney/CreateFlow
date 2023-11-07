@@ -1,6 +1,5 @@
 import * as api from "../api";
 
-
 export const register = async (user, navigate) => {
   const response = await api.registerUser(user);
   console.log(response);

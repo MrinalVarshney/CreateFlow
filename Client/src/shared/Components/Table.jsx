@@ -1,6 +1,6 @@
 import React from "react";
 
-const Table = ({ usersJoined, user }) => {
+const Table = ({ participants, user }) => {
   return (
     <div
       style={{
@@ -10,7 +10,7 @@ const Table = ({ usersJoined, user }) => {
         borderRadius: "10px",
       }}
     >
-      {usersJoined.map((User) => (
+      {participants?.map((User) => (
         <h4
           style={{
             display: "flex",
@@ -20,9 +20,9 @@ const Table = ({ usersJoined, user }) => {
             padding: "5px",
             marginBottom: "0px",
             borderBottom: "1px solid #b8bcbd",
-            backgroundColor: User._id === user._id ? "lightgreen" : "",
+            backgroundColor: User.userId === user.userId ? "lightgreen" : "",
           }}
-          key={User._id}
+          key={User.userId}
         >
           {User.userName}
         </h4>

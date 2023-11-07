@@ -2,7 +2,6 @@ import React from "react";
 import { Paper, Button } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import AddIcon from "@mui/icons-material/Add";
-// import { createNewRoom } from "../../RealTimeCommunication/socketConnection";
 
 const useStyles = makeStyles({
   boxContainer: {
@@ -16,7 +15,7 @@ const useStyles = makeStyles({
     transition: "transform 0.2s",
     border: "2px solid #black",
     borderRadius: "20px",
-    position:"absolute",
+    position: "absolute",
     "&:hover": {
       transform: "scale(1.05)",
       boxShadow: "0px 0px 10px 3px #888",
@@ -40,7 +39,7 @@ function CreateCanvas({ onBoxClick }) {
       <Button>
         <AddIcon style={{ height: 50, width: 50 }} />
       </Button>
-      New 
+      New
     </Paper>
   );
 }

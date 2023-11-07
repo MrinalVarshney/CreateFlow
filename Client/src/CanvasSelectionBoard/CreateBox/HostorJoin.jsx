@@ -70,15 +70,7 @@ function PlayOnline() {
   const [isUserJoined, setIsUserJoined] = useState(false);
   const socket = Socket.current;
 
-  const [usersJoined, setUsersJoined] = useState([
-    { _id: "1", userName: "user1" },
-    { _id: "2", userName: "user2" },
-    { _id: "3", userName: "user3" },
-    { _id: "4", userName: "user4" },
-    { _id: "5", userName: "user5" },
-    { _id: "6", userName: "user6" },
-    { _id: "7", userName: "user7" },
-  ]);
+  // const [usersJoined, setUsersJoined] = useState(null);
 
   const navigate = useNavigate();
   const openModal = () => {
@@ -92,9 +84,7 @@ function PlayOnline() {
   const playRandom = () => {};
   const join = () => {
     console.log("joining", joinRoomCode);
-    joinRoom(
-      joinRoomCode,
-    );
+    joinRoom(joinRoomCode);
   };
 
   const data = { userId: user?._id, userName: user?.username };
@@ -110,48 +100,52 @@ function PlayOnline() {
     if (socket.current) console.log("socket is there");
     socket.emit("room-create", data);
     socket.on("room-created", (room) => {
-      console.log("room created",room)
-      setRoomDetails(room)
+      console.log("room created", room);
+      setHostRoomCode({
+        host: room.roomCreator.userName,
+        roomCode: room.roomCode,
+      });
+      setRoomDetails(room);
       // joinRoom(room.roomCode)
     });
-    
   };
-  console.log("Room Details",roomDetails)
-  const handleUserJoined = useCallback((userData)=>{
-    console.log("in-join-room-handle", userData);
-    console.log("Rooooooooom",roomDetails)
-    if(roomDetails){
-      const participants = [...roomDetails.participants,userData]
-      console.log(participants)
-      const updatedRoom = {...roomDetails,participants}
+  console.log("Room Details", roomDetails);
+  const handleUserJoined = useCallback(
+    (userData) => {
+      console.log("in-join-room-handle", userData);
+      console.log("Rooooooooom", roomDetails);
+      if (roomDetails) {
+        const participants = [...roomDetails.participants, userData];
+        console.log(participants);
+        const updatedRoom = { ...roomDetails, participants };
 
-      setRoomDetails(updatedRoom)
-    }
-  },[roomDetails])
+        setRoomDetails(updatedRoom);
+      }
+    },
+    [roomDetails]
+  );
 
   useEffect(() => {
     socket?.on("user-joined", (userData) => {
       handleUserJoined(userData);
     });
-    socket?.on("game-started",(data)=>{
-      navigate("/skribble")
-    })
-    
-    return ()=>{
-      socket?.off("user-joined",handleUserJoined)
-    }
-  }, [socket,handleUserJoined,navigate]);
+    socket?.on("game-started", (data) => {
+      navigate("/skribble");
+    });
 
-  const joinRoom = (
-    roomCode,
-  ) => {
+    return () => {
+      socket?.off("user-joined", handleUserJoined);
+    };
+  }, [socket, handleUserJoined, navigate]);
+
+  const joinRoom = (roomCode) => {
     console.log("joined the room");
     socket.emit("join-room", roomCode, data);
-    console.log("roomDetails",roomDetails)
+    console.log("roomDetails", roomDetails);
 
     socket.on("room-joined", (room) => {
       console.log("join-room", room);
-      setRoomDetails(room)
+      setRoomDetails(room);
       setIsUserJoined(true);
     });
   };
@@ -164,8 +158,11 @@ function PlayOnline() {
 
   const start = () => {
     setIsModalOpen(false);
-
-    socket.emit("start-game",user._id)
+    socket.emit("start-game");
+  };
+  const hostUser = {
+    userId: roomDetails?.roomCreator.userId,
+    userName: roomDetails?.roomCreator.userName,
   };
   return (
     <div>
@@ -215,8 +212,11 @@ function PlayOnline() {
               >
                 <h1>Host: {HostroomCode.host}</h1>
                 <h3>roomId : {HostroomCode.roomCode}</h3>
-                <h3>Users Joined : {usersJoined.length}</h3>
-                <Table usersJoined={usersJoined} user={user} />
+                <h3>Users Joined : {roomDetails?.participants.length}</h3>
+                <Table
+                  participants={roomDetails?.participants}
+                  user={hostUser}
+                />
 
                 <Button
                   style={{ marginTop: "10px", backgroundColor: "lightBlue" }}
@@ -251,7 +251,10 @@ function PlayOnline() {
                 {isUserJoined && (
                   <>
                     <h1>Joined</h1>
-                    <Table usersJoined={usersJoined} user={user} />
+                    <Table
+                      participants={roomDetails?.participants}
+                      user={hostUser}
+                    />
                   </>
                 )}
               </div>
