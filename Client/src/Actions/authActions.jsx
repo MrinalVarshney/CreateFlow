@@ -1,5 +1,5 @@
 import * as api from "../api";
-import { connectWithSocketServer } from "../RealTimeCommunication/socketConnection";
+
 
 export const register = async (user, navigate) => {
   const response = await api.registerUser(user);

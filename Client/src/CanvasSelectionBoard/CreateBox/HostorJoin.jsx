@@ -1,13 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Paper, Button, Modal, Input } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import {
-  startGame,
-} from "../../RealTimeCommunication/socketConnection";
 import { useNavigate } from "react-router-dom";
 import { useUserAndChats } from "../../Context/userAndChatsProvider";
 import Table from "../../shared/Components/Table";
-import { onHostingRoom ,onJoiningRoom} from "../../RealTimeCommunication/RoomHandler";
+
 
 const useStyles = makeStyles({
   boxContainer: {
@@ -65,12 +62,13 @@ const useStyles = makeStyles({
 
 function PlayOnline() {
   const classes = useStyles();
-  const { user, socket,roomDetails,setRoomDetails } = useUserAndChats();
+  const { user, Socket,roomDetails,setRoomDetails } = useUserAndChats();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
   const [HostroomCode, setHostRoomCode] = useState({ host: "", roomCode: "" });
   const [joinRoomCode, setJoinRoomCode] = useState("");
   const [isUserJoined, setIsUserJoined] = useState(false);
+  const socket = Socket.current;
 
   const [usersJoined, setUsersJoined] = useState([
     { _id: "1", userName: "user1" },
@@ -99,7 +97,7 @@ function PlayOnline() {
     );
   };
 
-  const data = { userId: user._id, userName: user.username };
+  const data = { userId: user?._id, userName: user?.username };
 
 
   const Openjoin = () => {
@@ -108,7 +106,8 @@ function PlayOnline() {
 
   const createNewRoom = () => {
     console.log("Creating new room with name: " + data);
-    if (socket) console.log("socket is there");
+    
+    if (socket.current) console.log("socket is there");
     socket.emit("room-create", data);
     socket.on("room-created", (room) => {
       console.log("room created",room)
@@ -165,8 +164,8 @@ function PlayOnline() {
 
   const start = () => {
     setIsModalOpen(false);
-    socket.emit("start-game")
-    navigate("/skribble")
+
+    socket.emit("start-game",user._id)
   };
   return (
     <div>

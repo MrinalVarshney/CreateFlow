@@ -5,12 +5,11 @@ import HostorJoin from "./CreateBox/HostorJoin";
 import { useUserAndChats } from "../Context/userAndChatsProvider";
 
 const SelectionBoard = () => {
-  const { connectWithSocketServer } = useUserAndChats();
-  const user = JSON.parse(localStorage.getItem("user"))
+  const {connectWithSocketServer} = useUserAndChats()
+
   useEffect(() => {
-    connectWithSocketServer(user)
-  },[])
-  
+    connectWithSocketServer()
+  }, []);
   return (
     <div className="backGround" style={{ height: "100vh" }}>
       <CreateCanvas />

@@ -2,11 +2,22 @@ import React, { useEffect, useState } from "react";
 import { Grid, Box, Paper, Input, Button } from "@mui/material";
 import { useUserAndChats } from "./Context/userAndChatsProvider";
 import SendIcon from "@mui/icons-material/Send";
-import { sendRoomMessage } from "./RealTimeCommunication/socketConnection";
 
 function Skribble() {
+  const { user, chats, Socket, setChats, roomDetails,setRoomDetails, connectWithSocketServer } = useUserAndChats();
+  const socket = Socket.current;
+  useEffect(() => {
+    if(!socket){
+      connectWithSocketServer()
+    }
+    const roomDetails = JSON.parse(localStorage.getItem("roomDetails"));
+    const chats = JSON.parse(localStorage.getItem("chats"));
+    setRoomDetails(roomDetails);
+    setChats(chats);
+  }, []);
   const [message, setMessage] = useState("");
-  const { user, chats, socket, setChats, roomDetails } = useUserAndChats();
+
+  console.log("chats",chats)
   const handleSend = () => {
     console.log(message, user);
     const data = {
@@ -23,6 +34,7 @@ function Skribble() {
   };
   useEffect(() => {
     socket?.on("new-message", (data) => {
+      console.log("new-message", data)
       const newChat = { user: data.userName, message: data.message };
       setChats([...chats, newChat]);
     });
