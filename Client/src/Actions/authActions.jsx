@@ -13,7 +13,7 @@ export const register = async (user, navigate) => {
   }
 };
 
-export const login = async (user, navigate, connectWithSocketServer) => {
+export const login = async (user, navigate) => {
   console.log("loginauth");
   const response = await api.login(user);
   if (response.error) {
@@ -22,7 +22,6 @@ export const login = async (user, navigate, connectWithSocketServer) => {
     const userDetails = response.data;
     console.log(userDetails);
     localStorage.setItem("user", JSON.stringify(userDetails));
-    connectWithSocketServer(userDetails);
     navigate("/selectionBoard");
   }
 };

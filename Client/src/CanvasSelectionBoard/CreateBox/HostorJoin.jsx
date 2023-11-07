@@ -61,12 +61,13 @@ const useStyles = makeStyles({
 
 function PlayOnline() {
   const classes = useStyles();
-  const { user, socket, roomDetails, setRoomDetails } = useUserAndChats();
+  const { user, Socket, roomDetails, setRoomDetails } = useUserAndChats();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
   const [HostroomCode, setHostRoomCode] = useState({ host: "", roomCode: "" });
   const [joinRoomCode, setJoinRoomCode] = useState("");
   const [isUserJoined, setIsUserJoined] = useState(false);
+  const socket = Socket.current;
 
   // const [usersJoined, setUsersJoined] = useState(null);
 
@@ -93,7 +94,8 @@ function PlayOnline() {
 
   const createNewRoom = () => {
     console.log("Creating new room with name: " + data);
-    if (socket) console.log("socket is there");
+
+    if (socket.current) console.log("socket is there");
     socket.emit("room-create", data);
     socket.on("room-created", (room) => {
       console.log("room created", room);
@@ -125,7 +127,8 @@ function PlayOnline() {
     socket?.on("user-joined", (userData) => {
       handleUserJoined(userData);
     });
-    socket?.on("game-started", (data) => {
+    socket?.on("game-started", () => {
+      console.log("Starting game");
       navigate("/skribble");
     });
 
@@ -154,7 +157,7 @@ function PlayOnline() {
 
   const start = () => {
     setIsModalOpen(false);
-    socket.emit("start-game");
+    socket.emit("start-game", user._id);
   };
   const hostUser = {
     userId: roomDetails?.roomCreator.userId,

@@ -1,7 +1,7 @@
 const serverStore = require("./../serverStore")
 
 const endGameHandler = (socket) => {   
-    const roomCode = serverStore.getRoomCodeFromSocketId(socket.id)
+    const roomCode = serverStore.getRoomCode(socket.id)
     const updatedActiveRoom = serverStore.removeActiveRoom(roomCode)
 
     if(updatedActiveRoom){

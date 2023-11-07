@@ -1,7 +1,6 @@
-import { useContext, useState, createContext, useEffect, useRef } from "react";
+import { useContext, useState, createContext, useEffect,useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { io } from "socket.io-client";
-
+import {io} from "socket.io-client"
 const userContext = createContext();
 
 export const useUserAndChats = () => {
@@ -13,12 +12,27 @@ export const UserAndChatsProvider = ({ children }) => {
   const [chats, setChats] = useState([]);
   const navigate = useNavigate();
   const [roomDetails, setRoomDetails] = useState(null);
-  const Socket = useRef(null);
+  const Socket = useRef(null)
+
+  useEffect(() => {
+    if(roomDetails){
+      console.log("saving TO local")
+      const chatSessionKey = "roomDetails";
+      localStorage.setItem(chatSessionKey,JSON.stringify(roomDetails))
+    }
+  },[roomDetails])
+
+  useEffect(()=>{
+    if(chats){
+      const chatSessionKey = "chats";
+      localStorage.setItem(chatSessionKey,JSON.stringify(chats))
+    }
+  },[chats])
 
   useEffect(() => {
     const userDetails = JSON.parse(localStorage.getItem("user"));
     const currentPath = window.location.pathname;
-
+    console.log(user,"user")
     if (userDetails) {
       // Set the user data in the state
       setUser(userDetails);
@@ -31,19 +45,28 @@ export const UserAndChatsProvider = ({ children }) => {
     }
   }, [navigate]);
 
-  const connectWithSocketServer = (user) => {
+ const connectWithSocketServer = () => {
+  console.log("connecting to socket server")
+  const user =JSON.parse(localStorage.getItem("user"))
     const socket = io("http://localhost:5002", {
       auth: {
         token: user.token,
       },
     });
+    const userId = user._id;
+    
+ 
+    /// For maintaining unique socket id for each user
+    socket.emit("connect-user",userId,(socketId)=>{
+      console.log("socketId",socketId)
+      socket.id = socketId;
+    })
     Socket.current = socket;
     socket.on("connect", () => {
       console.log("Successfully connected with socket server");
     });
-  };
 
-  // The state update might not be visible immediately within this render cycle.
+  };
 
   const contextValue = {
     user,
@@ -53,7 +76,7 @@ export const UserAndChatsProvider = ({ children }) => {
     roomDetails,
     setRoomDetails,
     connectWithSocketServer,
-    socket: Socket.current,
+    Socket
   };
 
   return (

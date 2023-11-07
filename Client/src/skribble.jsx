@@ -6,10 +6,30 @@ import { useNavigate } from "react-router-dom";
 import SkribbleCanvas from "./skribbleCanvas";
 
 function Skribble() {
+  const {
+    user,
+    chats,
+    Socket,
+    setChats,
+    roomDetails,
+    setRoomDetails,
+    connectWithSocketServer,
+  } = useUserAndChats();
+  const socket = Socket.current;
+  if (socket) {
+    console.log("socket reloaded", socket.id);
+  }
+  console.log("Reloading");
+  useEffect(() => {
+    if (!socket) {
+      connectWithSocketServer();
+    }
+    const roomDetails = JSON.parse(localStorage.getItem("roomDetails"));
+    const chats = JSON.parse(localStorage.getItem("chats"));
+    setRoomDetails(roomDetails);
+    setChats(chats);
+  }, []);
   const [message, setMessage] = useState("");
-  const { user, chats, socket, setChats, roomDetails, setRoomDetails } =
-    useUserAndChats();
-
   const handleSend = () => {
     console.log(message, user);
     const data = {
@@ -20,10 +40,14 @@ function Skribble() {
     sendRoomMessage(data, roomDetails.roomCode);
     setMessage("");
   };
-  const sendRoomMessage = useCallback((data, roomCode) => {
-    console.log("send mesage", data, "hiiiiiiii");
-    socket.emit("send-message", data, roomCode);
-  }, []);
+  const sendRoomMessage = useCallback(
+    (data, roomCode) => {
+      console.log("send mesage", data, "hiiiiiiii");
+      socket.emit("send-message", data, roomCode);
+      console.log("message sent");
+    },
+    [socket]
+  );
   const navigate = useNavigate();
   const handleLeave = () => {
     console.log("leaving");
@@ -46,6 +70,7 @@ function Skribble() {
 
   useEffect(() => {
     socket?.on("new-message", (data) => {
+      console.log("new-message", data);
       const newChat = { user: data.userName, message: data.message };
       setChats([...chats, newChat]);
     });
@@ -80,13 +105,13 @@ function Skribble() {
     window.innerHeight
   );
   return (
-    <div style={{ height: "90vh" }}>
+    <div style={{ height: "100vh", marginBottom: "0px" }}>
       <SkribbleCanvas />
       <Paper
         style={{
           height: "9vh",
           marginBottom: "20px",
-          top: 10,
+          top: 0,
           width: "100%",
           position: "absolute",
           backgroundColor: "yellow",
@@ -117,10 +142,10 @@ function Skribble() {
       {/* First Part */}
       <Paper
         style={{
-          height: "89vh",
+          height: "91vh",
           width: "16%",
           position: "absolute",
-          top: 77,
+          top: 66,
           zIndex: 2,
         }}
       >
@@ -156,10 +181,10 @@ function Skribble() {
       {/* Third Part */}
       <Paper
         style={{
-          height: "89vh",
+          height: "91vh",
           width: "25%",
           right: 0,
-          top: 77,
+          top: 66,
           position: "absolute",
           zIndex: 2,
         }}
