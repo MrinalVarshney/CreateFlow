@@ -1,47 +1,45 @@
-
 let activeRooms = [];
 let io = null;
 const userSocketMap = new Map(); // Create a mapping of user IDs to socket IDs
 const roomCodeMap = new Map(); // Create a mapping of user IDs to roomCode
 const gameStartedMap = new Map(); // Create a mapping of room Code to game started
 
-const mapUserToRoomCode = (userId,roomCode)=>{
-  console.log("setting roomCode",roomCode,userId)
-  roomCodeMap.set(userId,roomCode);
-}
+const mapUserToRoomCode = (userId, roomCode) => {
+  console.log("setting roomCode", roomCode, userId);
+  roomCodeMap.set(userId, roomCode);
+};
 
-const setGameStarted = (roomCode)=>{
-  gameStartedMap.set(roomCode,true);
-}
+const setGameStarted = (roomCode) => {
+  gameStartedMap.set(roomCode, true);
+};
 
-const isGameStarted = (roomCode)=>{
+const isGameStarted = (roomCode) => {
   return gameStartedMap.get(roomCode);
-}
+};
 
-const getRoomCode = (userId)=>{
+const getRoomCode = (userId) => {
   return roomCodeMap.get(userId);
-}
+};
 
 const addUserToStore = (socketId, userId) => {
-  if(!userSocketMap.has(userId)){
+  if (!userSocketMap.has(userId)) {
     userSocketMap.set(userId, socketId);
   }
   return userSocketMap.get(userId);
-}
+};
 
-
-const getSocketId = (socket,userId) => {
-  if(userSocketMap.has(userId)){
-    console.log("user found")
+const getSocketId = (socket, userId) => {
+  if (userSocketMap.has(userId)) {
+    console.log("user found");
     return userSocketMap.get(userId);
   }
-  return socket.id
-}
+  return socket.id;
+};
 
 const addNewActiveRoom = ({ socketId, data, roomCode }) => {
   const userId = data.userId;
   const userName = data.userName;
-  if(userSocketMap.has(userId)){
+  if (userSocketMap.has(userId)) {
     socketId = userSocketMap.get(userId);
   }
   const newActiveRoom = {
@@ -64,7 +62,6 @@ const addNewActiveRoom = ({ socketId, data, roomCode }) => {
   return newActiveRoom;
 };
 
-
 const setSocketServerInstance = (ioInstance) => {
   io = ioInstance;
 };
@@ -86,11 +83,12 @@ const getActiveRoom = (roomCode) => {
 };
 
 const removeActiveRoom = (roomCode) => {
+  console.log(activeRooms);
   const updatedActiveRooms = activeRooms.filter(
     (room) => room.roomCode !== roomCode
   );
   activeRooms = updatedActiveRooms;
-  return updatedActiveRooms;
+  console.log(activeRooms);
 };
 
 const joinActiveRoom = ({ roomCode, socketId, data }) => {
@@ -107,7 +105,7 @@ const joinActiveRoom = ({ roomCode, socketId, data }) => {
   }
 };
 
-const leaveActiveRoom = (roomCode,socketId,userId) => {
+const leaveActiveRoom = (roomCode, socketId, userId) => {
   const room = getActiveRoom(roomCode);
   if (room) {
     const updatedParticipants = room.participants.filter(
@@ -118,11 +116,10 @@ const leaveActiveRoom = (roomCode,socketId,userId) => {
       removeActiveRoom(roomCode);
     }
   }
-  if(roomCodeMap.has(userId)){
+  if (roomCodeMap.has(userId)) {
     roomCodeMap.delete(userId);
   }
 };
-
 
 module.exports = {
   addNewActiveRoom,
@@ -138,5 +135,5 @@ module.exports = {
   mapUserToRoomCode,
   getRoomCode,
   setGameStarted,
-  isGameStarted
+  isGameStarted,
 };

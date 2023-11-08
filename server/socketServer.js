@@ -26,18 +26,17 @@ const registerSocketServer = (server) => {
   serverStore.setSocketServerInstance(io);
 
   io.on("connection", (socket) => {
-    console.log("new user connected with id: ",socket.id)
+    console.log("new user connected with id: ", socket.id);
 
-    socket.on("connect-user", (userId,callback) => {
-      newConnectionHandler(socket, userId,callback);
-    })
+    socket.on("connect-user", (userId, callback) => {
+      newConnectionHandler(socket, userId, callback);
+    });
 
     socket.on("room-create", (data) => {
       const roomCode = uuidv4();
       socket.join(roomCode);
       roomCreateHandler(socket, data, roomCode);
     });
-
 
     socket.on("join-room", (roomCode, data) => {
       roomJoinHandler(socket, roomCode, data);
@@ -49,17 +48,39 @@ const registerSocketServer = (server) => {
     });
 
     socket.on("start-game", (userId) => {
-      console.log("game-started")
-      startGameHandler(socket,userId);
+      console.log("game-started");
+      startGameHandler(socket, userId);
     });
-    socket.on("end-game", () => {
-      endGameHandler(socket);
+    socket.on("end-game", (userId) => {
+      endGameHandler(userId);
     });
     socket.on("send-message", (data, roomCode) => {
       io.to(roomCode).emit("new-message", data);
     });
+
+    socket.on("mouse-down", (data) => {
+      console.log("mouse-down socket", data);
+      io.to(data?.roomCode).emit("mouse-down", data);
+    });
+    socket.on("mouse-move", (data) => {
+      console.log("mouse-move socket", data);
+      io.to(data?.roomCode).emit("mouse-move", data);
+    });
+    socket.on("mouse-up", (roomCode) => {
+      io.to(roomCode).emit("mouse-up");
+    });
+    socket.on("virtual-mouse-down", (data) => {
+      console.log("virtual-mouse-down socket");
+      io.to(data?.roomCode).emit("virtual-mouse-down", data);
+    });
+    socket.on("virtual-mouse-move", (data) => {
+      // console.log("virtual-mouse-move socket", data);
+      io.to(data?.roomCode).emit("virtual-mouse-move", data);
+    });
+    socket.on("virtual-mouse-up", (data) => {
+      io.to(data.roomCode).emit("virtual-mouse-up", data);
+    });
   });
 };
-
 
 module.exports = { registerSocketServer };

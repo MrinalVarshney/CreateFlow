@@ -387,6 +387,7 @@ function DrawingCanvas() {
   /************************** Virtual Canvas Events *****************************/
 
   const handleVirtualMouseDown = (e) => {
+    console.log("vmD");
     console.log(isCustomizable.current);
     const x = e.nativeEvent.offsetX;
     const y = e.nativeEvent.offsetY;
@@ -409,6 +410,7 @@ function DrawingCanvas() {
   };
 
   const handleVirtualMouseMove = (e) => {
+    console.log("vmM");
     const offCanvas = offCanvasRef.current;
     const ctx = offCanvas.getContext("2d");
     ctx.strokeStyle = selectedColor;
@@ -427,6 +429,7 @@ function DrawingCanvas() {
   };
 
   const handleVirtualMouseUp = (e) => {
+    console.log("vmU");
     setDrawing(false);
     console.log("Drawing ", drawing);
     console.log("Mouse Up", isCustomizable.current);

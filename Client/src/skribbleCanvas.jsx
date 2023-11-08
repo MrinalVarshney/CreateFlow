@@ -8,6 +8,7 @@ import ShapesMenu from "./ToolBar/ShapesMenu";
 import { Box } from "@mui/system";
 import FloodFill from "q-floodfill";
 import { useStyles } from "./Assets/CursorStyles";
+import { useUserAndChats } from "./Context/userAndChatsProvider";
 import {
   drawRectangle,
   drawCircle,
@@ -29,6 +30,9 @@ function DrawingCanvas() {
     lineWidth,
     eraserWidth,
   } = useDrawingTools();
+  const { Socket, roomDetails } = useUserAndChats();
+  const socket = Socket.current;
+
   const { addToHistory } = useHistory();
   const [drawing, setDrawing] = useState(false);
   const [context, setContext] = useState(null);
@@ -355,6 +359,29 @@ function DrawingCanvas() {
 
   /************************** Main Canvas Events *****************************/
   const handleMouseDown = (e) => {
+    console.log(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+    StartRef.current = {
+      startX: e.nativeEvent.offsetX,
+      startY: e.nativeEvent.offsetY,
+    };
+    const data = {
+      roomCode: roomDetails.roomCode,
+      selectedTool: selectedTool,
+      selectedColor: selectedColor,
+      lineWidth: lineWidth,
+      eraserWidth: eraserWidth,
+      startX: e.nativeEvent.offsetX,
+      startY: e.nativeEvent.offsetY,
+      StartRef: StartRef,
+      EndRef: EndRef,
+      ExtremumRef: ExtremumRef,
+      pointRef: pointRef,
+      isResizing: isResizing,
+      stillResizing: stillResizing,
+      CurrentRef: CurrentRef,
+      isCustomizable: isCustomizable,
+    };
+    socket.emit("mouse-down", data);
     if (selectedTool === "PaintBucket") {
       const imgData = context.getImageData(
         0,
@@ -374,11 +401,30 @@ function DrawingCanvas() {
 
   const handleMouseMove = (e) => {
     if (!drawing) return;
+    StartRef.current = {
+      startX: e.nativeEvent.offsetX,
+      startY: e.nativeEvent.offsetY,
+    };
+    const data = {
+      roomCode: roomDetails.roomCode,
+      StartRef: StartRef.current,
+      endX: e.nativeEvent.offsetX,
+      endY: e.nativeEvent.offsetY,
+      ExtremumRef: ExtremumRef.current,
+      pointRef: pointRef.current,
+      isResizing: isResizing.current,
+      stillResizing: stillResizing.current,
+      CurrentRef: CurrentRef.current,
+      isCustomizable: isCustomizable.current,
+    };
+    console.log("moving");
+    socket.emit("mouse-move", data);
     context.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
     context.stroke();
   };
 
   const handleMouseUp = (e) => {
+    socket.emit("mouse-up", roomDetails.roomCode);
     setDrawing(false);
     context.closePath();
     saveCanvasState();
@@ -390,6 +436,18 @@ function DrawingCanvas() {
     console.log(isCustomizable.current);
     const x = e.nativeEvent.offsetX;
     const y = e.nativeEvent.offsetY;
+
+    const data = {
+      roomCode: roomDetails.roomCode,
+      selectedTool: selectedTool,
+      selectedColor: selectedColor,
+      lineWidth: lineWidth,
+      isCustomizable: isCustomizable.current,
+      x: x,
+      y: y,
+    };
+    socket.emit("virtual-mouse-down", data);
+
     if (isCustomizable.current) {
       const { endX, endY } = EndRef.current;
       console.log("Customizing");
@@ -402,6 +460,7 @@ function DrawingCanvas() {
         drawOnMainCanvas(endX, endY);
       }
     }
+
     if (selectedTool !== "UploadFiles") {
       setDrawing(true);
       StartRef.current = { startX: x, startY: y };
@@ -414,6 +473,13 @@ function DrawingCanvas() {
     ctx.strokeStyle = selectedColor;
     const endX = e.nativeEvent.offsetX;
     const endY = e.nativeEvent.offsetY;
+    const data = {
+      roomCode: roomDetails.roomCode,
+      isCustomizable: isCustomizable.current,
+      endX: endX,
+      endY: endY,
+    };
+    socket.emit("virtual-mouse-move", data);
     if (isCustomizable.current) {
       DoCursorStyling(endX, endY);
       if (CurrentRef.current.x !== -1) {
@@ -421,6 +487,7 @@ function DrawingCanvas() {
         return;
       }
     }
+
     if (!drawing || isCustomizable.current) return;
     ctx.clearRect(0, 0, offCanvas.width, offCanvas.height);
     chooseAndDrawShape(endX, endY, ctx);
@@ -428,6 +495,12 @@ function DrawingCanvas() {
 
   const handleVirtualMouseUp = (e) => {
     setDrawing(false);
+    const data = {
+      roomCode: roomDetails.roomCode,
+      endX: e.nativeEvent.offsetX,
+      endY: e.nativeEvent.offsetY,
+    };
+    socket.emit("virtual-mouse-up", data);
     console.log("Drawing ", drawing);
     console.log("Mouse Up", isCustomizable.current);
     const offCanvas = offCanvasRef.current;

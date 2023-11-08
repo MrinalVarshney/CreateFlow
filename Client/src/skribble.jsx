@@ -4,6 +4,7 @@ import { useUserAndChats } from "./Context/userAndChatsProvider";
 import SendIcon from "@mui/icons-material/Send";
 import { useNavigate } from "react-router-dom";
 import SkribbleCanvas from "./skribbleCanvas";
+import SharedCanvas from "./SharedCanvas";
 
 function Skribble() {
   const {
@@ -15,6 +16,7 @@ function Skribble() {
     setRoomDetails,
     connectWithSocketServer,
   } = useUserAndChats();
+
   const socket = Socket.current;
   if (socket) {
     console.log("socket reloaded", socket.id);
@@ -60,7 +62,10 @@ function Skribble() {
     socket?.emit("leave-room", data);
     navigate("/selectionBoard");
   };
-  const handleEnd = () => {};
+  const handleEnd = useCallback(() => {
+    console.log("Game ended");
+    socket.emit("end-game", user._id);
+  }, [navigate, socket]);
   const handleFilterParticpiants = useCallback((userId) => {
     const filtedParticipants = roomDetails?.participants.filter(
       (participants) => participants.userId !== userId
@@ -85,9 +90,20 @@ function Skribble() {
       // handleFilterParticpiants(data.userId);
       sendRoomMessage(data, roomDetails.roomCode);
     });
+    socket?.on("game-ended", () => {
+      localStorage.removeItem("roomDetails");
+      localStorage.removeItem("chats");
+      navigate("/selectionBoard");
+    });
+    socket?.on("join-room-error", (message) => {
+      console.log(message);
+      navigate("/selectionBoard");
+    });
     return () => {
       socket?.off("new-message");
       socket?.off("user-left");
+      socket?.off("ended-game");
+      socket?.off("join-room-error");
     };
   }, [
     socket,
@@ -96,6 +112,7 @@ function Skribble() {
     navigate,
     roomDetails?.roomCode,
     sendRoomMessage,
+    handleEnd,
     // handleFilterParticpiants,
   ]);
   console.log("rmD", roomDetails);
@@ -106,7 +123,11 @@ function Skribble() {
   );
   return (
     <div style={{ height: "100vh", marginBottom: "0px" }}>
-      <SkribbleCanvas />
+      {roomDetails?.roomCreator.userId === user?._id ? (
+        <SkribbleCanvas />
+      ) : (
+        <SharedCanvas />
+      )}
       <Paper
         style={{
           height: "9vh",

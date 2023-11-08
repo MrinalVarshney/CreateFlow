@@ -1,14 +1,11 @@
-const serverStore = require("./../serverStore")
+const serverStore = require("./../serverStore");
 
-const endGameHandler = (socket) => {   
-    const roomCode = serverStore.getRoomCode(socket.id)
-    const updatedActiveRoom = serverStore.removeActiveRoom(roomCode)
+const endGameHandler = (userId) => {
+  const roomCode = serverStore.getRoomCode(userId);
+  const io = serverStore.getSocketServerInstance();
+  console.log(roomCode);
+  serverStore.removeActiveRoom(roomCode);
+  io.to(roomCode).emit("game-ended");
+};
 
-    if(updatedActiveRoom){
-        updatedActiveRoom.participants.forEach((participant)=>{
-            socket.to(participant.socketId).emit("game-ended")
-        })
-    }
-}
-
-module.exports = endGameHandler
+module.exports = endGameHandler;
