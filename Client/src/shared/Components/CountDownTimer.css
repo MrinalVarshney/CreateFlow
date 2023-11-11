@@ -1,0 +1,32 @@
+
+/* CountdownTimer.css */
+
+.countdown-timer {
+    text-align: center;
+    margin: 20px;
+  }
+  
+  h1 {
+    font-size: 24px;
+    color: #333;
+  }
+  
+  .time-left {
+    font-size: 18px;
+    color: #ec1414;
+    margin: 10px 0;
+  }
+  
+  .start-button {
+    font-size: 16px;
+    background-color: #39953c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+  
+  .start-button:hover {
+    background-color: #0f7614;
+  }
+  
