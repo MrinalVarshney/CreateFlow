@@ -32,7 +32,7 @@ function DrawingCanvas() {
     lineWidth,
     eraserWidth,
   } = useDrawingTools();
-  const { addToHistory } = useHistory();
+  const { addToHistory, undo, redo } = useHistory();
   const [drawing, setDrawing] = useState(false);
   const [context, setContext] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -623,6 +623,22 @@ function DrawingCanvas() {
     },
     [addCustomizability, chooseAndDrawShape, drawing, isDragging, selectedTool]
   );
+  // Undo-Redo handling
+  const handlesharedUndo = useCallback(() => {
+    console.log(" shared undoing");
+    const data = undo();
+    if (data) {
+      redrawCanvas(data);
+    }
+  }, [undo, redrawCanvas]);
+
+  const handlesharedRedo = useCallback(() => {
+    console.log("shared redoing");
+    const data = redo();
+    if (data) {
+      redrawCanvas(data);
+    }
+  }, [redo, redrawCanvas]);
 
   useEffect(() => {
     socket.on("mouse-down", (data) => {
@@ -707,6 +723,16 @@ function DrawingCanvas() {
       handleVirtualMouseUp(endX, endY);
     });
 
+    // undo-redo handling
+    socket?.on("undo", () => {
+      console.log("undoing");
+      handlesharedUndo();
+    });
+    socket?.on("redo", () => {
+      console.log("redoing");
+      handlesharedRedo();
+    });
+
     return () => {
       socket?.off("virtual-mouse-down");
       socket?.off("virtual-mouse-up");
@@ -722,6 +748,8 @@ function DrawingCanvas() {
     handleVirtualMouseDown,
     handleVirtualMouseMove,
     handleVirtualMouseUp,
+    handlesharedUndo,
+    handlesharedRedo,
   ]);
 
   return (

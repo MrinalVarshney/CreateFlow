@@ -78,7 +78,13 @@ const registerSocketServer = (server) => {
       io.to(data?.roomCode).emit("virtual-mouse-move", data);
     });
     socket.on("virtual-mouse-up", (data) => {
-      io.to(data.roomCode).emit("virtual-mouse-up", data);
+      io.to(data?.roomCode).emit("virtual-mouse-up", data);
+    });
+    socket.on("undo", (roomCode) => {
+      io.to(roomCode).emit("undo");
+    });
+    socket.on("redo", (roomCode) => {
+      io.to(roomCode).emit("redo");
     });
   });
 };
