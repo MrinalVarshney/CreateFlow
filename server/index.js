@@ -5,6 +5,9 @@ const connectDB = require("./config/db");
 const socketServer = require("./socketServer")
 const http = require("http")
 const authRoutes = require("./routes/authRoutes");
+const cookieSession = require("cookie-session")
+const passport = require("./config/passport-config");
+const googleAuthRoutes = require("./routes/googleAuthRoutes")
 
 
 dotenv.config();
@@ -18,7 +21,19 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/auth",authRoutes)
+app.use(
+  cookieSession({
+    name: "session",
+    keys: ["Mrinal"],
+    maxAge: 24 * 60 * 60 * 100,
+  })
+);
+
+app.use(passport.initialize())
+app.use(passport.session())
+
+app.use("/api/user",authRoutes)
+app.use("/auth/google",googleAuthRoutes)
 
 app.get("/", (req, res) => {
   res.send("Hello World");

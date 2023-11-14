@@ -30,12 +30,16 @@ export const UserAndChatsProvider = ({ children }) => {
   },[chats])
 
   useEffect(() => {
+
     const userDetails = JSON.parse(localStorage.getItem("user"));
     const currentPath = window.location.pathname;
-    console.log(user,"user")
+    console.log(userDetails,"user")
+    
     if (userDetails) {
-      // Set the user data in the state
       setUser(userDetails);
+      if(currentPath === "/" || currentPath === "/register"){
+        navigate("/dashboard");
+      }
     } else if (currentPath === "/register") {
       // Allow access to the register page
       return;

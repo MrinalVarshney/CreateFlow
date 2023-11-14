@@ -3,6 +3,8 @@ import CustomPrimaryButton from "../../shared/Components/customPrimaryButton";
 import RedirectInfo from "../../shared/Components/RedirectInfo";
 import { useNavigate } from "react-router-dom";
 import { Tooltip } from "@mui/material";
+import googleLogo from "../../Assets/Images/google.png";
+import "./login.css";
 
 const getFormNotValidMessage = () => {
   return "Enter correct e-mail address and password should contains between 6 and 12 characters";
@@ -16,8 +18,18 @@ const LoginPageFooter = ({ handleLogin, isFormValid }) => {
   const navigate = useNavigate();
 
   const handlePushToRegisterPage = () => {
-    navigate("/register")
+    navigate("/register");
   };
+
+const handleGoogleLogin = (e) => {
+    e.preventDefault();
+    try{
+      window.open("http://localhost:8000/auth/google", "_self");
+    }
+    catch(error){
+      console.log(error.message)
+    }
+}
 
   return (
     <>
@@ -25,6 +37,7 @@ const LoginPageFooter = ({ handleLogin, isFormValid }) => {
         title={!isFormValid ? getFormNotValidMessage() : getFormValidMessage()}
       >
         <div>
+        
           <CustomPrimaryButton
             label="Log in"
             additionalStyles={{ marginTop: "30px" }}
@@ -39,6 +52,17 @@ const LoginPageFooter = ({ handleLogin, isFormValid }) => {
         additionalStyles={{ marginTop: "5px" }}
         redirectHandler={handlePushToRegisterPage}
       />
+      <div>
+        <span>OR</span>
+      </div>
+      <div className="google-sign-in-container">
+        <img
+          src={googleLogo}
+          onClick={handleGoogleLogin}
+          alt="Sign in with Google"
+          className="google-logo"
+        />
+      </div>
     </>
   );
 };

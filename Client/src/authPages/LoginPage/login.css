@@ -1,0 +1,24 @@
+.google-sign-in-container {
+    display: flex;
+    justify-content: center;
+    width: 100%; /* Take up the entire width of the container */
+  }
+  
+  .google-logo {
+    width: 40%; /* Set the width of the image */
+    cursor: pointer; /* Make the logo clickable */
+    max-width: 200px; /* Optionally set a max-width to ensure it doesn't get too large */
+  }
+
+  .awesome-text {
+ 
+    color: black;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    font-size: 24px;
+  }
+  
+  
+  

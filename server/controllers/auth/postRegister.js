@@ -8,7 +8,8 @@ const postRegister = async (req, res) => {
     //Check if email already exists
     console.log(mail)
     const user = await User.findOne({ email: mail.toLowerCase() });
-    if (user) {
+
+    if (user && user.signedUpWithCustomMethod) {
       res.status(400).send("Email already exists !");
     } else {
       console.log(req.body);
@@ -16,12 +17,15 @@ const postRegister = async (req, res) => {
         username,
         email: mail.toLowerCase(),
         password,
+        signedUpWithCustomMethod: true,
+        verified:true
       });
       if (user) {
         res.status(201).json({
           _id: user._id,
           username: user.username,
           email: user.email,
+          verified: user.verified,
           token: generateToken(user._id),
         });
       } else {
