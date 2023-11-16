@@ -3,12 +3,20 @@ import { Box, Paper, Grid } from "@mui/material";
 import { useDrawingTools } from "../Context/DrawingToolsContext";
 import colors from "../Assets/Colors";
 import ColorSelector from "../Assets/ColorSelecter";
+import { useUserAndChats } from "../Context/userAndChatsProvider";
 
 function ColorPalette() {
   const { selectedColor, setSelectedColor } = useDrawingTools();
+  const {playingGameRef,Socket,roomDetails} = useUserAndChats()
+  const socket =  Socket.current;
 
   const handleColorClick = (color) => {
     setSelectedColor(color);
+    if(playingGameRef.current){
+      const roomCode = roomDetails.roomCode;
+      const data = {roomCode, color};
+      socket?.emit("color-change", data);
+    }
   };
 
   return (

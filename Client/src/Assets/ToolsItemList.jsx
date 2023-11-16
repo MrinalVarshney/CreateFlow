@@ -6,6 +6,7 @@ import LineWeightIcon from "@mui/icons-material/LineWeight";
 import PaintBucket from "../Drawing_Tools/PaintBucket";
 import UploadFiles from "../Drawing_Tools/uploadFiles";
 
+
 const toolsList = [
   { icon: <Pencil />, name: "Pencil" },
   { icon: <Pen />, name: "Pen" },

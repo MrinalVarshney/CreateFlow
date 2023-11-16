@@ -6,15 +6,18 @@ import { Popover, Slider, Typography } from "@mui/material";
 import { useState } from "react";
 import { useDrawingTools } from "../Context/DrawingToolsContext";
 import toolsList from "../Assets/ToolsItemList";
-import { useCallback } from "react";
+import { useUserAndChats } from "../Context/userAndChatsProvider";
 
 export default function Tools({ setIsOpen, selectFile }) {
-  const { lineWidth, setLineWidth, selectedTool, setSelectedTool } =
+  const {Socket, roomDetails,playingGameRef} = useUserAndChats()
+  const { lineWidth, setLineWidth, selectedTool, setSelectedTool,eraserWidth } =
     useDrawingTools();
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [min, setMin] = useState(1);
   const [max, setMax] = useState(10);
+
+  const socket = Socket.current;
 
   const handleOpen = (event) => {
     event.stopPropagation();
@@ -27,25 +30,38 @@ export default function Tools({ setIsOpen, selectFile }) {
     setOpen(false);
   };
 
-  const handleSelection = useCallback(
-    (e, tool) => {
+  const handleSelection = (e, tool) => {
       e.preventDefault();
+      var width=0;
       if (tool === "UploadFiles") {
         selectFile();
-      } else if (tool === "Pen" || tool === "Brush") {
+      }
+     
+      else if (tool === "Pen" || tool === "Brush") {
         setMin(5);
-        if (selectedTool !== tool) setLineWidth(5);
+        if (selectedTool !== tool){
+          width=5;
+          setLineWidth(5);
+        } 
         setMax(20);
       } else {
         setMin(1);
-        if (selectedTool !== tool) setLineWidth(1);
+        if (selectedTool !== tool){
+          width=1;
+          setLineWidth(1);
+        } 
         setMax(10);
       }
 
       setSelectedTool(tool);
-    },
-    [setLineWidth, selectedTool, setSelectedTool]
-  );
+      if(playingGameRef.current){
+        if(tool === "Eraser") width = eraserWidth;
+        else if(!width) width = lineWidth;
+        const roomCode = roomDetails.roomCode
+        const data = {roomCode,tool,width}
+        socket?.emit("tool-change", data)
+      }
+  }
 
   return (
     <div
@@ -64,6 +80,7 @@ export default function Tools({ setIsOpen, selectFile }) {
         direction="down"
       >
         {toolsList.map((action) => (
+          action.name === "UploadFiles" && playingGameRef.current ? null :
           <SpeedDialAction
             key={action.name}
             icon={action.icon}

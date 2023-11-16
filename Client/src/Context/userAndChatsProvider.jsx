@@ -12,7 +12,9 @@ export const UserAndChatsProvider = ({ children }) => {
   const [chats, setChats] = useState([]);
   const navigate = useNavigate();
   const [roomDetails, setRoomDetails] = useState(null);
+  const playingGameRef = useRef(false)
   const Socket = useRef(null)
+
 
   useEffect(() => {
     if(roomDetails){
@@ -80,7 +82,8 @@ export const UserAndChatsProvider = ({ children }) => {
     roomDetails,
     setRoomDetails,
     connectWithSocketServer,
-    Socket
+    Socket,
+    playingGameRef
   };
 
   return (

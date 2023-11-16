@@ -61,7 +61,7 @@ const useStyles = makeStyles({
 
 function PlayOnline() {
   const classes = useStyles();
-  const { user, Socket, roomDetails, setRoomDetails } = useUserAndChats();
+  const { user, Socket, roomDetails, setRoomDetails, playingGameRef } = useUserAndChats();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
   const [HostroomCode, setHostRoomCode] = useState({ host: "", roomCode: "" });
@@ -129,11 +129,13 @@ function PlayOnline() {
     });
     socket?.on("game-started", () => {
       console.log("Starting game");
+      playingGameRef.current = true;
       navigate("/skribble");
     });
 
     return () => {
       socket?.off("user-joined", handleUserJoined);
+      socket?.off("game-started")
     };
   }, [socket, handleUserJoined, navigate]);
 

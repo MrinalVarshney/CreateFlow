@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Grid, Box, Paper, Input, Button } from "@mui/material";
-import { useUserAndChats } from "./Context/userAndChatsProvider";
+import { useUserAndChats } from "../../Context/userAndChatsProvider";
 import SendIcon from "@mui/icons-material/Send";
 import { useNavigate } from "react-router-dom";
 import SkribbleCanvas from "./skribbleCanvas";
@@ -15,6 +15,7 @@ function Skribble() {
     roomDetails,
     setRoomDetails,
     connectWithSocketServer,
+    playingGameRef,
   } = useUserAndChats();
 
   const socket = Socket.current;
@@ -28,6 +29,7 @@ function Skribble() {
     }
     const roomDetails = JSON.parse(localStorage.getItem("roomDetails"));
     const chats = JSON.parse(localStorage.getItem("chats"));
+    playingGameRef.current= true;
     setRoomDetails(roomDetails);
     setChats(chats);
   }, []);
@@ -58,6 +60,7 @@ function Skribble() {
       userId: user?._id,
       roomCode: roomDetails?.roomCode,
     };
+    localStorage.removeItem("roomDetails");
     setChats([]);
     socket?.emit("leave-room", data);
     navigate("/selectionBoard");
@@ -65,7 +68,9 @@ function Skribble() {
   const handleEnd = useCallback(() => {
     console.log("Game ended");
     socket.emit("end-game", user._id);
+    localStorage.removeItem("roomDetails");
   }, [navigate, socket]);
+
   const handleFilterParticpiants = useCallback((userId) => {
     const filtedParticipants = roomDetails?.participants.filter(
       (participants) => participants.userId !== userId
@@ -76,8 +81,13 @@ function Skribble() {
   useEffect(() => {
     socket?.on("new-message", (data) => {
       console.log("new-message", data);
+      console.log(chats);
       const newChat = { user: data.userName, message: data.message };
-      setChats([...chats, newChat]);
+      if (chats) {
+        setChats([...chats, newChat]);
+      } else {
+        setChats([newChat]);
+      }
     });
     socket?.on("user-left", (userData) => {
       console.log("work leave", userData);

@@ -1,6 +1,6 @@
 import "./App.css";
 import Canvas from "./Canvas";
-import Skribble from "./skribble";
+import SkribblePage from "./SkribbleGame/SkribblePage.jsx";
 import SelectionBoard from "./CanvasSelectionBoard/SelectionBoard";
 import Login from "./authPages/LoginPage/login.jsx";
 import Register from "./authPages/RegisterPage/register";
@@ -17,7 +17,7 @@ function App() {
       <Route exact path="/selectionBoard" Component={SelectionBoard} />
       <Route exact path="/" Component={Login} />
       <Route exact path="/register" Component={Register} />
-      <Route exact path="/skribble" Component={Skribble} />
+      <Route exact path="/skribble" Component={SkribblePage} />
       <Route exact path="/verify-email" Component={EmailConfirmationPage} />
       <Route exact path="/reset-password" Component={ResetPasswordPage} />
     </Routes>

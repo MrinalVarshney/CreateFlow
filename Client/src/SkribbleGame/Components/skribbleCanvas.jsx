@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useDrawingTools } from "./Context/DrawingToolsContext";
-import { useHistory } from "./Context/History";
-import ColorPalette from "./ToolBar/ColorPalette";
-import Tools from "./ToolBar/Tools";
-import UndoRedo from "./utils/UndoRedo";
-import ShapesMenu from "./ToolBar/ShapesMenu";
+import {useDrawingTools} from "../../Context/DrawingToolsContext";
+import { useHistory } from "../../Context/History";
+import ColorPalette from "../../ToolBar/ColorPalette.jsx";
+import Tools from "../../ToolBar/Tools.jsx";
+import UndoRedo from "../../utils/UndoRedo.jsx";
+import ShapesMenu from "../../ToolBar/ShapesMenu.jsx";
 import { Box } from "@mui/system";
 import FloodFill from "q-floodfill";
-import { useStyles } from "./Assets/CursorStyles";
-import { useUserAndChats } from "./Context/userAndChatsProvider";
+import { useStyles } from "../../Assets/CursorStyles.jsx";
+import { useUserAndChats } from "../../Context/userAndChatsProvider.jsx";
 import {
   drawRectangle,
   drawCircle,
@@ -18,7 +18,7 @@ import {
   drawNSidePolygon,
   drawDashedRectangle,
   drawLineDashedRectangle,
-} from "./utils/ShapesLogic.jsx";
+} from "../../utils/ShapesLogic.jsx";
 
 function DrawingCanvas() {
   const canvasRef = useRef(null);
@@ -359,27 +359,15 @@ function DrawingCanvas() {
 
   /************************** Main Canvas Events *****************************/
   const handleMouseDown = (e) => {
-    console.log(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-    StartRef.current = {
-      startX: e.nativeEvent.offsetX,
-      startY: e.nativeEvent.offsetY,
-    };
+    // StartRef.current = {
+    //   startX: e.nativeEvent.offsetX,
+    //   startY: e.nativeEvent.offsetY,
+    // };
     const data = {
       roomCode: roomDetails.roomCode,
       selectedTool: selectedTool,
-      selectedColor: selectedColor,
-      lineWidth: lineWidth,
-      eraserWidth: eraserWidth,
-      startX: e.nativeEvent.offsetX,
-      startY: e.nativeEvent.offsetY,
-      StartRef: StartRef,
-      EndRef: EndRef,
-      ExtremumRef: ExtremumRef,
-      pointRef: pointRef,
-      isResizing: isResizing,
-      stillResizing: stillResizing,
-      CurrentRef: CurrentRef,
-      isCustomizable: isCustomizable,
+      x:e.nativeEvent.offsetX,
+      y:e.nativeEvent.offsetY
     };
     socket.emit("mouse-down", data);
     if (selectedTool === "PaintBucket") {
@@ -401,21 +389,10 @@ function DrawingCanvas() {
 
   const handleMouseMove = (e) => {
     if (!drawing) return;
-    StartRef.current = {
-      startX: e.nativeEvent.offsetX,
-      startY: e.nativeEvent.offsetY,
-    };
     const data = {
       roomCode: roomDetails.roomCode,
-      StartRef: StartRef.current,
-      endX: e.nativeEvent.offsetX,
-      endY: e.nativeEvent.offsetY,
-      ExtremumRef: ExtremumRef.current,
-      pointRef: pointRef.current,
-      isResizing: isResizing.current,
-      stillResizing: stillResizing.current,
-      CurrentRef: CurrentRef.current,
-      isCustomizable: isCustomizable.current,
+      x:e.nativeEvent.offsetX,
+      y:e.nativeEvent.offsetY
     };
     console.log("moving");
     socket.emit("mouse-move", data);
@@ -439,8 +416,6 @@ function DrawingCanvas() {
 
     const data = {
       roomCode: roomDetails.roomCode,
-      selectedTool: selectedTool,
-      selectedColor: selectedColor,
       lineWidth: lineWidth,
       isCustomizable: isCustomizable.current,
       x: x,
@@ -623,7 +598,11 @@ function DrawingCanvas() {
         }}
       >
         <Tools setIsOpen={setIsOpen} selectFile={selectFile} />
-        <ShapesMenu SwitchToVirtual={SwitchToVirtual} />
+        <ShapesMenu
+          endX={EndRef.current.endX}
+          endY={EndRef.current.endY}
+          SwitchToVirtual={SwitchToVirtual}
+        />
         <ColorPalette />
         <UndoRedo isOpen={isOpen} redrawCanvas={redrawCanvas} />
       </Box>

@@ -1,4 +1,4 @@
-import { useContext, useState, createContext } from "react";
+import { useContext, useState, createContext,useRef } from "react";
 
 const HistoryContext = createContext();
 
@@ -7,46 +7,40 @@ export const useHistory = () => {
 };
 
 export const HistoryProvider = ({ children }) => {
-  const [undoHistory, setUndoHistory] = useState([]);
-  const [redoHistory, setRedoHistory] = useState([]);
+  const undoHistoryRef = useRef([]);
+  const redoHistoryRef = useRef([]);
   const [blankStage, setBlankStage] = useState(null); 
   const addToHistory = (data) => {
-    // console.log(data)
-    if (undoHistory.length > 0 && data === undoHistory[undoHistory.length - 1]){
+    if (undoHistoryRef.current.length > 0 && data === undoHistoryRef.current[undoHistoryRef.current.length - 1]){
       console.log("Duplicate")
       return;
     }
-
-    if(undoHistory.length===0) setBlankStage(data);
-    console.log("Added to history")
-    setUndoHistory([...undoHistory, data]);
-    setRedoHistory([]);
+    if(undoHistoryRef.current.length===0) setBlankStage(data);
+    undoHistoryRef.current = [...undoHistoryRef.current, data];
+    redoHistoryRef.current = [];
   };
-  const undo = () => {   
-    if (undoHistory.length > 0) {
-      const last = undoHistory[undoHistory.length - 1];
-      
-      if(undoHistory.length===1){
-        setUndoHistory([blankStage])
+  const undo = () => { 
+    if(undoHistoryRef.current.length > 0){
+      const last = undoHistoryRef.current[undoHistoryRef.current.length - 1];
+      if(undoHistoryRef.current.length===1){
+        undoHistoryRef.current = [blankStage];
       }
       else {
-        setUndoHistory(undoHistory.slice(0, -1));
-        setRedoHistory([...redoHistory, last]);
+        undoHistoryRef.current = undoHistoryRef.current.slice(0, -1);
+        redoHistoryRef.current = [...redoHistoryRef.current, last];
       }
       return last;
     }
   };
   const redo = () => {
-    if (redoHistory.length > 0) {
-      const last = redoHistory[redoHistory.length - 1];
-      setUndoHistory([...undoHistory, last]);
-      setRedoHistory(redoHistory.slice(0, -1));
-      return last; 
+    if(redoHistoryRef.current.length > 0){
+      const last = redoHistoryRef.current[redoHistoryRef.current.length - 1];
+      undoHistoryRef.current = [...undoHistoryRef.current, last];
+      redoHistoryRef.current = redoHistoryRef.current.slice(0, -1);
+      return last;
     }
   };
   const contextValue = {
-    undoHistory,
-    redoHistory,
     addToHistory,
     undo,
     redo,

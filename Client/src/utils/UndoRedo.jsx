@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React from "react";
 import UndoRoundedIcon from "@mui/icons-material/UndoRounded";
 import RedoRoundedIcon from "@mui/icons-material/RedoRounded";
 import { useHistory } from "../Context/History";
@@ -15,7 +15,7 @@ const UndoRedo = ({ redrawCanvas, isOpen }) => {
     if (data) {
       console.log("undoing");
       redrawCanvas(data);
-      socket.emit("undo", roomDetails.roomCode);
+      socket?.emit("undo", roomDetails.roomCode);
     }
   };
 
@@ -23,7 +23,7 @@ const UndoRedo = ({ redrawCanvas, isOpen }) => {
     console.log("redoing");
     const data = redo();
     if (data) {
-      socket.emit("redo", roomDetails.roomCode);
+      socket?.emit("redo", roomDetails.roomCode);
       redrawCanvas(data);
     }
   };
