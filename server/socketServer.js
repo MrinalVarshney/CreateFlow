@@ -67,7 +67,7 @@ const registerSocketServer = (server) => {
       io.to(data?.roomCode).emit("mouse-move", data);
     });
     socket.on("mouse-up", (roomCode) => {
-      console.log("mouse-up")
+      console.log("mouse-up");
       io.to(roomCode).emit("mouse-up");
     });
     socket.on("virtual-mouse-down", (data) => {
@@ -82,20 +82,27 @@ const registerSocketServer = (server) => {
       io.to(data?.roomCode).emit("virtual-mouse-up", data);
     });
     socket.on("undo", (roomCode) => {
-      console.log("Undo event ")
+      console.log("Undo event ");
       io.to(roomCode).emit("undo");
     });
     socket.on("redo", (roomCode) => {
       io.to(roomCode).emit("redo");
     });
-    socket.on("color-change",(data)=>{
-      console.log(data)
-      io.to(data.roomCode).emit("color-change",data.color)
-    })
-    socket.on("tool-change",(data)=>{
-      console.log("Selected tool event")
-      io.to(data.roomCode).emit("selected-tool",{tool:data.tool,width:data.width})
-    })
+    socket.on("color-change", (data) => {
+      console.log(data);
+      io.to(data.roomCode).emit("color-change", data.color);
+    });
+    socket.on("tool-change", (data) => {
+      console.log("Selected tool event");
+      io.to(data.roomCode).emit("selected-tool", {
+        tool: data.tool,
+        width: data.width,
+      });
+    });
+    socket.on("onToolsClick", (data) => {
+      console.log("data", data);
+      io.to(data.roomCode).emit("onToolsClick", data);
+    });
   });
 };
 

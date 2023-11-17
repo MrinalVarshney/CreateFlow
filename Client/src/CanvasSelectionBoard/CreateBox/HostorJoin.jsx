@@ -47,29 +47,19 @@ const useStyles = makeStyles({
       transform: "scale(1.05)",
       boxShadow: "0px 0px 10px 3px #888",
     },
-    modalContent: {
-      backgroundColor: "lightyellow",
-      width: "100%",
-      height: "100%",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      flexDirection: "column",
-    },
   },
 });
 
 function PlayOnline() {
   const classes = useStyles();
-  const { user, Socket, roomDetails, setRoomDetails, playingGameRef } = useUserAndChats();
+  const { user, Socket, roomDetails, setRoomDetails, playingGameRef } =
+    useUserAndChats();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
   const [HostroomCode, setHostRoomCode] = useState({ host: "", roomCode: "" });
   const [joinRoomCode, setJoinRoomCode] = useState("");
   const [isUserJoined, setIsUserJoined] = useState(false);
-  const socket = Socket.current;
-
-  // const [usersJoined, setUsersJoined] = useState(null);
+  const socket = Socket?.current;
 
   const navigate = useNavigate();
   const openModal = () => {
@@ -77,6 +67,10 @@ function PlayOnline() {
     setModalContent("play");
   };
   const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleCloseHostModal = () => {
     setIsModalOpen(false);
   };
 
@@ -95,9 +89,9 @@ function PlayOnline() {
   const createNewRoom = () => {
     console.log("Creating new room with name: " + data);
 
-    if (socket.current) console.log("socket is there");
-    socket.emit("room-create", data);
-    socket.on("room-created", (room) => {
+    if (socket?.current) console.log("socket is there");
+    socket?.emit("room-create", data);
+    socket?.on("room-created", (room) => {
       console.log("room created", room);
       setHostRoomCode({
         host: room.roomCreator.userName,
@@ -107,20 +101,18 @@ function PlayOnline() {
       // joinRoom(room.roomCode)
     });
   };
-  console.log("Room Details", roomDetails);
+
   const handleUserJoined = useCallback(
     (userData) => {
       console.log("in-join-room-handle", userData);
-      console.log("Rooooooooom", roomDetails);
       if (roomDetails) {
         const participants = [...roomDetails.participants, userData];
         console.log(participants);
         const updatedRoom = { ...roomDetails, participants };
-
         setRoomDetails(updatedRoom);
       }
     },
-    [roomDetails]
+    [roomDetails, setRoomDetails]
   );
 
   useEffect(() => {
@@ -135,16 +127,16 @@ function PlayOnline() {
 
     return () => {
       socket?.off("user-joined", handleUserJoined);
-      socket?.off("game-started")
+      socket?.off("game-started");
     };
   }, [socket, handleUserJoined, navigate]);
 
   const joinRoom = (roomCode) => {
     console.log("joined the room");
-    socket.emit("join-room", roomCode, data);
+    socket?.emit("join-room", roomCode, data);
     console.log("roomDetails", roomDetails);
 
-    socket.on("room-joined", (room) => {
+    socket?.on("room-joined", (room) => {
       console.log("join-room", room);
       setRoomDetails(room);
       setIsUserJoined(true);
@@ -159,12 +151,14 @@ function PlayOnline() {
 
   const start = () => {
     setIsModalOpen(false);
-    socket.emit("start-game", user._id);
+    socket?.emit("start-game", user._id);
   };
+
   const hostUser = {
     userId: roomDetails?.roomCreator.userId,
     userName: roomDetails?.roomCreator.userName,
   };
+
   return (
     <div>
       <Paper className={classes.boxContainer}>
@@ -174,7 +168,13 @@ function PlayOnline() {
         <Modal
           className={classes.modal}
           open={isModalOpen}
-          onClose={closeModal}
+          onClose={(event, reason) => {
+            if (modalContent === "play") {
+              closeModal();
+            } else if (reason !== "backdropClick") {
+              closeModal();
+            }
+          }}
         >
           <>
             {modalContent === "play" && (
@@ -218,13 +218,26 @@ function PlayOnline() {
                   participants={roomDetails?.participants}
                   user={hostUser}
                 />
-
-                <Button
-                  style={{ marginTop: "10px", backgroundColor: "lightBlue" }}
-                  onClick={start}
-                >
-                  Start
-                </Button>
+                <div>
+                  <Button
+                    style={{ marginTop: "10px", backgroundColor: "lightBlue" }}
+                    onClick={() => {
+                      start();
+                    }}
+                  >
+                    Start
+                  </Button>
+                  <Button
+                    style={{
+                      marginLeft: "10px",
+                      marginTop: "10px",
+                      backgroundColor: "lightBlue",
+                    }}
+                    onClick={handleCloseHostModal}
+                  >
+                    Close
+                  </Button>
+                </div>
               </div>
             )}
             {modalContent === "join" && (
@@ -246,7 +259,10 @@ function PlayOnline() {
                       placeholder="Enter Room Id"
                       onChange={(e) => setJoinRoomCode(e.target.value)}
                     />
-                    <Button onClick={join}>Join</Button>
+                    <div>
+                      <Button onClick={join}>Join</Button>
+                      <Button onClick={handleCloseHostModal}>Close</Button>
+                    </div>
                   </>
                 )}
                 {isUserJoined && (

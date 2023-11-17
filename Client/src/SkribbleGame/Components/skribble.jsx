@@ -29,7 +29,7 @@ function Skribble() {
     }
     const roomDetails = JSON.parse(localStorage.getItem("roomDetails"));
     const chats = JSON.parse(localStorage.getItem("chats"));
-    playingGameRef.current= true;
+    playingGameRef.current = true;
     setRoomDetails(roomDetails);
     setChats(chats);
   }, []);
@@ -47,7 +47,7 @@ function Skribble() {
   const sendRoomMessage = useCallback(
     (data, roomCode) => {
       console.log("send mesage", data, "hiiiiiiii");
-      socket.emit("send-message", data, roomCode);
+      socket?.emit("send-message", data, roomCode);
       console.log("message sent");
     },
     [socket]
@@ -67,9 +67,9 @@ function Skribble() {
   };
   const handleEnd = useCallback(() => {
     console.log("Game ended");
-    socket.emit("end-game", user._id);
+    socket?.emit("end-game", user._id);
     localStorage.removeItem("roomDetails");
-  }, [navigate, socket]);
+  }, [socket, user._id]);
 
   const handleFilterParticpiants = useCallback((userId) => {
     const filtedParticipants = roomDetails?.participants.filter(

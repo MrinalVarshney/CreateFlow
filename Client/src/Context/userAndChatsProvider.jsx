@@ -1,6 +1,6 @@
-import { useContext, useState, createContext, useEffect,useRef } from "react";
+import { useContext, useState, createContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import {io} from "socket.io-client"
+import { io } from "socket.io-client";
 const userContext = createContext();
 
 export const useUserAndChats = () => {
@@ -12,34 +12,32 @@ export const UserAndChatsProvider = ({ children }) => {
   const [chats, setChats] = useState([]);
   const navigate = useNavigate();
   const [roomDetails, setRoomDetails] = useState(null);
-  const playingGameRef = useRef(false)
-  const Socket = useRef(null)
-
+  const playingGameRef = useRef(false);
+  const Socket = useRef(null);
 
   useEffect(() => {
-    if(roomDetails){
-      console.log("saving TO local")
+    if (roomDetails) {
+      console.log("saving TO local");
       const chatSessionKey = "roomDetails";
-      localStorage.setItem(chatSessionKey,JSON.stringify(roomDetails))
+      localStorage.setItem(chatSessionKey, JSON.stringify(roomDetails));
     }
-  },[roomDetails])
-
-  useEffect(()=>{
-    if(chats){
-      const chatSessionKey = "chats";
-      localStorage.setItem(chatSessionKey,JSON.stringify(chats))
-    }
-  },[chats])
+  }, [roomDetails]);
 
   useEffect(() => {
+    if (chats) {
+      const chatSessionKey = "chats";
+      localStorage.setItem(chatSessionKey, JSON.stringify(chats));
+    }
+  }, [chats]);
 
+  useEffect(() => {
     const userDetails = JSON.parse(localStorage.getItem("user"));
     const currentPath = window.location.pathname;
-    console.log(userDetails,"user")
-    
+    console.log(userDetails, "user");
+
     if (userDetails) {
       setUser(userDetails);
-      if(currentPath === "/" || currentPath === "/register"){
+      if (currentPath === "/" || currentPath === "/register") {
         navigate("/dashboard");
       }
     } else if (currentPath === "/register") {
@@ -51,27 +49,25 @@ export const UserAndChatsProvider = ({ children }) => {
     }
   }, [navigate]);
 
- const connectWithSocketServer = () => {
-  console.log("connecting to socket server")
-  const user =JSON.parse(localStorage.getItem("user"))
+  const connectWithSocketServer = () => {
+    console.log("connecting to socket server");
+    const user = JSON.parse(localStorage.getItem("user"));
     const socket = io("http://localhost:5002", {
       auth: {
         token: user.token,
       },
     });
     const userId = user._id;
-    
- 
+
     /// For maintaining unique socket id for each user
-    socket.emit("connect-user",userId,(socketId)=>{
-      console.log("socketId",socketId)
+    socket?.emit("connect-user", userId, (socketId) => {
+      console.log("socketId", socketId);
       socket.id = socketId;
-    })
+    });
     Socket.current = socket;
-    socket.on("connect", () => {
+    socket?.on("connect", () => {
       console.log("Successfully connected with socket server");
     });
-
   };
 
   const contextValue = {
@@ -83,7 +79,7 @@ export const UserAndChatsProvider = ({ children }) => {
     setRoomDetails,
     connectWithSocketServer,
     Socket,
-    playingGameRef
+    playingGameRef,
   };
 
   return (
