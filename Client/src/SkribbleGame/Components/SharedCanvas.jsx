@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useDrawingTools } from "../../Context/DrawingToolsContext";
 import { useHistory } from "../../Context/History";
 import FloodFill from "q-floodfill";
 import { useUserAndChats } from "../../Context/userAndChatsProvider";
-import { useStyles } from "../../Assets/CursorStyles";
+
 import {
   drawRectangle,
   drawCircle,
@@ -534,20 +533,14 @@ function DrawingCanvas() {
 
   useEffect(() => {
     // shape and color change handling
-    socket.on("color-change", (color) => {
+    socket?.on("color-change", (color) => {
       console.log("Color-Changed to",color)
       changeSelectedColor(color);
     });
-    socket.on("selected-tool",(data)=>{
+    socket?.on("selected-tool",(data)=>{
       console.log("Changing selected tool to",data)
       selectTool(data)
     })
-    socket.on("shapeChange", (data) => {
-      const { startX, startY } = StartRef.current;
-      // const { endX, endY } = EndRef.current;
-      console.log("shapeChange", startX, startY, data.endX, data.endY);
-      drawOnMainCanvas(data.endX, data.endY);
-    });
     return () => {
       socket?.off("color-change");
       socket?.off("shapeChange");
@@ -556,24 +549,24 @@ function DrawingCanvas() {
   }, [socket, drawOnMainCanvas, changeSelectedColor,selectTool]);
 
   useEffect(() => {
-    socket.on("mouse-down", (data) => {
+    socket?.on("mouse-down", (data) => {
       const x = data.x;
       const y = data.y;
       handleMouseDown(x,y)
     });
-    socket.on("mouse-move", (data) => {
+    socket?.on("mouse-move", (data) => {
       //   console.log("mouse-move", data);
       const x = data.x;
       const y = data.y;
       handleMouseMove(x,y);
     });
-    socket.on("mouse-up", () => {
+    socket?.on("mouse-up", () => {
       handleMouseUp();
     });
 
     // virtual mouse events handling
 
-    socket.on("virtual-mouse-down", (data) => {
+    socket?.on("virtual-mouse-down", (data) => {
       isCustomizable.current = data.isCustomizable;
       const x = data.x;
       const y = data.y;
@@ -582,7 +575,7 @@ function DrawingCanvas() {
       setContext(ctx);
       handleVirtualMouseDown(x, y);
     });
-    socket.on("virtual-mouse-move", (data) => {
+    socket?.on("virtual-mouse-move", (data) => {
       // console.log("virtual-mouse-move", data);
       isCustomizable.current = data.isCustomizable;
       const endX = data.endX;
@@ -592,7 +585,7 @@ function DrawingCanvas() {
       setContext(ctx);
       handleVirtualMouseMove(endX, endY);
     });
-    socket.on("virtual-mouse-up", (data) => {
+    socket?.on("virtual-mouse-up", (data) => {
       console.log("virtual-mouse-up");
       const endX = data.endX;
       const endY = data.endY;

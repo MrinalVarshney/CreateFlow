@@ -7,19 +7,30 @@ import { useNavigate } from "react-router-dom";
 import { login } from "../../Actions/authActions";
 import { useUserAndChats } from "../../Context/userAndChatsProvider";
 import LoginHeader from "./LoginHeader";
-import { Container } from "@mui/material";
+import { Container} from "@mui/material";
 import backgroundImage from "../../Assets/Images/backgroundImage.jpg";
+
 
 const Login = () => {
   const { connectWithSocketServer } = useUserAndChats();
-
+  const [error,setError] = useState(null)
   const [mail, setMail] = useState("");
   const [password, setPassword] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
+  const [showProgressBar, setShowProgressBar] = useState(false)
+
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    login({ mail, password }, navigate, connectWithSocketServer);
+  const handleLogin = async () => {
+    setShowProgressBar(true)
+    const response = await login({ mail, password }, navigate, connectWithSocketServer);
+    setShowProgressBar(false)
+    if(response.error){
+      setError(response.errorMessage);
+    }
+    else{
+      navigate("/dashBoard")
+    }
   };
 
   useEffect(() => {
@@ -52,6 +63,9 @@ const Login = () => {
             setPassword={setPassword}
           />
           <LoginPageFooter
+            showProgressBar = {showProgressBar}
+            error = {error}
+            setError = {setError}
             isFormValid={isFormValid}
             handleLogin={handleLogin}
           />

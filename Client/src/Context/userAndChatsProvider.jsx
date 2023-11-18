@@ -42,11 +42,12 @@ export const UserAndChatsProvider = ({ children }) => {
       if(currentPath === "/" || currentPath === "/register"){
         navigate("/dashboard");
       }
-    } else if (currentPath === "/register") {
+    } else if (currentPath === "/register" || currentPath === "/reset-password/") {
       // Allow access to the register page
       return;
     } else {
       // Redirect to the login page
+      console.log(currentPath)
       navigate("/");
     }
   }, [navigate]);

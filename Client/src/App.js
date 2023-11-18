@@ -1,6 +1,7 @@
 import "./App.css";
 import Canvas from "./Canvas";
 import SkribblePage from "./SkribbleGame/SkribblePage.jsx";
+// import Skribble from "../src/SkribbleGame/Components/skribble.jsx";
 import SelectionBoard from "./CanvasSelectionBoard/SelectionBoard";
 import Login from "./authPages/LoginPage/login.jsx";
 import Register from "./authPages/RegisterPage/register";

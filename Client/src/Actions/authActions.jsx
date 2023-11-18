@@ -17,13 +17,12 @@ export const login = async (user, navigate) => {
   console.log("loginauth");
   const response = await api.login(user);
   if (response.error) {
-    console.log(response.errorMessage);
   } else {
     const userDetails = response.data;
     console.log(userDetails);
     localStorage.setItem("user", JSON.stringify(userDetails));
-    navigate("/dashboard");
   }
+  return response;
 };
 
 export const sendVerificationMail = async(user) => {
@@ -49,5 +48,10 @@ export const checkExpiry = async (token) => {
 
 export const resetPassword = async (token,password) => {
   const response = await api.resetPassword(token,password); 
+  return response;
+}
+
+export const userLogout = async (userId) => {
+  const response = await api.userLogout(userId);
   return response;
 }

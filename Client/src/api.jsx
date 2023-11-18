@@ -25,6 +25,7 @@ export const login = async (data) => {
     try {
       return await apiClient.post("/api/user/login", data);
     } catch (error) {
+      console.log(error)
       return {
         error: true,
         errorMessage: error.response.data,
@@ -98,6 +99,21 @@ export const markAsVerified = async (token) => {
       token:token
     }
     return await apiClient.get("/api/user/verify-email", {params:params});
+  } catch (error) {
+    return {
+      error: true,
+      errorMessage: error.response.data,
+    };
+  }
+}
+
+export const userLogout = async (userId) => {
+  try {
+    const params = {
+      userId:userId
+    }
+    console.log(params)
+    return await apiClient.get("/api/user/logout",{params:params});
   } catch (error) {
     return {
       error: true,
