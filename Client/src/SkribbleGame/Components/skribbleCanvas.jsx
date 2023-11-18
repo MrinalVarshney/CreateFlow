@@ -19,8 +19,9 @@ import {
   drawDashedRectangle,
   drawLineDashedRectangle,
 } from "../../utils/ShapesLogic.jsx";
+import RandomWordModal from "./randomWordModal.jsx";
 
-function DrawingCanvas() {
+function DrawingCanvas({ show, setShow, closeRandomWordModal }) {
   const canvasRef = useRef(null);
   const offCanvasRef = useRef(null);
   const {
@@ -52,6 +53,8 @@ function DrawingCanvas() {
   useEffect(() => {
     saveCanvasState();
   }, []);
+
+  console.log("Show modal value=--", show);
 
   /*********************Functionality to toggle between main and virtual canvas*****************************/
 
@@ -613,6 +616,11 @@ function DrawingCanvas() {
         <ColorPalette />
         <UndoRedo isOpen={isOpen} redrawCanvas={redrawCanvas} />
       </Box>
+      <RandomWordModal
+        show={show}
+        setShow={setShow}
+        closeRandomWordModal={closeRandomWordModal}
+      />
       <canvas
         className={classes[selectedTool]}
         ref={canvasRef}

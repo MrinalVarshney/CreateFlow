@@ -1,6 +1,6 @@
 const serverStore = require("../serverStore");
 
-const startGameHandler = (socket,userId) => {
+const startGameHandler = (socket, userId) => {
   console.log("game-started");
   const io = serverStore.getSocketServerInstance();
   const roomCode = serverStore.getRoomCode(userId);

@@ -100,8 +100,14 @@ const registerSocketServer = (server) => {
       });
     });
     socket.on("onToolsClick", (data) => {
-      console.log("data", data);
       io.to(data.roomCode).emit("onToolsClick", data);
+    });
+    socket.on("wordSelected", (data) => {
+      io.to(data.roomCode).emit("word-Selected", data.word);
+    });
+    socket.on("reload", (data) => {
+      console.log("rmC", data.roomCode);
+      io.to(data.roomCode).emit("reload", data);
     });
   });
 };

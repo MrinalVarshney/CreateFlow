@@ -5,6 +5,7 @@ import SendIcon from "@mui/icons-material/Send";
 import { useNavigate } from "react-router-dom";
 import SkribbleCanvas from "./skribbleCanvas";
 import SharedCanvas from "./SharedCanvas";
+import CountdownTimer from "../../shared/Components/CountDownTimer";
 
 function Skribble() {
   const {
@@ -18,11 +19,20 @@ function Skribble() {
     playingGameRef,
   } = useUserAndChats();
 
+  const [selectedWord, setSelectedWord] = useState("");
+  const [randomDrawer, setRandomDrawer] = useState(null);
+  const [show, setShow] = useState(false);
+  console.log(randomDrawer);
   const socket = Socket.current;
   if (socket) {
-    console.log("socket reloaded", socket.id);
+    console.log("socket reloaded", socket?.id);
   }
   console.log("Reloading");
+
+  function closeRandomWordModal() {
+    setShow(false);
+  }
+
   useEffect(() => {
     if (!socket) {
       connectWithSocketServer();
@@ -32,14 +42,20 @@ function Skribble() {
     playingGameRef.current = true;
     setRoomDetails(roomDetails);
     setChats(chats);
+    if (!randomDrawer) setShow(true);
+    setRandomDrawer(roomDetails?.roomCreator);
   }, []);
   const [message, setMessage] = useState("");
   const handleSend = () => {
     console.log(message, user);
+    if (message === selectedWord) {
+      console.log("guessed");
+    }
     const data = {
       userId: user?._id,
       userName: user?.username,
-      message: message,
+      message:
+        message === selectedWord ? `${user?.username} has guessed!` : message,
     };
     sendRoomMessage(data, roomDetails.roomCode);
     setMessage("");
@@ -82,7 +98,13 @@ function Skribble() {
     socket?.on("new-message", (data) => {
       console.log("new-message", data);
       console.log(chats);
-      const newChat = { user: data.userName, message: data.message };
+      const guess_message = user.username + " has guessed!";
+      console.log(guess_message);
+      var message = data.message;
+      if (data.userId === user._id && message === guess_message) {
+        message = "Great! You guessed it right!";
+      }
+      const newChat = { user: data.userName, message: message };
       if (chats) {
         setChats([...chats, newChat]);
       } else {
@@ -109,11 +131,22 @@ function Skribble() {
       console.log(message);
       navigate("/selectionBoard");
     });
+    socket?.on("word-Selected", (word) => {
+      setSelectedWord(word);
+    });
+    socket?.on("reload", (data) => {
+      console.log("recieved", data);
+      setShow(true);
+      if (data.player.userId === randomDrawer.userId) return;
+      setRandomDrawer(data.player);
+    });
     return () => {
       socket?.off("new-message");
       socket?.off("user-left");
       socket?.off("ended-game");
       socket?.off("join-room-error");
+      socket?.off("word-Selected");
+      socket?.off("reload");
     };
   }, [
     socket,
@@ -123,18 +156,23 @@ function Skribble() {
     roomDetails?.roomCode,
     sendRoomMessage,
     handleEnd,
+    randomDrawer,
     // handleFilterParticpiants,
   ]);
-  console.log("rmD", roomDetails);
-  console.log(
-    "skribble window width and height",
-    window.innerWidth,
-    window.innerHeight
-  );
+
+  console.log("selectedWord", selectedWord);
+
   return (
     <div style={{ height: "100vh", marginBottom: "0px" }}>
-      {roomDetails?.roomCreator.userId === user?._id ? (
-        <SkribbleCanvas />
+      {randomDrawer?.userId === user?._id ? (
+        <>
+          <SkribbleCanvas
+            setWord={setSelectedWord}
+            show={show}
+            setShow={setShow}
+            closeRandomWordModal={closeRandomWordModal}
+          />
+        </>
       ) : (
         <SharedCanvas />
       )}
@@ -150,8 +188,8 @@ function Skribble() {
         }}
       >
         <Box>
-          <h2 style={{ display: "flex" }}>
-            tool Box
+          <div style={{ display: "flex" }}>
+            <CountdownTimer />
             <div style={{ width: "auto", marginLeft: "70%" }}>
               <Button variant="outlined" color="error" onClick={handleLeave}>
                 Leave
@@ -167,7 +205,7 @@ function Skribble() {
                 </Button>
               )}
             </div>
-          </h2>
+          </div>
         </Box>
       </Paper>
       {/* First Part */}
