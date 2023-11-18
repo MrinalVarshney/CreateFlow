@@ -1,11 +1,11 @@
 const authSocket = require("./middlewares/authSocket");
-const roomCreateHandler = require("./socketHandlers/roomCreateHandler");
-const roomJoinHandler = require("./socketHandlers/roomJoinHandler");
-const startGameHandler = require("./socketHandlers/startGameHandler");
-const endGameHandler = require("./socketHandlers/endGameHandler");
-const roomLeaveHandler = require("./socketHandlers/roomLeaveHandler");
+const roomCreateHandler = require("./socketHandlers/PrivateGameSpecificEvents/roomCreateHandler");
+const roomJoinHandler = require("./socketHandlers/PrivateGameSpecificEvents/roomJoinHandler");
+const startGameHandler = require("./socketHandlers/CommonEvents/startGameHandler");
+const endGameHandler = require("./socketHandlers/CommonEvents/endGameHandler");
+const roomLeaveHandler = require("./socketHandlers/CommonEvents/roomLeaveHandler");
 const serverStore = require("./serverStore");
-const newConnectionHandler = require("./socketHandlers/newConnectionHandler");
+const newConnectionHandler = require("./socketHandlers/CommonEvents/newConnectionHandler");
 const { v4: uuidv4 } = require("uuid");
 
 const registerSocketServer = (server) => {
@@ -32,6 +32,10 @@ const registerSocketServer = (server) => {
       newConnectionHandler(socket, userId, callback);
     });
 
+    socket.on("play-random",(data)=>{
+      handlePlayRandom(socket,data);
+    })
+
     socket.on("room-create", (data) => {
       const roomCode = uuidv4();
       socket.join(roomCode);
@@ -44,7 +48,7 @@ const registerSocketServer = (server) => {
     });
 
     socket.on("leave-room", (data) => {
-      roomLeaveHandler(socket, data);
+      roomLeaveHandler(data);
     });
 
     socket.on("start-game", (userId) => {

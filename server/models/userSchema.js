@@ -10,6 +10,7 @@ const userSchema = mongoose.Schema(
     googleId:{type:String,default:""},
     verified:{type:Boolean,default:false},
     signedUpWithCustomMethod:{type:Boolean,default:false},
+    isUserLogin:{type:Boolean,default:false},
   },
   {
     timestamps: true,

@@ -1,4 +1,4 @@
-const serverStore = require("../serverStore");
+const serverStore = require("../../serverStore");
 
 const newConnectionHandler = (socket, userId, callback) => {
   const socketId = serverStore.addUserToStore(socket.id, userId);

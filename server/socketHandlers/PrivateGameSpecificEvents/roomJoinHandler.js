@@ -1,4 +1,4 @@
-const serverStore = require("../serverStore");
+const serverStore = require("../../serverStore");
 
 const roomJoinHandler = (socket, roomCode, data) => {
   const socketId = serverStore.getSocketId(socket, data.userId);

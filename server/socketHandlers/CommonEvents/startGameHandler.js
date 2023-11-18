@@ -1,4 +1,4 @@
-const serverStore = require("../serverStore");
+const serverStore = require("../../serverStore");
 
 const startGameHandler = (socket,userId) => {
   console.log("game-started");

@@ -5,6 +5,7 @@ const checkExpiry = require("./checkExpiry");
 const resetPassword = require("./resetPassword");
 const sendVerificationMail = require("./sendVerificationMail");
 const markAsVerified = require("./markAsVerified");
+const userLogout   = require("./logout")
 
 module.exports = {
   postLogin,
@@ -13,6 +14,7 @@ module.exports = {
   checkExpiry,
   resetPassword, 
   sendVerificationMail,
-  markAsVerified
+  markAsVerified,
+  userLogout
 };
 

@@ -29,7 +29,7 @@ const markAsVerified = async (req, res) => {
         .status(400)
         .send("Invalid verification link ! Please try again");
     }
-    await User.findOneAndUpdate({ _id: savedToken.userId }, { $set: { verified: true } })
+    await User.findOneAndUpdate({ _id: savedToken.userId }, { $set:{ verified: true },$set: { isUserLogin: true } })
     await verificationToken.deleteOne({ token: token });
     return res.status(200).json({username:user.username,email:user.email,verified:true,token:token,_id:user._id});
   } catch (error) {

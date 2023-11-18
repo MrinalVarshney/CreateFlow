@@ -1,4 +1,4 @@
-const serverStore = require("./../serverStore");
+const serverStore = require("../../serverStore");
 
 const endGameHandler = (userId) => {
   const roomCode = serverStore.getRoomCode(userId);

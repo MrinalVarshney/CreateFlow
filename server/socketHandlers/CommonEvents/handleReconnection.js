@@ -1,4 +1,4 @@
-const serverStore = require("./../serverStore");
+const serverStore = require("../../serverStore");
 
 const handleRoomReconnection = (userId, callback) => {
     const roomCode = serverStore.getRoomCode(userId);
