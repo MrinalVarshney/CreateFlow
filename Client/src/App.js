@@ -9,6 +9,7 @@ import { Routes, Route } from "react-router-dom";
 import ResetPasswordPage from "./authPages/ResetPasswordPage";
 import EmailConfirmationPage from "./authPages/EmailConfirmationPage.js";
 import Dashboard from "../src/DashBoard/Dashboard";
+import PlayOnline from "./CanvasSelectionBoard/CreateBox/PlayOnline.jsx";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
       <Route exact path="/skribble" Component={SkribblePage} />
       <Route exact path="/verify-email" Component={EmailConfirmationPage} />
       <Route exact path="/reset-password" Component={ResetPasswordPage} />
+      <Route exact path="/selectionBoard/playOnline" Component={PlayOnline} />
     </Routes>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import {useDrawingTools} from "../../Context/DrawingToolsContext";
+import { useDrawingTools } from "../../Context/DrawingToolsContext";
 import { useHistory } from "../../Context/History";
 import ColorPalette from "../../ToolBar/ColorPalette.jsx";
 import Tools from "../../ToolBar/Tools.jsx";
@@ -19,8 +19,9 @@ import {
   drawDashedRectangle,
   drawLineDashedRectangle,
 } from "../../utils/ShapesLogic.jsx";
+import RandomWordModal from "./randomWordModal.jsx";
 
-function DrawingCanvas() {
+function DrawingCanvas({ show, setShow, closeRandomWordModal }) {
   const canvasRef = useRef(null);
   const offCanvasRef = useRef(null);
   const {
@@ -52,6 +53,8 @@ function DrawingCanvas() {
   useEffect(() => {
     saveCanvasState();
   }, []);
+
+  console.log("Show modal value=--", show);
 
   /*********************Functionality to toggle between main and virtual canvas*****************************/
 
@@ -228,6 +231,13 @@ function DrawingCanvas() {
   const checkAndDrawOnMainCanvas = () => {
     if (isCustomizable.current) {
       const { endX, endY } = EndRef.current;
+      const data = {
+        selectedTool: selectedTool,
+        roomCode: roomDetails?.roomCode,
+        selectedColor: selectedColor,
+      };
+      socket?.emit("onToolsClick", data);
+      console.log("check", data);
       drawOnMainCanvas(endX, endY);
     }
   };
@@ -366,10 +376,10 @@ function DrawingCanvas() {
     const data = {
       roomCode: roomDetails.roomCode,
       selectedTool: selectedTool,
-      x:e.nativeEvent.offsetX,
-      y:e.nativeEvent.offsetY
+      x: e.nativeEvent.offsetX,
+      y: e.nativeEvent.offsetY,
     };
-    socket.emit("mouse-down", data);
+    socket?.emit("mouse-down", data);
     if (selectedTool === "PaintBucket") {
       const imgData = context.getImageData(
         0,
@@ -391,17 +401,17 @@ function DrawingCanvas() {
     if (!drawing) return;
     const data = {
       roomCode: roomDetails.roomCode,
-      x:e.nativeEvent.offsetX,
-      y:e.nativeEvent.offsetY
+      x: e.nativeEvent.offsetX,
+      y: e.nativeEvent.offsetY,
     };
     console.log("moving");
-    socket.emit("mouse-move", data);
+    socket?.emit("mouse-move", data);
     context.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
     context.stroke();
   };
 
   const handleMouseUp = (e) => {
-    socket.emit("mouse-up", roomDetails.roomCode);
+    socket?.emit("mouse-up", roomDetails.roomCode);
     setDrawing(false);
     context.closePath();
     saveCanvasState();
@@ -421,7 +431,7 @@ function DrawingCanvas() {
       x: x,
       y: y,
     };
-    socket.emit("virtual-mouse-down", data);
+    socket?.emit("virtual-mouse-down", data);
 
     if (isCustomizable.current) {
       const { endX, endY } = EndRef.current;
@@ -454,7 +464,7 @@ function DrawingCanvas() {
       endX: endX,
       endY: endY,
     };
-    socket.emit("virtual-mouse-move", data);
+    socket?.emit("virtual-mouse-move", data);
     if (isCustomizable.current) {
       DoCursorStyling(endX, endY);
       if (CurrentRef.current.x !== -1) {
@@ -475,7 +485,7 @@ function DrawingCanvas() {
       endX: e.nativeEvent.offsetX,
       endY: e.nativeEvent.offsetY,
     };
-    socket.emit("virtual-mouse-up", data);
+    socket?.emit("virtual-mouse-up", data);
     console.log("Drawing ", drawing);
     console.log("Mouse Up", isCustomizable.current);
     const offCanvas = offCanvasRef.current;
@@ -606,6 +616,11 @@ function DrawingCanvas() {
         <ColorPalette />
         <UndoRedo isOpen={isOpen} redrawCanvas={redrawCanvas} />
       </Box>
+      <RandomWordModal
+        show={show}
+        setShow={setShow}
+        closeRandomWordModal={closeRandomWordModal}
+      />
       <canvas
         className={classes[selectedTool]}
         ref={canvasRef}

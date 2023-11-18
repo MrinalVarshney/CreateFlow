@@ -30,10 +30,10 @@ function DrawingCanvas() {
   const pointRef = useRef({ pt3X: -1 });
   const isResizing = useRef(false);
   const stillResizing = useRef(false);
-  const selectedTool = useRef("Pencil")
-  const selectedColor = useRef("black")
-  const lineWidth = useRef(1)
-  const eraserWidth = useRef(5)
+  const selectedTool = useRef("Pencil");
+  const selectedColor = useRef("black");
+  const lineWidth = useRef(1);
+  const eraserWidth = useRef(5);
 
   const { Socket } = useUserAndChats();
   const socket = Socket.current;
@@ -214,7 +214,7 @@ function DrawingCanvas() {
         ctx.strokeStyle = "white";
         ctx.lineWidth = eraserWidth.current;
       } else {
-        console.log("Selected color is",selectedColor.current)
+        console.log("Selected color is", selectedColor.current);
         ctx.strokeStyle = selectedColor.current;
         ctx.lineWidth = lineWidth.current;
       }
@@ -225,46 +225,51 @@ function DrawingCanvas() {
   // console.log("Selected color",selectedColor)
   // console.log("Selected tool",selectedTool.current)
   /************************** Main Canvas Events *****************************/
-  const handleMouseDown = useCallback((x,y) => {
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d")
-    console.log("Mouse Down selectedTool",selectedTool.current)
-    if (selectedTool.current === "PaintBucket") {
-      const imgData = context.getImageData(
-        0,
-        0,
-        canvasRef.current.width,
-        canvasRef.current.height
-      );
-      const floodFill = new FloodFill(imgData);
-      floodFill.fill(context.strokeStyle, x, y, 0);
-      context.putImageData(floodFill.imageData, 0, 0);
-    } else {
-      setDrawing(true);
-      context.beginPath();
-      context.moveTo(x, y);
-    }
-  }, [selectedTool]);
+  const handleMouseDown = useCallback(
+    (x, y) => {
+      const canvas = canvasRef.current;
+      const context = canvas.getContext("2d");
+      console.log("Mouse Down selectedTool", selectedTool.current);
+      if (selectedTool.current === "PaintBucket") {
+        const imgData = context.getImageData(
+          0,
+          0,
+          canvasRef.current.width,
+          canvasRef.current.height
+        );
+        const floodFill = new FloodFill(imgData);
+        floodFill.fill(context.strokeStyle, x, y, 0);
+        context.putImageData(floodFill.imageData, 0, 0);
+      } else {
+        setDrawing(true);
+        context.beginPath();
+        context.moveTo(x, y);
+      }
+    },
+    [selectedTool]
+  );
 
-  const handleMouseMove = useCallback((x,y) => {
-    if (!drawing) return;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
-    console.log("moving");
-    context.lineTo(x, y);
-    context.stroke();
-  }, [drawing]);
+  const handleMouseMove = useCallback(
+    (x, y) => {
+      if (!drawing) return;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext("2d");
+      console.log("moving");
+      context.lineTo(x, y);
+      context.stroke();
+    },
+    [drawing]
+  );
 
   const handleMouseUp = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     setDrawing(false);
     ctx.closePath();
-    console.log("Mouse up")
+    console.log("Mouse up");
     saveCanvasState();
-    console.log("Saved canvas state")
+    console.log("Saved canvas state");
   }, [saveCanvasState]);
-
 
   /************************ Making resizable shapes functionality ************************************/
 
@@ -321,14 +326,10 @@ function DrawingCanvas() {
       };
 
       const virtualCtx = offCanvasRef.current.getContext("2d");
-        chooseAndDrawShape(x, y, virtualCtx);
-        CurrentRef.current = { x: currX, y: currY };
+      chooseAndDrawShape(x, y, virtualCtx);
+      CurrentRef.current = { x: currX, y: currY };
     },
-    [
-      chooseAndDrawShape,
-      clearVirtualCanvas,
-      offCanvasRef,
-    ]
+    [chooseAndDrawShape, clearVirtualCanvas, offCanvasRef]
   );
 
   // socket events handling
@@ -341,19 +342,15 @@ function DrawingCanvas() {
       isCustomizable.current = false;
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
-        // ctx.strokeStyle = selectedColor;
-        console.log("inside drawonMainCanvas");
-        chooseAndDrawShape(endX, endY, ctx);
-        saveCanvasState();
+      // ctx.strokeStyle = selectedColor;
+      console.log("inside drawonMainCanvas");
+      chooseAndDrawShape(endX, endY, ctx);
+      saveCanvasState();
 
       pointRef.current = { pt3X: -1 };
       CurrentRef.current = { x: -1, y: -1 };
     },
-    [
-      chooseAndDrawShape,
-      saveCanvasState,
-      clearVirtualCanvas,
-    ]
+    [chooseAndDrawShape, saveCanvasState, clearVirtualCanvas]
   );
 
   // mini feature
@@ -386,14 +383,11 @@ function DrawingCanvas() {
       };
       pointRef.current = { pt3X: pointRef.current.pt3X + offsetX };
       const virtualCtx = offCanvasRef.current.getContext("2d");
-        chooseAndDrawShape(endX + offsetX, endY + offsetY, virtualCtx);
+      chooseAndDrawShape(endX + offsetX, endY + offsetY, virtualCtx);
 
       CurrentRef.current = { x: currX, y: currY };
     },
-    [
-      chooseAndDrawShape,
-      clearVirtualCanvas,
-    ]
+    [chooseAndDrawShape, clearVirtualCanvas]
   );
 
   /************************* Customising Events ****************************/
@@ -411,7 +405,7 @@ function DrawingCanvas() {
         MakeResizable(endX, endY);
       }
     },
-    [ MakeDraggable, MakeResizable]
+    [MakeDraggable, MakeResizable]
   );
 
   /************************** Virtual Canvas Events *****************************/
@@ -484,7 +478,6 @@ function DrawingCanvas() {
 
         chooseAndDrawShape(endX, endY, virtualCtx);
         addCustomizability(virtualCtx);
-
       }
     },
     [addCustomizability, chooseAndDrawShape, drawing, isDragging, selectedTool]
@@ -506,59 +499,64 @@ function DrawingCanvas() {
     }
   }, [redo, redrawCanvas]);
 
+  const changeSelectedColor = useCallback(
+    (color) => {
+      selectedColor.current = color;
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      ctx.strokeStyle = color;
+    },
+    [selectedColor]
+  );
 
-  const changeSelectedColor = useCallback((color) => {
-    selectedColor.current = color
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    ctx.strokeStyle = color;
-  },[selectedColor]);
-
-  const selectTool = useCallback((data)=>{
-    const {tool,width} = data
-    selectedTool.current=tool
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    console.log(width,"width")
-    if(tool==="Eraser"){
-      ctx.strokeStyle = "white";
-      ctx.lineWidth = width;
-    }
-    else{
-      console.log("Selected color is",selectedColor.current)
-      ctx.strokeStyle = selectedColor.current;
-      ctx.lineWidth=width
-    }
-    },[selectedTool])
+  const selectTool = useCallback(
+    (data) => {
+      const { tool, width } = data;
+      selectedTool.current = tool;
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      console.log(width, "width");
+      if (tool === "Eraser") {
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = width;
+      } else {
+        console.log("Selected color is", selectedColor.current);
+        ctx.strokeStyle = selectedColor.current;
+        ctx.lineWidth = width;
+      }
+    },
+    [selectedTool]
+  );
 
   useEffect(() => {
     // shape and color change handling
     socket?.on("color-change", (color) => {
-      console.log("Color-Changed to",color)
+      console.log("Color-Changed to", color);
       changeSelectedColor(color);
     });
-    socket?.on("selected-tool",(data)=>{
-      console.log("Changing selected tool to",data)
-      selectTool(data)
-    })
+    socket?.on("selected-tool", (data) => {
+      console.log("Changing selected tool to", data);
+      selectTool(data);
+    });
+
     return () => {
       socket?.off("color-change");
       socket?.off("shapeChange");
-      socket?.off("selected-tool")
+      // socket?.off("selected-tool");
     };
-  }, [socket, drawOnMainCanvas, changeSelectedColor,selectTool]);
+  }, [socket, drawOnMainCanvas, changeSelectedColor, selectTool]);
 
   useEffect(() => {
     socket?.on("mouse-down", (data) => {
       const x = data.x;
       const y = data.y;
-      handleMouseDown(x,y)
+      handleMouseDown(x, y);
     });
     socket?.on("mouse-move", (data) => {
       //   console.log("mouse-move", data);
       const x = data.x;
       const y = data.y;
-      handleMouseMove(x,y);
+      handleMouseMove(x, y);
     });
     socket?.on("mouse-up", () => {
       handleMouseUp();
@@ -605,16 +603,23 @@ function DrawingCanvas() {
       console.log("redoing");
       handlesharedRedo();
     });
+    socket?.on("onToolsClick", (data) => {
+      console.log("hhhh", data);
+      changeSelectedColor(data.selectedColor);
+      selectedTool.current = data.selectedTool;
+      checkAndDrawOnMainCanvas();
+    });
 
     return () => {
       socket?.off("mouse-up");
-      socket?.off("mouse-down",handleMouseDown)
+      socket?.off("mouse-down", handleMouseDown);
       socket?.off("mouse-move");
       socket?.off("virtual-mouse-down");
       socket?.off("virtual-mouse-up");
       socket?.off("virtual-mouse-move");
       socket?.off("undo");
       socket?.off("redo");
+      socket?.off("onToolsClick");
     };
   }, [
     socket,
@@ -627,6 +632,9 @@ function DrawingCanvas() {
     handlesharedUndo,
     handlesharedRedo,
     selectedColor,
+    selectTool,
+    checkAndDrawOnMainCanvas,
+    changeSelectedColor,
   ]);
 
   return (

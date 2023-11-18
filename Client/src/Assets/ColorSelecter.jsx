@@ -2,13 +2,22 @@ import { Paper } from "@mui/material";
 import React, { useState } from "react";
 import { SketchPicker } from "react-color";
 import { useDrawingTools } from "../Context/DrawingToolsContext";
+import { useUserAndChats } from "../Context/userAndChatsProvider";
 
 function ColorSelector() {
   const { selectedColor, setSelectedColor } = useDrawingTools();
   const [showColorPicker, setShowColorPicker] = useState(false);
 
+  const { playingGameRef, Socket, roomDetails } = useUserAndChats();
+  const socket = Socket.current;
   const handleColorChange = (newColor) => {
-    setSelectedColor(newColor.hex);
+    const color = newColor.hex;
+    setSelectedColor(color);
+    if (playingGameRef.current) {
+      const roomCode = roomDetails.roomCode;
+      const data = { roomCode, color };
+      socket?.emit("color-change", data);
+    }
   };
 
   const toggleColorPicker = () => {
