@@ -12,6 +12,9 @@ export const UserAndChatsProvider = ({ children }) => {
   const [chats, setChats] = useState([]);
   const navigate = useNavigate();
   const [roomDetails, setRoomDetails] = useState(null);
+  const [rounds, setRounds] = useState(2);
+  const [time, setTime] = useState(30);
+  const [players, setPlayers] = useState(2);
   const playingGameRef = useRef(false);
   const Socket = useRef(null);
 
@@ -40,12 +43,15 @@ export const UserAndChatsProvider = ({ children }) => {
       if (currentPath === "/" || currentPath === "/register") {
         navigate("/dashboard");
       }
-    } else if (currentPath === "/register" || currentPath === "/reset-password/") {
+    } else if (
+      currentPath === "/register" ||
+      currentPath === "/reset-password/"
+    ) {
       // Allow access to the register page
       return;
     } else {
       // Redirect to the login page
-      console.log(currentPath)
+      console.log(currentPath);
       navigate("/");
     }
   }, [navigate]);
@@ -81,6 +87,12 @@ export const UserAndChatsProvider = ({ children }) => {
     connectWithSocketServer,
     Socket,
     playingGameRef,
+    rounds,
+    setRounds,
+    time,
+    setTime,
+    players,
+    setPlayers,
   };
 
   return (

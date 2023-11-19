@@ -32,7 +32,8 @@ const useStyles = makeStyles({
 });
 
 const RandomWordModal = ({ show, setShow, closeRandomWordModal }) => {
-  const { Socket, roomDetails } = useUserAndChats();
+  const { Socket, roomDetails, rounds, time } = useUserAndChats();
+  console.log("time in random", time);
   const socket = Socket.current;
   const classes = useStyles();
   const [randomWords, setRandomWords] = useState([]);
@@ -70,14 +71,25 @@ const RandomWordModal = ({ show, setShow, closeRandomWordModal }) => {
 
     setTimeout(() => {
       const player = randomPlayer();
-      console.log("player random", player);
+      console.log("player random", player, time);
+
+      let roundsPlayed =
+        parseInt(localStorage.getItem("roundsPlayed"), 10) || 1;
+
+      console.log("roundsPlayed", roundsPlayed);
+      localStorage.setItem("roundsPlayed", roundsPlayed + 1);
+      if (roundsPlayed >= parseInt(rounds)) {
+        console.log("game finished");
+        localStorage.removeItem("roundsPlayed");
+        return;
+      }
 
       const data = {
         roomCode: roomDetails?.roomCode,
         player: player,
       };
       socket?.emit("reload", data);
-    }, 10000);
+    }, time * 1000);
     setRandomWords([]);
   };
   console.log(selectedWord);
