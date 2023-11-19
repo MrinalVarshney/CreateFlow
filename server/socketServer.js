@@ -32,9 +32,9 @@ const registerSocketServer = (server) => {
       newConnectionHandler(socket, userId, callback);
     });
 
-    socket.on("play-random",(data)=>{
-      handlePlayRandom(socket,data);
-    })
+    socket.on("play-random", (data) => {
+      handlePlayRandom(socket, data);
+    });
 
     socket.on("room-create", (data) => {
       const roomCode = uuidv4();
@@ -107,11 +107,17 @@ const registerSocketServer = (server) => {
       io.to(data.roomCode).emit("onToolsClick", data);
     });
     socket.on("wordSelected", (data) => {
+      console.log("wordfjflksfj", data);
+      const usersInRoom = io.sockets.adapter.rooms.get(data.roomCode);
+      console.log("usersInRoom ", usersInRoom);
       io.to(data.roomCode).emit("word-Selected", data.word);
     });
     socket.on("reload", (data) => {
       console.log("rmC", data.roomCode);
       io.to(data.roomCode).emit("reload", data);
+    });
+    socket.on("setTimer", (data) => {
+      io.to(data.roomCode).emit("set-Timer", data);
     });
   });
 };
