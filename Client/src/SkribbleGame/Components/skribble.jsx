@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Grid, Box, Paper, Input, Button } from "@mui/material";
 import { useUserAndChats } from "../../Context/userAndChatsProvider";
 import SendIcon from "@mui/icons-material/Send";
@@ -30,6 +30,7 @@ function Skribble() {
   const [show, setShow] = useState(false);
   const [startTimer, setStartTimer] = useState(false);
   const [message, setMessage] = useState("");
+  const messageContainerRef = useRef(null);
   console.log(randomDrawer);
   const socket = Socket.current;
   if (socket) {
@@ -52,6 +53,12 @@ function Skribble() {
 
     return similarity / len;
   }
+  useEffect(() => {
+    if (messageContainerRef.current) {
+      messageContainerRef.current.scrollTop =
+        messageContainerRef.current.scrollHeight;
+    }
+  }, [chats]);
 
   useEffect(() => {
     if (!socket) {
@@ -67,7 +74,7 @@ function Skribble() {
       const data = {
         roomCode: roomDetails?.roomCode,
         time: time,
-        rounds: rounds,
+        rounds: roomDetails?.participants.length,
         players: players,
       };
       if (user?._id === roomDetails?.roomCreator.userId) {
@@ -127,7 +134,6 @@ function Skribble() {
   useEffect(() => {
     socket?.on("new-message", (data) => {
       console.log("new-message", data);
-      console.log(chats);
       const guess_message = user.username + " has guessed!";
       var message = data.message;
       if (data.userId === user._id) {
@@ -305,7 +311,13 @@ function Skribble() {
         <Box p={2}>
           <Paper style={{ height: "77vh" }}>
             <div
-              style={{ height: "100%", overflowY: "auto", marginBottom: "5px" }}
+              ref={messageContainerRef}
+              style={{
+                height: "100%",
+                overflowY: "auto",
+                overflowX: "hidden",
+                marginBottom: "5px",
+              }}
             >
               {chats &&
                 chats.map((m) => (
@@ -315,6 +327,8 @@ function Skribble() {
                       borderBottom: "0.5px solid #b8bcbd",
                       display: "flex",
                       margin: "1px",
+                      wordWrap: "break-word",
+                      overflowWrap: "break-word",
                     }}
                   >
                     <h5

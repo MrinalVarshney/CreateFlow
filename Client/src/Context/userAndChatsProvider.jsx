@@ -12,9 +12,9 @@ export const UserAndChatsProvider = ({ children }) => {
   const [chats, setChats] = useState([]);
   const navigate = useNavigate();
   const [roomDetails, setRoomDetails] = useState(null);
-  const [rounds, setRounds] = useState(2);
-  const [time, setTime] = useState(30);
-  const [players, setPlayers] = useState(2);
+  const [rounds, setRounds] = useState(null);
+  const [time, setTime] = useState(15);
+  const [players, setPlayers] = useState(null);
   const playingGameRef = useRef(false);
   const Socket = useRef(null);
 

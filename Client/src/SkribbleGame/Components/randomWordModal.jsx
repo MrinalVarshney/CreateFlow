@@ -68,15 +68,18 @@ const RandomWordModal = ({ show, setShow, closeRandomWordModal }) => {
 
     socket?.emit("wordSelected", data);
     closeRandomWordModal();
-
+    let interval = setInterval(() => {
+      socket?.emit("timer", roomDetails?.roomCode);
+    }, 1000);
+    console.log("interval", interval);
     setTimeout(() => {
       const player = randomPlayer();
       console.log("player random", player, time);
-
+      clearInterval(interval);
       let roundsPlayed =
         parseInt(localStorage.getItem("roundsPlayed"), 10) || 1;
 
-      console.log("roundsPlayed", roundsPlayed);
+      console.log("roundsPlayed", roundsPlayed, "out of ", rounds);
       localStorage.setItem("roundsPlayed", roundsPlayed + 1);
       if (roundsPlayed >= parseInt(rounds)) {
         console.log("game finished");
