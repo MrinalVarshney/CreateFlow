@@ -1,5 +1,5 @@
 const User = require("../../models/userSchema");
-const {generateToken} = require("../../utils/generateToken");
+const { generateToken } = require("../../utils/generateToken");
 
 const postLogin = async (req, res) => {
   const { mail, password } = req.body;
@@ -7,12 +7,10 @@ const postLogin = async (req, res) => {
     const user = await User.findOne({ email: mail.toLowerCase() });
     if (!user) {
       res.status(400).send("Email not registered");
-    }
-    else if(user.isUserLogin){
-      res.status(400).send("Account already logged in from another device")
-    }
-    else if (user && (await user.matchPassword(password))) {
-      await user.updateOne({isUserLogin:true});
+    } else if (user.isUserLogin) {
+      res.status(400).send("Account already logged in from another device");
+    } else if (user && (await user.matchPassword(password))) {
+      await user.updateOne({ isUserLogin: true });
       res.status(201).json({
         _id: user._id,
         username: user.username,

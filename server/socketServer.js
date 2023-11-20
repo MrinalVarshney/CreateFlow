@@ -113,11 +113,14 @@ const registerSocketServer = (server) => {
       io.to(data.roomCode).emit("word-Selected", data.word);
     });
     socket.on("reload", (data) => {
-      console.log("rmC", data.roomCode);
+      // console.log("rmC", data.roomCode);
       io.to(data.roomCode).emit("reload", data);
     });
     socket.on("setTimer", (data) => {
       io.to(data.roomCode).emit("set-Timer", data);
+    });
+    socket.on("timer", (roomCode) => {
+      io.to(roomCode).emit("timer");
     });
   });
 };
