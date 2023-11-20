@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useUserAndChats } from "../../Context/userAndChatsProvider";
 import Table from "../../shared/Components/Table";
 import Carousel from "../../shared/Components/Carousel";
+import HostInput from "../../shared/Components/HostInput";
 
 const useStyles = makeStyles({
   modal: {
@@ -44,6 +45,9 @@ function PlayOnline() {
     playingGameRef,
     connectWithSocketServer,
     setShowTimer,
+    setRounds,
+    setPlayers,
+    setTime,
   } = useUserAndChats();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
@@ -51,6 +55,10 @@ function PlayOnline() {
   const [joinRoomCode, setJoinRoomCode] = useState("");
   const [isUserJoined, setIsUserJoined] = useState(false);
   const navigate = useNavigate();
+
+  const timeSlots = ["30", "60", "90", "120"];
+  const roundSlots = ["1", "2", "3", "4", "5", "6"];
+  const playerSlots = ["2", "3", "4", "5", "6"];
   useEffect(() => {
     connectWithSocketServer();
   }, []);
@@ -294,23 +302,27 @@ function PlayOnline() {
               >
                 <h1>Host: {HostroomCode.host}</h1>
                 <h3>roomId : {HostroomCode.roomCode}</h3>
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <label>rounds:</label>
-                  <input style={{ width: "50px" }} type="number" min={2} />
-                  <label>time period:</label>
-                  <input
-                    style={{ width: "50px" }}
-                    type="number"
-                    min={30}
-                    max={120}
-                  />
-                  <label>players:</label>
-                  <input
-                    style={{ width: "50px" }}
-                    type="number"
-                    min={2}
-                    max={5}
-                  />
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    width: "70%",
+                    gap: "2%",
+                  }}
+                >
+                  <div style={{ display: "flex", width: "33%" }}>
+                    <h4>rounds:</h4>
+                    <HostInput slots={roundSlots} setValue={setRounds} />
+                  </div>
+                  <div style={{ display: "flex", width: "33%" }}>
+                    <h4>time:</h4>
+                    <HostInput slots={timeSlots} setValue={setTime} />
+                  </div>
+                  <div style={{ display: "flex", width: "33%" }}>
+                    <h4>players:</h4>
+                    <HostInput slots={playerSlots} setValue={setPlayers} />
+                  </div>
                 </div>
                 <h3>Users Joined : {roomDetails?.participants.length}</h3>
                 <Table

@@ -17,12 +17,20 @@ function Skribble() {
     setRoomDetails,
     connectWithSocketServer,
     playingGameRef,
-    setShowTimer
+    setShowTimer,
+    time,
+    setTime,
+    rounds,
+    setRounds,
+    players,
+    setPlayers,
   } = useUserAndChats();
 
   const [selectedWord, setSelectedWord] = useState("");
   const [randomDrawer, setRandomDrawer] = useState(null);
   const [show, setShow] = useState(false);
+  const [startTimer, setStartTimer] = useState(false);
+  const [message, setMessage] = useState("");
   console.log(randomDrawer);
   const socket = Socket.current;
   if (socket) {
@@ -32,6 +40,18 @@ function Skribble() {
 
   function closeRandomWordModal() {
     setShow(false);
+  }
+  function calculateSimilarity(str1, str2) {
+    const len = Math.max(str1.length, str2.length);
+    let similarity = 0;
+
+    for (let i = 0; i < len; i++) {
+      if (str1[i] && str2[i] && str1[i] === str2[i]) {
+        similarity++;
+      }
+    }
+
+    return similarity / len;
   }
 
   useEffect(() => {
@@ -43,16 +63,27 @@ function Skribble() {
     playingGameRef.current = true;
     setRoomDetails(roomDetails);
     setChats(chats);
-    if (!randomDrawer) setShow(true);
+    if (!randomDrawer) {
+      setShow(true);
+      const data = {
+        roomCode: roomDetails?.roomCode,
+        time: time,
+        rounds: rounds,
+        players: players,
+      };
+      if (user?._id === roomDetails?.roomCreator.userId) {
+        console.log("emitted timer");
+        socket?.emit("setTimer", data);
+      }
+    }
+
+    localStorage.removeItem("roundsPlayed");
     setRandomDrawer(roomDetails?.roomCreator);
   }, []);
 
-  const [message, setMessage] = useState("");
   const handleSend = () => {
     console.log(message, user);
-    if (message === selectedWord) {
-      console.log("guessed");
-    }
+
     const data = {
       userId: user?._id,
       userName: user?.username,
@@ -133,10 +164,12 @@ function Skribble() {
       console.log("new-message", data);
       console.log(chats);
       const guess_message = user.username + " has guessed!";
-      console.log(guess_message);
       var message = data.message;
-      if (data.userId === user._id && message === guess_message) {
-        message = "Great! You guessed it right!";
+      if (data.userId === user._id) {
+        if (message === guess_message) message = "Great! You guessed it right!";
+        else if (calculateSimilarity(message, selectedWord) > 0.5) {
+          message = "You are close! try again";
+        }
       }
       const newChat = { user: data.userName, message: message };
       if (chats) {
@@ -169,6 +202,8 @@ function Skribble() {
       navigate("/selectionBoard");
     });
     socket?.on("word-Selected", (word) => {
+      console.log("wordSelected", word);
+      setStartTimer(true);
       setSelectedWord(word);
     });
     socket?.on("reload", (data) => {
@@ -180,6 +215,11 @@ function Skribble() {
     socket?.on("game-started",()=>{  // For starting random game
        startRandomGame()
     })
+    socket?.on("set-Timer", (data) => {
+      setTime(data.time);
+      setRounds(data.rounds);
+      setPlayers(data.players);
+    });
     return () => {
       socket?.off("new-message");
       socket?.off("user-left");
@@ -188,6 +228,7 @@ function Skribble() {
       socket?.off("word-Selected");
       socket?.off("reload");
       socket?.off("game-started")
+      socket?.off("set-Timer");
     };
 
   }, [
@@ -195,7 +236,9 @@ function Skribble() {
     startRandomGame,
     setShowTimer,
     roomDetails,
-    user,
+    setPlayers,
+    selectedWord,
+    setRounds,
     socket,
     chats,
     setChats,
@@ -204,6 +247,9 @@ function Skribble() {
     sendRoomMessage,
     handleEnd,
     randomDrawer,
+    user,
+    time,
+    setTime,
     // handleFilterParticpiants,
   ]);
 
@@ -239,7 +285,7 @@ function Skribble() {
       >
         <Box>
           <div style={{ display: "flex" }}>
-            <CountdownTimer />
+            <CountdownTimer startTimer={startTimer} />
             <div style={{ width: "auto", marginLeft: "70%" }}>
               <Button variant="outlined" color="error" onClick={handleLeave}>
                 Leave
@@ -318,36 +364,40 @@ function Skribble() {
       >
         <Box p={2}>
           <Paper style={{ height: "77vh" }}>
-            {chats &&
-              chats.map((m) => (
-                <p
-                  key={m.message}
-                  style={{
-                    borderBottom: "0.5px solid #b8bcbd",
-                    display: "flex",
-                    margin: "1px",
-                  }}
-                >
-                  <h5
-                    style={{
-                      margin: "0px",
-                      paddingTop: "12px",
-                      width: "auto",
-                    }}
-                  >
-                    {m.user}:
-                  </h5>
+            <div
+              style={{ height: "100%", overflowY: "auto", marginBottom: "5px" }}
+            >
+              {chats &&
+                chats.map((m) => (
                   <p
+                    key={m.message}
                     style={{
-                      width: "auto",
-                      margin: "5px 0px",
-                      padding: "2px",
+                      borderBottom: "0.5px solid #b8bcbd",
+                      display: "flex",
+                      margin: "1px",
                     }}
                   >
-                    {m.message}
+                    <h5
+                      style={{
+                        margin: "0px",
+                        paddingTop: "12px",
+                        width: "auto",
+                      }}
+                    >
+                      {m.user}:
+                    </h5>
+                    <p
+                      style={{
+                        width: "auto",
+                        margin: "5px 0px",
+                        padding: "2px",
+                      }}
+                    >
+                      {m.message}
+                    </p>
                   </p>
-                </p>
-              ))}
+                ))}
+            </div>
           </Paper>
         </Box>
         <Box p={1}>
