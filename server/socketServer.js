@@ -6,6 +6,7 @@ const endGameHandler = require("./socketHandlers/CommonEvents/endGameHandler");
 const roomLeaveHandler = require("./socketHandlers/CommonEvents/roomLeaveHandler");
 const serverStore = require("./serverStore");
 const newConnectionHandler = require("./socketHandlers/CommonEvents/newConnectionHandler");
+const  handlePlayRandom = require("./socketHandlers/RandomRoomSpecificEvents/handlePlayRandom");
 const { v4: uuidv4 } = require("uuid");
 
 const registerSocketServer = (server) => {
@@ -33,6 +34,7 @@ const registerSocketServer = (server) => {
     });
 
     socket.on("play-random",(data)=>{
+      console.log("play-random request")
       handlePlayRandom(socket,data);
     })
 
@@ -48,12 +50,13 @@ const registerSocketServer = (server) => {
     });
 
     socket.on("leave-room", (data) => {
+      console.log("USer leaving",data)
       roomLeaveHandler(data);
     });
 
-    socket.on("start-game", (userId) => {
+    socket.on("start-game",(data) => {
       console.log("game-started");
-      startGameHandler(socket, userId);
+      startGameHandler(socket, data);
     });
     socket.on("end-game", (userId) => {
       endGameHandler(userId);

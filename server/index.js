@@ -8,6 +8,7 @@ const authRoutes = require("./routes/authRoutes");
 const cookieSession = require("cookie-session")
 const passport = require("./config/passport-config");
 const googleAuthRoutes = require("./routes/googleAuthRoutes")
+const canvasRoutes = require("./routes/canvasRoutes")
 
 
 dotenv.config();
@@ -34,6 +35,7 @@ app.use(passport.session())
 
 app.use("/api/user",authRoutes)
 app.use("/auth/google",googleAuthRoutes)
+app.use("/api/canvas",canvasRoutes)
 
 app.get("/", (req, res) => {
   res.send("Hello World");

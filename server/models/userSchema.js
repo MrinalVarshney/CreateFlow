@@ -11,6 +11,8 @@ const userSchema = mongoose.Schema(
     verified:{type:Boolean,default:false},
     signedUpWithCustomMethod:{type:Boolean,default:false},
     isUserLogin:{type:Boolean,default:false},
+    createdCanvases: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Canvas' }],
+    collaboratedCanvases: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Canvas' }],
   },
   {
     timestamps: true,

@@ -8,9 +8,9 @@ const postLogin = async (req, res) => {
     if (!user) {
       res.status(400).send("Email not registered");
     }
-    else if(user.isUserLogin){
-      res.status(400).send("Account already logged in from another device")
-    }
+    // else if(user.isUserLogin){
+    //   res.status(400).send("Account already logged in from another device")
+    // }
     else if (user && (await user.matchPassword(password))) {
       await user.updateOne({isUserLogin:true});
       res.status(201).json({
