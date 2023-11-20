@@ -1,28 +1,28 @@
 .Inner-container {
     display: flex;
     height: 100vh;
+    margin-top:0px;
+    padding-top:0px;
   }
   
   .left-container {
     width: 30%;
     background-color: transparent;
     box-sizing: border-box;
-    padding: 20px;
   }
   
   .right-container {
     width: 70%;
     background-color: transparent;
     box-sizing: border-box;
-    padding: 20px;
-    justify-content: center;
     display:flex;
+    flex-direction: column;
   }
 
   .top-box {
-    height: 50%;
+    height: 60%;
     background-color: transparent;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
   }
 
   /* Middle Box */
