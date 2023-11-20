@@ -17,6 +17,7 @@ export const UserAndChatsProvider = ({ children }) => {
   const [players, setPlayers] = useState(null);
   const playingGameRef = useRef(false);
   const Socket = useRef(null);
+  const [showTimer,setShowTimer] = useState(false);
 
   useEffect(() => {
     if (roomDetails) {
@@ -87,6 +88,8 @@ export const UserAndChatsProvider = ({ children }) => {
     connectWithSocketServer,
     Socket,
     playingGameRef,
+    showTimer,
+    setShowTimer,
     rounds,
     setRounds,
     time,

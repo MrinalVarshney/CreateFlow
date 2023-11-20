@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import "./Content.css";
-import { Grid } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import AppGif from "../../Assets/GIF/App.gif";
 import AppImg from "../../Assets/Images/App.jpg";
+import Navbar from "./Navbar";
 
 const YourComponent = () => {
   const [playedOnce, setPlayedOnce] = useState(false);
@@ -11,6 +12,13 @@ const YourComponent = () => {
       if (!playedOnce) setPlayedOnce(true);
     }, [4000]);
   };
+  const navigate = useNavigate();
+  const GotoGamePage = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate("/PlayOnline")
+  }
+
   return (
     <div className="Inner-container">
       <div className="left-container">
@@ -33,7 +41,7 @@ const YourComponent = () => {
 
         <div class="middle-box">
           <div className="box sideBoxes">
-            <div className="playText">Play Skribble</div>
+            <div className="playText" onClick={GotoGamePage}>Play Skribble</div>
           </div>
         </div>
 
@@ -45,6 +53,7 @@ const YourComponent = () => {
       </div>
 
       <div className="right-container">
+      <Navbar />
       <div className="welcome-page">
         <h2 className="welcome-title">Welcome, Doodlers!</h2>
         <p className="welcome-text">

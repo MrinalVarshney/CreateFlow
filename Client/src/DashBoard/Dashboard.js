@@ -22,7 +22,6 @@ const Dashboard = () => {
 
   return (
     <div className="container" >
-      <Navbar />
       <Content />
       <ParticleJsBackground />
     </div>

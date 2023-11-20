@@ -44,6 +44,7 @@ function PlayOnline() {
     setRoomDetails,
     playingGameRef,
     connectWithSocketServer,
+    setShowTimer,
     setRounds,
     setPlayers,
     setTime,
@@ -53,6 +54,7 @@ function PlayOnline() {
   const [HostroomCode, setHostRoomCode] = useState({ host: "", roomCode: "" });
   const [joinRoomCode, setJoinRoomCode] = useState("");
   const [isUserJoined, setIsUserJoined] = useState(false);
+  const navigate = useNavigate();
 
   const timeSlots = ["30", "60", "90", "120"];
   const roundSlots = ["1", "2", "3", "4", "5", "6"];
@@ -62,7 +64,47 @@ function PlayOnline() {
   }, []);
   const socket = Socket?.current;
 
-  const navigate = useNavigate();
+  const createNewRandomRoom = useCallback(
+    (room) => {
+      console.log("random-room-created", room);
+      if (room.roomCreator.userId === user._id) {
+        setHostRoomCode({
+          host: room.roomCreator.userName,
+          roomCode: room.roomCode,
+        });
+      }
+      console.log("Room", room);
+      setRoomDetails(room);
+      navigate("/skribble");
+    },
+    [navigate, setRoomDetails, user]
+  );
+
+  const addInRandomRoom = (player) => {
+    if(player.userId === user._id) return;
+    console.log("random-user-join", player);
+    const roomDetails = JSON.parse(localStorage.getItem("roomDetails"));
+    console.log(roomDetails?.participants);
+
+    const participants = [...roomDetails.participants, player];
+    const updatedRoom = { ...roomDetails, participants };
+    console.log(updatedRoom);
+    setRoomDetails(updatedRoom);
+  };
+
+  useEffect(() => {
+    socket?.on("random-room-created", (room) => {
+      createNewRandomRoom(room);
+    });
+    socket?.on("random-room-joined", (room) => {
+      createNewRandomRoom(room);
+    });
+    return () => {
+      socket?.off("random-room-created");
+      socket?.off("random-room-joined");
+    };
+  }, [socket, createNewRandomRoom]);
+
   const closeModal = () => {
     setIsModalOpen(false);
   };
@@ -71,7 +113,18 @@ function PlayOnline() {
     setIsModalOpen(false);
   };
 
-  const playRandom = () => {};
+  const playRandom = () => {
+    console.log("play-random", data);
+    socket?.emit("play-random", data);
+    socket?.on("random-user-join", (player) => {
+      console.log("random-user-join", player);
+      addInRandomRoom(player);
+    });
+    return ()=>{
+      socket?.off("random-user-join")
+    }
+  };
+
   const join = () => {
     console.log("joining", joinRoomCode);
     joinRoom(joinRoomCode);
@@ -98,6 +151,11 @@ function PlayOnline() {
       setRoomDetails(room);
     });
   };
+  const startGame = useCallback(() => {
+    setShowTimer(true);
+    playingGameRef.current = true;
+    navigate("/skribble");
+  }, [setShowTimer, navigate, playingGameRef]);
 
   const handleUserJoined = useCallback(
     (userData) => {
@@ -118,15 +176,14 @@ function PlayOnline() {
     });
     socket?.on("game-started", () => {
       console.log("Starting game");
-      playingGameRef.current = true;
-      navigate("/skribble");
+      startGame();
     });
 
     return () => {
       socket?.off("user-joined", handleUserJoined);
-      socket?.off("game-started");
+      socket?.off("game-started", startGame);
     };
-  }, [socket, handleUserJoined, navigate, playingGameRef]);
+  }, [socket, handleUserJoined, navigate, playingGameRef, startGame]);
 
   const joinRoom = (roomCode) => {
     console.log("joined the room");
@@ -149,13 +206,25 @@ function PlayOnline() {
 
   const start = () => {
     setIsModalOpen(false);
-    socket?.emit("start-game", user._id);
+    const data = {
+      roomCode: roomDetails.roomCode,
+      player: roomDetails.roomCreator,
+    };
+    const start_data = {
+      roomCode: roomDetails.roomCode,
+      roomType: roomDetails.roomType,
+    };
+
+    console.log("from pl", data);
+    socket?.emit("reload", data);
+    socket?.emit("start-game", start_data);
   };
 
   const hostUser = {
     userId: roomDetails?.roomCreator.userId,
     userName: roomDetails?.roomCreator.userName,
   };
+  console.log("Room details", roomDetails);
 
   return (
     <div

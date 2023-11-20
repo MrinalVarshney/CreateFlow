@@ -3,6 +3,7 @@ const mongoose = require("mongoose")
 const canvasSchema = mongoose.Schema(
     {
         canvasName: {type: String, required: true},
+        data: {type: String, required: true},
         contributors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     },
     {
@@ -12,4 +13,4 @@ const canvasSchema = mongoose.Schema(
 
 const Canvas = mongoose.model("Canvas", canvasSchema);
 
-export default Canvas;
+module.exports = Canvas

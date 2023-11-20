@@ -11,7 +11,6 @@ const uuidv4 = require("uuid").v4;
 const checkRandomRoomAvailable = () => {
   for (let i = 0; i < randomRooms.length; i++) {
     if (
-      randomRooms[i].entryOpen &&
       randomRooms[i].participants.length < randomRooms[i].maxParticipants
     ) {
       return randomRooms[i];
@@ -35,12 +34,13 @@ const createNewRandomRoom = (data) => {
     ],
     roomCode,
     roomType: "random",
-    maxParticipants: 10,
-    rounds: 3,
-    duration: 60,
-    entryOpen: true,
+    maxParticipants: 5,
+    rounds: 5,
+    duration: 80,
+    isGameStarted: false
   };
   randomRooms.push(newRandomRoom);
+  roomCodeMap.set(data.userId, roomCode);
   return newRandomRoom;
 };
 
@@ -50,6 +50,8 @@ const pushInAvailableRandomRoom = (data, roomCode) => {
     userId: data.userId,
     userName: data.userName,
   });
+  roomCodeMap.set(data.userId, roomCode);
+  return room;
 };
 
 const removerUserFromRandomRoom = (userId,roomCode) =>{
@@ -61,6 +63,7 @@ const removerUserFromRandomRoom = (userId,roomCode) =>{
   if(roomCodeMap.has(userId)){
     roomCodeMap.delete(userId)
   }
+  return room;
 }
 
 const mapUserToRoomCode = (userId, roomCode) => {
@@ -122,6 +125,14 @@ const addNewActiveRoom = ({ socketId, data, roomCode }) => {
   return newActiveRoom;
 };
 
+const startRandomGame = (roomCode)=>{
+  const room = randomRooms.find((room)=> room.roomCode === roomCode)
+  if(room){
+    console.log("starting random game")
+    room.isGameStarted = true;
+  }
+}
+
 const setSocketServerInstance = (ioInstance) => {
   io = ioInstance;
 };
@@ -179,6 +190,7 @@ const leaveActiveRoom = (roomCode, userId) => {
   if (roomCodeMap.has(userId)) {
     roomCodeMap.delete(userId);
   }
+  return room;
 };
 
 module.exports = {
@@ -200,4 +212,5 @@ module.exports = {
   createNewRandomRoom,
   pushInAvailableRandomRoom,
   removerUserFromRandomRoom,
+  startRandomGame
 };
