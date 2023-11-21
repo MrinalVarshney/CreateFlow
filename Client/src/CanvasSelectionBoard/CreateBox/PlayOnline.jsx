@@ -56,7 +56,7 @@ function PlayOnline() {
   const [isUserJoined, setIsUserJoined] = useState(false);
   const navigate = useNavigate();
 
-  const timeSlots = [15, 20, 30];
+  const timeSlots = [30, 60, 90, 120, 200];
   const roundSlots = [1, 2, 3, 4, 5, 6];
   const difficultySlots = ["Easy", "Medium", "Hard"];
 
