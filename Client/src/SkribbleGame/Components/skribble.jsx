@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { Grid, Box, Paper, Input, Button } from "@mui/material";
+import { Grid, Box, Paper, Input, Button, Modal } from "@mui/material";
 import { useUserAndChats } from "../../Context/userAndChatsProvider";
 import SendIcon from "@mui/icons-material/Send";
 import { useNavigate } from "react-router-dom";
 import SkribbleCanvas from "./skribbleCanvas";
 import SharedCanvas from "./SharedCanvas";
 import CountdownTimer from "../../shared/Components/CountDownTimer";
+import LeaderBoard from "../../shared/Components/LeaderBoard";
 
 function Skribble() {
   const {
@@ -22,8 +23,8 @@ function Skribble() {
     setTime,
     rounds,
     setRounds,
-    players,
-    setPlayers,
+    difficulty,
+    setDifficulty,
   } = useUserAndChats();
 
   const [selectedWord, setSelectedWord] = useState("");
@@ -31,7 +32,10 @@ function Skribble() {
   const [show, setShow] = useState(false);
   const [startTimer, setStartTimer] = useState(false);
   const [message, setMessage] = useState("");
+  const [showLeaderBoard, setShowLeaderBoard] = useState(false);
+  const scoreCard = useRef(null);
   const messageContainerRef = useRef(null);
+
   console.log(randomDrawer);
   const socket = Socket.current;
   if (socket) {
@@ -62,6 +66,21 @@ function Skribble() {
   }, [chats]);
 
   useEffect(() => {
+    const players = [];
+    roomDetails?.participants.map((participant) => {
+      const data = {
+        userName: participant.userName,
+        userId: participant.userId,
+        scores: 0,
+      };
+      players.push(data);
+    });
+    // console.log("player for scoreCard", players);
+    scoreCard.current = players;
+  }, []);
+  // console.log("scoreCard", scoreCard.current);
+
+  useEffect(() => {
     if (!socket) {
       connectWithSocketServer();
     }
@@ -75,8 +94,8 @@ function Skribble() {
       const data = {
         roomCode: roomDetails?.roomCode,
         time: time,
-        rounds: roomDetails?.participants.length,
-        players: players,
+        rounds: rounds,
+        difficulty: difficulty,
       };
       if (user?._id === roomDetails?.roomCreator.userId) {
         console.log("emitted timer");
@@ -97,6 +116,14 @@ function Skribble() {
       message:
         message === selectedWord ? `${user?.username} has guessed!` : message,
     };
+    if (message !== data.message) {
+      const data = {
+        userId: user?._id,
+        userName: user?.username,
+        roomCode: roomDetails?.roomCode,
+      };
+      socket?.emit("guessed", data);
+    }
     sendRoomMessage(data, roomDetails.roomCode);
     setMessage("");
   };
@@ -122,7 +149,7 @@ function Skribble() {
     setShowTimer(false);
     localStorage.removeItem("roomDetails");
     setRoomDetails(null);
-    localStorage.removeItem("chats")
+    localStorage.removeItem("chats");
     setChats([]);
     socket?.emit("leave-room", data);
     navigate("/playOnline");
@@ -131,40 +158,42 @@ function Skribble() {
     console.log("Game ended");
     socket?.emit("end-game", user._id);
     localStorage.removeItem("roomDetails");
-    localStorage.removeItem("chats")
+    localStorage.removeItem("chats");
   }, [socket]);
 
-  const handleFilterParticipants = useCallback((userId) => {
-    if(roomDetails){
-      console.log("room detailssss",roomDetails)
-      const filteredParticipants = roomDetails?.participants.filter(
-        (participants) => participants.userId !== userId
-      );
-      setRoomDetails({...roomDetails, participants: filteredParticipants });
-      console.log("roomDetails", roomDetails)
-    }
-  }, [roomDetails,setRoomDetails]);
+  const handleFilterParticipants = useCallback(
+    (userId) => {
+      if (roomDetails) {
+        console.log("room detailssss", roomDetails);
+        const filteredParticipants = roomDetails?.participants.filter(
+          (participants) => participants.userId !== userId
+        );
+        setRoomDetails({ ...roomDetails, participants: filteredParticipants });
+        console.log("roomDetails", roomDetails);
+      }
+    },
+    [roomDetails, setRoomDetails]
+  );
 
-  const startGame = ()=>{
-    if(roomDetails.participants.length === 1){
+  const startGame = () => {
+    if (roomDetails.participants.length === 1) {
       alert("Atleast 2 players are required for starting the game");
       return;
-    }
-    else if(roomDetails.isGameStarted){
+    } else if (roomDetails.isGameStarted) {
       alert("Game already started");
       return;
     }
     const roomType = roomDetails.roomType;
     const roomCode = roomDetails.roomCode;
-    const data = {roomType,roomCode};
-    socket?.emit("start-game",data);
-  }
+    const data = { roomType, roomCode };
+    socket?.emit("start-game", data);
+  };
 
-  const startRandomGame = useCallback(()=>{
-    console.log("Starting random game")
+  const startRandomGame = useCallback(() => {
+    console.log("Starting random game");
     setShowTimer(true);
-    setRoomDetails({...roomDetails,isGameStarted:true})
-  },[roomDetails,setShowTimer,setRoomDetails])
+    setRoomDetails({ ...roomDetails, isGameStarted: true });
+  }, [roomDetails, setShowTimer, setRoomDetails]);
 
   useEffect(() => {
     socket?.on("new-message", (data) => {
@@ -186,7 +215,7 @@ function Skribble() {
     });
     socket?.on("user-left", (userData) => {
       console.log("work leave", userData);
-      console.log("user-leffffffft",userData)
+      console.log("user-leffffffft", userData);
       const userName = userData?.userName;
       const userId = userData?.userId;
       const message = `${userName} has left the room.`;
@@ -194,9 +223,9 @@ function Skribble() {
         message: message,
         user: userName,
       };
-      console.log(data)
+      console.log(data);
       handleFilterParticipants(userId);
-      setChats([...chats,data]);
+      setChats([...chats, data]);
     });
     socket?.on("game-ended", () => {
       localStorage.removeItem("roomDetails");
@@ -214,17 +243,25 @@ function Skribble() {
     });
     socket?.on("reload", (data) => {
       console.log("recieved", data);
+      setShowLeaderBoard(false);
       setShow(true);
       if (data.player.userId === randomDrawer.userId) return;
       setRandomDrawer(data.player);
     });
-    socket?.on("game-started",()=>{  // For starting random game
-       startRandomGame()
-    })
+    socket?.on("game-started", () => {
+      // For starting random game
+      startRandomGame();
+    });
     socket?.on("set-Timer", (data) => {
+      console.log("set-Timer", data);
       setTime(data.time);
       setRounds(data.rounds);
-      setPlayers(data.players);
+      setDifficulty(data.difficulty);
+      localStorage.removeItem("roundsPlayed");
+    });
+    socket?.on("showLeaderBoard", () => {
+      console.log("showLeaderBoard");
+      setShowLeaderBoard(true);
     });
     return () => {
       socket?.off("new-message");
@@ -233,16 +270,16 @@ function Skribble() {
       socket?.off("join-room-error");
       socket?.off("word-Selected");
       socket?.off("reload");
-      socket?.off("game-started")
+      socket?.off("game-started");
       socket?.off("set-Timer");
+      socket?.off("showLeaderBoard");
     };
-
   }, [
     handleFilterParticipants,
     startRandomGame,
     setShowTimer,
     roomDetails,
-    setPlayers,
+    setDifficulty,
     selectedWord,
     setRounds,
     socket,
@@ -260,13 +297,15 @@ function Skribble() {
   ]);
 
   console.log("selectedWord", selectedWord);
-  console.log("roomDetails",roomDetails)
-  console.log(randomDrawer)
+  console.log("roomDetails", roomDetails);
+  console.log("rounds ", rounds);
   return (
     <div style={{ height: "100vh", marginBottom: "0px" }}>
-    {roomDetails && roomDetails.roomType === "random"  && roomDetails.isGameStarted === false ? 
-      <SharedCanvas />: 
-       randomDrawer?.userId === user?._id ? (
+      {roomDetails &&
+      roomDetails.roomType === "random" &&
+      roomDetails.isGameStarted === false ? (
+        <SharedCanvas />
+      ) : randomDrawer?.userId === user?._id ? (
         <>
           <SkribbleCanvas
             setWord={setSelectedWord}
@@ -278,6 +317,9 @@ function Skribble() {
       ) : (
         <SharedCanvas />
       )}
+      <Modal open={showLeaderBoard} style={{ top: "50px" }}>
+        <LeaderBoard scoreCard={scoreCard} />
+      </Modal>
       <Paper
         style={{
           height: "9vh",
@@ -291,29 +333,32 @@ function Skribble() {
       >
         <Box>
           <div style={{ display: "flex" }}>
-            <CountdownTimer startTimer={startTimer} />
+            <CountdownTimer startTimer={startTimer} scoreCard={scoreCard} />
             <div style={{ width: "auto", marginLeft: "70%" }}>
               <Button variant="outlined" color="error" onClick={handleLeave}>
                 Leave
               </Button>
-              {roomDetails && user?._id === roomDetails?.roomCreator?.userId && (
-                roomDetails.roomType === "private" ?
-                <Button
-                  style={{ marginLeft: "10px" }}
-                  variant="contained"
-                  color="success"
-                  onClick={handleEnd}
-                >
-                  End
-                </Button>:
-                <Button
-                  style={{ marginLeft: "10px" }}
-                  variant="contained"
-                  color="success"
-                  onClick={startGame}>
+              {roomDetails &&
+                user?._id === roomDetails?.roomCreator?.userId &&
+                (roomDetails.roomType === "private" ? (
+                  <Button
+                    style={{ marginLeft: "10px" }}
+                    variant="contained"
+                    color="success"
+                    onClick={handleEnd}
+                  >
+                    End
+                  </Button>
+                ) : (
+                  <Button
+                    style={{ marginLeft: "10px" }}
+                    variant="contained"
+                    color="success"
+                    onClick={startGame}
+                  >
                     Start Game
                   </Button>
-              )}
+                ))}
             </div>
           </div>
         </Box>

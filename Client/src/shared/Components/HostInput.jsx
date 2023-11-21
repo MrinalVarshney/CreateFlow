@@ -9,7 +9,7 @@ const InputWithDropdown = ({ slots, setValue }) => {
   };
 
   return (
-    <div style={{ width: "40%" }}>
+    <div style={{ width: "auto" }}>
       <Autocomplete
         options={slots}
         freeSolo

@@ -7,13 +7,13 @@ import animationData from "./Animations/trophy.json"; // Replace with the path t
 import React, { useState } from "react";
 import "./LeaderBoard.css"; // Import the updated LeaderboardBox styles
 
-function Leaderboard() {
-  const [players, setPlayers] = useState([
-    { name: "Player 1", score: 100 },
-    { name: "Player 2", score: 110 },
-    { name: "Player 3", score: 90 },
-    // Add more players and scores as needed
-  ]);
+function Leaderboard({ scoreCard }) {
+  // const [players, setPlayers] = useState([
+  //   { name: "Player 1", score: 100 },
+  //   { name: "Player 2", score: 110 },
+  //   { name: "Player 3", score: 90 },
+  //   // Add more players and scores as needed
+  // ]);
 
   const defaultOptions = {
     loop: true, // Set to true if you want the animation to loop
@@ -22,21 +22,11 @@ function Leaderboard() {
   };
 
   // Sort players by score in descending order
-  players.sort((a, b) => b.score - a.score);
+  console.log(typeof scoreCard.current, scoreCard.current);
+  scoreCard.current.sort((a, b) => b.scores - a.scores);
 
-  function getMaxScore(players) {
-    let maxScore = -1; // Initialize with a value lower than any possible score
-
-    for (const player of players) {
-      if (player.score > maxScore) {
-        maxScore = player.score;
-      }
-    }
-
-    return maxScore;
-  }
-
-  const maxScore = getMaxScore(players);
+  let roundsPlayed = parseInt(localStorage.getItem("roundsPlayed"), 10) || 1;
+  const maxScore = 200 * roundsPlayed;
 
   return (
     <div className="leaderboard-box">
@@ -53,26 +43,26 @@ function Leaderboard() {
           </tr>
         </thead>
         <tbody>
-          {players.map((player, index) => (
+          {scoreCard.current.map((player, index) => (
             <tr key={index}>
               <td>
                 <div className="user-profile">
                   <img
                     src=/*{player.profilePic}*/ "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png"
-                    alt={player.name}
+                    alt={player.userName}
                     width="50"
                     height="50"
                   />
-                  {player.name}
+                  {player.userName}
                   <div
                     className="score-line"
                     style={{
-                      width: `${((player.score + 1) / maxScore) * 200}px`,
+                      width: `${((player.scores + 1) / maxScore) * 200}px`,
                     }}
                   ></div>
                 </div>
               </td>
-              <td>{player.score}</td>
+              <td>{player.scores}</td>
             </tr>
           ))}
         </tbody>

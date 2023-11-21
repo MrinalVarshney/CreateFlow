@@ -46,7 +46,7 @@ function PlayOnline() {
     connectWithSocketServer,
     setShowTimer,
     setRounds,
-    setPlayers,
+    setDifficulty,
     setTime,
   } = useUserAndChats();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,7 +58,8 @@ function PlayOnline() {
 
   const timeSlots = ["30", "60", "90", "120"];
   const roundSlots = ["1", "2", "3", "4", "5", "6"];
-  const playerSlots = ["2", "3", "4", "5", "6"];
+  const difficultySlots = ["Easy", "Medium", "Hard"];
+
   useEffect(() => {
     connectWithSocketServer();
   }, []);
@@ -81,7 +82,7 @@ function PlayOnline() {
   );
 
   const addInRandomRoom = (player) => {
-    if(player.userId === user._id) return;
+    if (player.userId === user._id) return;
     console.log("random-user-join", player);
     const roomDetails = JSON.parse(localStorage.getItem("roomDetails"));
     console.log(roomDetails?.participants);
@@ -120,9 +121,9 @@ function PlayOnline() {
       console.log("random-user-join", player);
       addInRandomRoom(player);
     });
-    return ()=>{
-      socket?.off("random-user-join")
-    }
+    return () => {
+      socket?.off("random-user-join");
+    };
   };
 
   const join = () => {
@@ -320,8 +321,11 @@ function PlayOnline() {
                     <HostInput slots={timeSlots} setValue={setTime} />
                   </div>
                   <div style={{ display: "flex", width: "33%" }}>
-                    <h4>players:</h4>
-                    <HostInput slots={playerSlots} setValue={setPlayers} />
+                    <h4>Difficulty:</h4>
+                    <HostInput
+                      slots={difficultySlots}
+                      setValue={setDifficulty}
+                    />
                   </div>
                 </div>
                 <h3>Users Joined : {roomDetails?.participants.length}</h3>

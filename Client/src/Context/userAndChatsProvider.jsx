@@ -12,12 +12,12 @@ export const UserAndChatsProvider = ({ children }) => {
   const [chats, setChats] = useState([]);
   const navigate = useNavigate();
   const [roomDetails, setRoomDetails] = useState(null);
-  const [rounds, setRounds] = useState(null);
-  const [time, setTime] = useState(15);
-  const [players, setPlayers] = useState(null);
+  const [rounds, setRounds] = useState(2);
+  const [time, setTime] = useState(90);
+  const [difficulty, setDifficulty] = useState("Easy");
   const playingGameRef = useRef(false);
   const Socket = useRef(null);
-  const [showTimer,setShowTimer] = useState(false);
+  const [showTimer, setShowTimer] = useState(false);
 
   useEffect(() => {
     if (roomDetails) {
@@ -94,8 +94,8 @@ export const UserAndChatsProvider = ({ children }) => {
     setRounds,
     time,
     setTime,
-    players,
-    setPlayers,
+    difficulty,
+    setDifficulty,
   };
 
   return (

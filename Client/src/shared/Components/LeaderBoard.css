@@ -1,33 +1,30 @@
+.leaderboard-box {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 20px;
+  margin: 0 auto;
+  background-color: #f7f7f7;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
 
-  
-  .leaderboard-box {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 20px;
-    margin: 0 auto;
-    background-color: #f7f7f7;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: fit-content;
-  
-    /* Animation */
-    animation: scale-up 0.5s ease-in-out both;
-  
-    @keyframes scale-up {
-      0% {
-        transform: scale(0.8);
-        opacity: 0;
-      }
-      100% {
-        transform: scale(1);
-        opacity: 1;
-      }
+  /* Animation */
+  animation: scale-up 0.5s ease-in-out both;
+
+  @keyframes scale-up {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
     }
-  
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
 
-      /* Additional animated background */
+  /* Additional animated background */
   background: linear-gradient(45deg, #ff9a8b, #a4b1f2, #ff9a8b, #a4b1f2);
   background-size: 400% 400%;
   animation: gradientBg 10s linear infinite;
@@ -43,16 +40,16 @@
       background-position: 0% 50%;
     }
   }
-  }
-  
-  .header {
-    position:relative;
-    right:10%;
-    top:2%;
-    display:flex;
-    flex-direction: row;
-    align-items: center;
-  }
+}
+
+.header {
+  position: relative;
+  right: 10%;
+  top: 2%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
 
 /* Add this CSS in your LeaderboardBox.css or your CSS file */
 
@@ -83,8 +80,7 @@
   transition: width 0.5s; /* Smooth width transition animation */
   margin-left: 30px;
   opacity: 0; /* Start with 0 opacity */
-  animation: fadeIn 1s ease-in forwards; /* Use the 'fadeIn' animation */ 
-
+  animation: fadeIn 1s ease-in forwards; /* Use the 'fadeIn' animation */
 }
 
 /* Hover effect for the score line */
@@ -95,10 +91,7 @@
 .score-value {
   padding-left: 10px; /* Add some spacing between the score value and the line */
   margin-left: 10px;
-
 }
-
-
 
 @keyframes fadeIn {
   from {
@@ -108,4 +101,3 @@
     opacity: 1;
   }
 }
-

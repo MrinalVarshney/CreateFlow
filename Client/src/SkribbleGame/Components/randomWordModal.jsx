@@ -31,8 +31,8 @@ const useStyles = makeStyles({
   },
 });
 
-const RandomWordModal = ({ show, setShow, closeRandomWordModal }) => {
-  const { Socket, roomDetails, rounds, time } = useUserAndChats();
+const RandomWordModal = ({ show, closeRandomWordModal }) => {
+  const { Socket, roomDetails, rounds, time, difficulty } = useUserAndChats();
   console.log("time in random", time);
   const socket = Socket.current;
   const classes = useStyles();
@@ -43,13 +43,15 @@ const RandomWordModal = ({ show, setShow, closeRandomWordModal }) => {
     setRandomWords([]);
     setRandomWords((prevWords) => {
       const newWords = [];
-      for (let i = 0; i < 3; i++) {
-        const word = getRandomWord();
+      let difficultyFactor =
+        difficulty === "Easy" ? 3 : difficulty === "Medium" ? 2 : 1;
+      for (let i = 0; i < difficultyFactor; i++) {
+        const word = getRandomWord(difficultyFactor);
         newWords.push(word);
       }
       return [...prevWords, ...newWords];
     });
-  }, [show]);
+  }, [show, difficulty]);
 
   console.log("Show value---->", show);
 
@@ -60,6 +62,7 @@ const RandomWordModal = ({ show, setShow, closeRandomWordModal }) => {
   };
 
   const handleclose = (word) => {
+    console.log("close clicked");
     setSelectedWord(word);
     const data = {
       word: word,
@@ -71,28 +74,31 @@ const RandomWordModal = ({ show, setShow, closeRandomWordModal }) => {
     let interval = setInterval(() => {
       socket?.emit("timer", roomDetails?.roomCode);
     }, 1000);
-    console.log("interval", interval);
+
     setTimeout(() => {
-      const player = randomPlayer();
-      console.log("player random", player, time);
+      // it is delay so that leaderBoard can be showed
       clearInterval(interval);
-      let roundsPlayed =
-        parseInt(localStorage.getItem("roundsPlayed"), 10) || 1;
+      socket?.emit("showLeaderBoard", roomDetails?.roomCode);
+      setTimeout(() => {
+        const player = randomPlayer();
+        console.log("player random", player, time);
 
-      console.log("roundsPlayed", roundsPlayed, "out of ", rounds);
-      localStorage.setItem("roundsPlayed", roundsPlayed + 1);
-      if (roundsPlayed >= parseInt(rounds)) {
-        console.log("game finished");
-        localStorage.removeItem("roundsPlayed");
-        return;
-      }
+        let roundsPlayed =
+          parseInt(localStorage.getItem("roundsPlayed"), 10) || 1;
+        clearInterval(interval);
+        if (roundsPlayed > parseInt(rounds)) {
+          console.log("game finished", roundsPlayed);
+          return;
+        }
 
-      const data = {
-        roomCode: roomDetails?.roomCode,
-        player: player,
-      };
-      socket?.emit("reload", data);
-    }, time * 1000);
+        const data = {
+          roomCode: roomDetails?.roomCode,
+          player: player,
+        };
+        socket?.emit("reload", data);
+      }, 5000);
+    }, (time + 1) * 1000);
+
     setRandomWords([]);
   };
   console.log(selectedWord);
