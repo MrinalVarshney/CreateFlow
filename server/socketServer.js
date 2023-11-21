@@ -6,7 +6,7 @@ const endGameHandler = require("./socketHandlers/CommonEvents/endGameHandler");
 const roomLeaveHandler = require("./socketHandlers/CommonEvents/roomLeaveHandler");
 const serverStore = require("./serverStore");
 const newConnectionHandler = require("./socketHandlers/CommonEvents/newConnectionHandler");
-const  handlePlayRandom = require("./socketHandlers/RandomRoomSpecificEvents/handlePlayRandom");
+const handlePlayRandom = require("./socketHandlers/RandomRoomSpecificEvents/handlePlayRandom");
 const { v4: uuidv4 } = require("uuid");
 
 const registerSocketServer = (server) => {
@@ -34,7 +34,7 @@ const registerSocketServer = (server) => {
     });
 
     socket.on("play-random", (data) => {
-      console.log("play-random request")
+      console.log("play-random request");
       handlePlayRandom(socket, data);
     });
 
@@ -50,11 +50,11 @@ const registerSocketServer = (server) => {
     });
 
     socket.on("leave-room", (data) => {
-      console.log("USer leaving",data)
+      console.log("USer leaving", data);
       roomLeaveHandler(data);
     });
 
-    socket.on("start-game",(data) => {
+    socket.on("start-game", (data) => {
       console.log("game-started");
       startGameHandler(socket, data);
     });
@@ -89,18 +89,18 @@ const registerSocketServer = (server) => {
       io.to(data?.roomCode).emit("virtual-mouse-up", data);
     });
     socket.on("undo", (roomCode) => {
-      console.log("Undo event ");
+      // console.log("Undo event ");
       io.to(roomCode).emit("undo");
     });
     socket.on("redo", (roomCode) => {
       io.to(roomCode).emit("redo");
     });
     socket.on("color-change", (data) => {
-      console.log(data);
+      // console.log(data);
       io.to(data.roomCode).emit("color-change", data.color);
     });
     socket.on("tool-change", (data) => {
-      console.log("Selected tool event");
+      // console.log("Selected tool event");
       io.to(data.roomCode).emit("selected-tool", {
         tool: data.tool,
         width: data.width,
@@ -110,9 +110,8 @@ const registerSocketServer = (server) => {
       io.to(data.roomCode).emit("onToolsClick", data);
     });
     socket.on("wordSelected", (data) => {
-      console.log("wordfjflksfj", data);
       const usersInRoom = io.sockets.adapter.rooms.get(data.roomCode);
-      console.log("usersInRoom ", usersInRoom);
+      // console.log("usersInRoom ", usersInRoom);
       io.to(data.roomCode).emit("word-Selected", data.word);
     });
     socket.on("reload", (data) => {
@@ -120,10 +119,18 @@ const registerSocketServer = (server) => {
       io.to(data.roomCode).emit("reload", data);
     });
     socket.on("setTimer", (data) => {
+      console.log("setTimer", data);
       io.to(data.roomCode).emit("set-Timer", data);
     });
     socket.on("timer", (roomCode) => {
       io.to(roomCode).emit("timer");
+    });
+    socket.on("showLeaderBoard", (roomCode) => {
+      io.to(roomCode).emit("showLeaderBoard");
+    });
+    socket.on("guessed", (data) => {
+      // console.log("guessed", data);
+      io.to(data.roomCode).emit("guessed", data);
     });
   });
 };
