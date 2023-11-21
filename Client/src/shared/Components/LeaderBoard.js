@@ -43,26 +43,26 @@ function Leaderboard({ scoreCard }) {
           </tr>
         </thead>
         <tbody>
-          {scoreCard.current.map((player, index) => (
+          {scoreCard?.current.map((player, index) => (
             <tr key={index}>
               <td>
                 <div className="user-profile">
                   <img
                     src=/*{player.profilePic}*/ "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png"
-                    alt={player.userName}
+                    alt={player?.userName}
                     width="50"
                     height="50"
                   />
-                  {player.userName}
+                  {player?.userName}
                   <div
                     className="score-line"
                     style={{
-                      width: `${((player.scores + 1) / maxScore) * 200}px`,
+                      width: `${((player?.scores + 1) / maxScore) * 200}px`,
                     }}
                   ></div>
                 </div>
               </td>
-              <td>{player.scores}</td>
+              <td>{player?.scores}</td>
             </tr>
           ))}
         </tbody>

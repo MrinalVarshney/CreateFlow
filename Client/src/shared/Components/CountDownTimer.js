@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useUserAndChats } from "../../Context/userAndChatsProvider";
 
 function CountdownTimer({ startTimer, scoreCard }) {
-  const { Socket, time, rounds } = useUserAndChats();
+  const { Socket, time, rounds, roomDetails } = useUserAndChats();
   const [timeLeft, setTimeLeft] = useState(time); // Initial time in seconds
   const socket = Socket.current;
   // console.log("scoreCardfirst", scoreCard);
@@ -15,8 +15,20 @@ function CountdownTimer({ startTimer, scoreCard }) {
   }, []);
 
   const updateScoresForUser = (userId, newScore) => {
-    scoreCard.current = scoreCard.current.map((user) =>
-      user.userId === userId
+    // drawer score update
+    const drawerScore = Math.round(
+      200 / (roomDetails?.participants.length - 1)
+    );
+    console.log("drawscore", drawerScore);
+    scoreCard.current = scoreCard?.current.map((user) =>
+      user?.userId === roomDetails?.roomCreator.userId
+        ? { ...user, scores: user.scores + drawerScore }
+        : user
+    );
+
+    // guessed person score update
+    scoreCard.current = scoreCard?.current.map((user) =>
+      user?.userId === userId
         ? { ...user, scores: user.scores + newScore }
         : user
     );
@@ -47,7 +59,7 @@ function CountdownTimer({ startTimer, scoreCard }) {
       console.log("updated scoreCard", scoreCard, newScore);
     });
     return () => {
-      socket?.off("word-Selected");
+      // socket?.off("word-Selected");
       socket?.off("timer");
       socket?.off("guessed");
     };

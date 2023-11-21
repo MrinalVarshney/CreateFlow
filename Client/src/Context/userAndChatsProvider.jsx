@@ -13,7 +13,7 @@ export const UserAndChatsProvider = ({ children }) => {
   const navigate = useNavigate();
   const [roomDetails, setRoomDetails] = useState(null);
   const [rounds, setRounds] = useState(2);
-  const [time, setTime] = useState(90);
+  const [time, setTime] = useState(10);
   const [difficulty, setDifficulty] = useState("Easy");
   const playingGameRef = useRef(false);
   const Socket = useRef(null);

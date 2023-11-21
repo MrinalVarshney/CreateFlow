@@ -236,10 +236,10 @@ function Skribble() {
       console.log(message);
       navigate("/selectionBoard");
     });
-    socket?.on("word-Selected", (word) => {
-      console.log("wordSelected", word);
+    socket?.on("word-Selected", (data) => {
+      console.log("wordSelected", data);
       setStartTimer(true);
-      setSelectedWord(word);
+      setSelectedWord(data.word);
     });
     socket?.on("reload", (data) => {
       console.log("recieved", data);
@@ -268,7 +268,7 @@ function Skribble() {
       socket?.off("user-left");
       socket?.off("ended-game");
       socket?.off("join-room-error");
-      socket?.off("word-Selected");
+      // socket?.off("word-Selected");
       socket?.off("reload");
       socket?.off("game-started");
       socket?.off("set-Timer");

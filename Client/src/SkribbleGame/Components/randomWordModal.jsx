@@ -68,17 +68,21 @@ const RandomWordModal = ({ show, closeRandomWordModal }) => {
       word: word,
       roomCode: roomDetails?.roomCode,
     };
-
+    console.log("present1");
     socket?.emit("wordSelected", data);
     closeRandomWordModal();
+
     let interval = setInterval(() => {
       socket?.emit("timer", roomDetails?.roomCode);
     }, 1000);
+    console.log("present2");
 
     setTimeout(() => {
       // it is delay so that leaderBoard can be showed
-      clearInterval(interval);
+      console.log("leader");
+
       socket?.emit("showLeaderBoard", roomDetails?.roomCode);
+      clearInterval(interval);
       setTimeout(() => {
         const player = randomPlayer();
         console.log("player random", player, time);
@@ -98,7 +102,7 @@ const RandomWordModal = ({ show, closeRandomWordModal }) => {
         socket?.emit("reload", data);
       }, 5000);
     }, (time + 1) * 1000);
-
+    console.log("after");
     setRandomWords([]);
   };
   console.log(selectedWord);
