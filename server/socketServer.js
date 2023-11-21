@@ -110,16 +110,15 @@ const registerSocketServer = (server) => {
       io.to(data.roomCode).emit("onToolsClick", data);
     });
     socket.on("wordSelected", (data) => {
-      const usersInRoom = io.sockets.adapter.rooms.get(data.roomCode);
-      // console.log("usersInRoom ", usersInRoom);
-      io.to(data.roomCode).emit("word-Selected", data.word);
+      // const usersInRoom = io.sockets.adapter.rooms.get(data.roomCode);
+      // console.log("usersInRoom forword ", usersInRoom, data);
+      io.to(data.roomCode).emit("word-Selected", data);
     });
     socket.on("reload", (data) => {
       // console.log("rmC", data.roomCode);
       io.to(data.roomCode).emit("reload", data);
     });
     socket.on("setTimer", (data) => {
-      console.log("setTimer", data);
       io.to(data.roomCode).emit("set-Timer", data);
     });
     socket.on("timer", (roomCode) => {
