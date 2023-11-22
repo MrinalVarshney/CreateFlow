@@ -1,0 +1,89 @@
+
+
+/* NetworkErrorPage.css */
+
+ .errorPage {
+  font-family: 'Arial', sans-serif;
+  background-color: rgb(41, 39, 39);
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  
+}
+
+.network-error {
+  color: #e7e4e4;
+  padding: 5px;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  margin: 10px;
+  text-align: center;
+  margin-top: 30px;
+  display:block;
+  width: 50%;
+  margin-left: 120px;
+}
+
+.network-error h1 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.network-error p {
+  font-size: 16px;
+  margin-top: 0;
+}
+
+.game-rules{
+  color: #ede6e6;
+  padding: 5px;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  text-align: center;
+  display:block;
+  width: 50%;
+  margin-left: 120px;
+}
+/* Add any other styles you want for your RexGame component here */
+
+
+
+#game {
+  position: relative;
+  border: 2px solid black;
+  margin: 10px;
+  background-color: #f7f5f5; /* Set your desired background color */
+  overflow: hidden;
+}
+
+
+.button-container {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.button-container button {
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #4caf50; /* Green color */
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+.button-container button:hover {
+  background-color: #1e7323; /* Darker green color on hover */
+}
+.game-box{
+  border-radius: 5px;
+  margin: 10px;
+  text-align: center;
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+} 

@@ -7,6 +7,7 @@ import SkribbleCanvas from "./skribbleCanvas";
 import SharedCanvas from "./SharedCanvas";
 import CountdownTimer from "../../shared/Components/CountDownTimer";
 import LeaderBoard from "../../shared/Components/LeaderBoard";
+import PopUpMenu from "../../shared/Components/PopUpMenu";
 import ErrorToast from "../../shared/Components/ErrorToast";
 
 function Skribble() {
@@ -345,6 +346,19 @@ function Skribble() {
     // handleFilterParticpiants,
   ]);
 
+  const handleUserClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const UserId = user._id;
+    const hostId = roomDetails.roomCreator.userId;
+    if (UserId === hostId) {
+    }
+  };
+
+  const handleRestrict = (e) => {};
+  const handleKick = (e) => {};
+  const handleWarn = (e) => {};
+
   console.log("selectedWord", selectedWord);
   console.log("roomDetails", roomDetails);
   console.log("rounds ", rounds);
@@ -435,15 +449,26 @@ function Skribble() {
                           ? "lightgreen"
                           : "white",
                     }}
+                    onClick={handleUserClick}
                   >
                     <p
                       style={{
                         fontSize: "17px",
                         marginLeft: "10px",
                       }}
-                    >
-                      {participants.userName}
-                    </p>
+                    ></p>
+                    {participants.userName}
+                    {user?._id === roomDetails?.roomCreator?.userId &&
+                      participants.userId !==
+                        roomDetails?.roomCreator?.userId && (
+                        <PopUpMenu
+                          style={{ position: "relative", right: "0" }}
+                          userName={participants.userName}
+                          handleKick={handleKick}
+                          handleRestrict={handleRestrict}
+                          handleWarn={handleWarn}
+                        />
+                      )}
                   </div>
                 ))
               : null // or another fallback if needed
