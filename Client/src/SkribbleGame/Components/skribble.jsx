@@ -7,6 +7,7 @@ import SkribbleCanvas from "./skribbleCanvas";
 import SharedCanvas from "./SharedCanvas";
 import CountdownTimer from "../../shared/Components/CountDownTimer";
 import LeaderBoard from "../../shared/Components/LeaderBoard";
+import ErrorToast from "../../shared/Components/ErrorToast";
 
 function Skribble() {
   const {
@@ -33,8 +34,13 @@ function Skribble() {
   const [startTimer, setStartTimer] = useState(false);
   const [message, setMessage] = useState("");
   const [showLeaderBoard, setShowLeaderBoard] = useState(false);
+  const [error, setError] = useState(null);
   const scoreCard = useRef(null);
   const messageContainerRef = useRef(null);
+
+  const apiKey = "AIzaSyB58_MfvweEbHpuIinywiYxzSpLvh9U7v8";
+  const perspectiveEndpoint =
+    "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze";
 
   console.log(randomDrawer);
   const socket = Socket.current;
@@ -107,9 +113,52 @@ function Skribble() {
     setRandomDrawer(roomDetails?.roomCreator);
   }, []);
 
-  const handleSend = () => {
-    console.log(message, user);
+  const checkForAbusiveLanguage = async (e) => {
+    e.preventDefault();
+    console.log("inside abusive word checker");
+    const requestBody = {
+      comment: { text: message },
+      languages: ["en"],
+      requestedAttributes: { TOXICITY: {} },
+    };
 
+    try {
+      const response = await fetch(`${perspectiveEndpoint}?key=${apiKey}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const result = await response.json();
+      console.log("result", result);
+      const toxicityScore = result.attributeScores.TOXICITY.summaryScore.value;
+      console.log("toxicityScore", toxicityScore);
+      if (toxicityScore > 0.7) {
+        const data = {
+          roomCode: roomDetails?.roomCode,
+          userId: user?._id,
+        };
+        console.log("data abusive", data);
+        socket?.emit("abusive-message", data);
+        setError(
+          "Abusive language is not allowed, you will be kicked out after 3 warnings"
+        );
+        console.log("abusive message emitted");
+        setMessage("");
+        return;
+      } else {
+        handleSend(e);
+      }
+    } catch (error) {
+      console.error("Error checking for abusive language:", error);
+    }
+  };
+
+  const handleSend = (e) => {
+    e.preventDefault();
+    console.log(message, user);
     const data = {
       userId: user?._id,
       userName: user?.username,
@@ -474,12 +523,13 @@ function Skribble() {
             }}
             variant="contained"
             endIcon={<SendIcon />}
-            onClick={handleSend}
+            onClick={(e) => checkForAbusiveLanguage(e)}
           >
             Send
           </Button>
         </Box>
       </Paper>
+      {error && <ErrorToast message={error} setError={setError} />}
     </div>
   );
 }

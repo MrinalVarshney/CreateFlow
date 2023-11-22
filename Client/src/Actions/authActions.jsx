@@ -7,7 +7,7 @@ export const register = async (user, navigate) => {
     console.log(response.errorMessage);
   } else {
     const userDetails = response.data;
-    console.log(userDetails);
+    console.log("userDetails", userDetails);
     localStorage.setItem("user", JSON.stringify(userDetails));
     navigate("/dashboard");
   }
@@ -25,33 +25,33 @@ export const login = async (user, navigate) => {
   return response;
 };
 
-export const sendVerificationMail = async(user) => {
+export const sendVerificationMail = async (user) => {
   const response = await api.sendVerificationMail(user);
   return response;
-}
+};
 
 export const markAsVerified = async (token) => {
   const response = await api.markAsVerified(token);
-  console.log(response)
+  console.log(response);
   return response;
-}
+};
 
 export const RecoverPassword = async (mail) => {
   const response = await api.RecoverPassword(mail);
   return response;
-}
+};
 
 export const checkExpiry = async (token) => {
   const response = await api.checkExpiry(token);
   return response;
-}
+};
 
-export const resetPassword = async (token,password) => {
-  const response = await api.resetPassword(token,password); 
+export const resetPassword = async (token, password) => {
+  const response = await api.resetPassword(token, password);
   return response;
-}
+};
 
 export const userLogout = async (userId) => {
   const response = await api.userLogout(userId);
   return response;
-}
+};
