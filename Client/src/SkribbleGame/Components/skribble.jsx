@@ -7,6 +7,7 @@ import SkribbleCanvas from "./skribbleCanvas";
 import SharedCanvas from "./SharedCanvas";
 import CountdownTimer from "../../shared/Components/CountDownTimer";
 import LeaderBoard from "../../shared/Components/LeaderBoard";
+import PopUpMenu from "../../shared/Components/PopUpMenu";
 
 function Skribble() {
   const {
@@ -296,6 +297,26 @@ function Skribble() {
     // handleFilterParticpiants,
   ]);
 
+  const handleUserClick = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const UserId = user._id
+    const hostId = roomDetails.roomCreator.userId
+    if(UserId===hostId ){
+       
+    }
+  }
+
+  const handleRestrict = (e) => {
+
+  }
+  const handleKick = (e) => {
+
+  }
+  const handleWarn = (e) => {
+
+  }
+
   console.log("selectedWord", selectedWord);
   console.log("roomDetails", roomDetails);
   console.log("rounds ", rounds);
@@ -386,7 +407,10 @@ function Skribble() {
                           ? "lightgreen"
                           : "white",
                     }}
+                    onClick={handleUserClick}
+
                   >
+                    
                     <p
                       style={{
                         fontSize: "17px",
@@ -394,6 +418,7 @@ function Skribble() {
                       }}
                     >
                       {participants.userName}
+                      <PopUpMenu style={{position:"relative",right:"0"}} userName={participants.userName} handleKick={handleKick} handleRestrict={handleRestrict} handleWarn={handleWarn} />
                     </p>
                   </div>
                 ))
