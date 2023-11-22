@@ -298,24 +298,17 @@ function Skribble() {
   ]);
 
   const handleUserClick = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const UserId = user._id
-    const hostId = roomDetails.roomCreator.userId
-    if(UserId===hostId ){
-       
+    e.preventDefault();
+    e.stopPropagation();
+    const UserId = user._id;
+    const hostId = roomDetails.roomCreator.userId;
+    if (UserId === hostId) {
     }
-  }
+  };
 
-  const handleRestrict = (e) => {
-
-  }
-  const handleKick = (e) => {
-
-  }
-  const handleWarn = (e) => {
-
-  }
+  const handleRestrict = (e) => {};
+  const handleKick = (e) => {};
+  const handleWarn = (e) => {};
 
   console.log("selectedWord", selectedWord);
   console.log("roomDetails", roomDetails);
@@ -408,18 +401,23 @@ function Skribble() {
                           : "white",
                     }}
                     onClick={handleUserClick}
-
                   >
-                    
                     <p
                       style={{
                         fontSize: "17px",
                         marginLeft: "10px",
                       }}
-                    >
-                      {participants.userName}
-                      <PopUpMenu style={{position:"relative",right:"0"}} userName={participants.userName} handleKick={handleKick} handleRestrict={handleRestrict} handleWarn={handleWarn} />
-                    </p>
+                    ></p>
+                    {participants.userName}
+                    {user?._id === roomDetails?.roomCreator?.userId && participants.userId!==roomDetails?.roomCreator?.userId && (
+                      <PopUpMenu
+                        style={{ position: "relative", right: "0" }}
+                        userName={participants.userName}
+                        handleKick={handleKick}
+                        handleRestrict={handleRestrict}
+                        handleWarn={handleWarn}
+                      />
+                    )}
                   </div>
                 ))
               : null // or another fallback if needed
