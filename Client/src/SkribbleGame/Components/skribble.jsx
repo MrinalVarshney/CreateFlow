@@ -306,9 +306,15 @@ function Skribble() {
     }
   };
 
-  const handleRestrict = (e) => {};
-  const handleKick = (e) => {};
-  const handleWarn = (e) => {};
+  const handleRestrict = (e) => {
+
+  };
+  const handleKick = (e) => {
+
+  };
+  const handleWarn = (e) => {
+    
+  };
 
   console.log("selectedWord", selectedWord);
   console.log("roomDetails", roomDetails);

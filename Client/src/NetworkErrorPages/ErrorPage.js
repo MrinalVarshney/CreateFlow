@@ -29,11 +29,10 @@ const NetworkErrorPage = () => {
             <p >Please check your internet connection and try again.</p>
           </div>
           <div className='game-rules'>
-          <h2>Let's have some fun !</h2>
-          <ul>
-            <li>Press 'Space' or 'J' to Jump. </li>
-            <li>Press 'LeftShift' or 'D' to Duck.</li>
-          </ul>
+           <h2>Let's have some fun !</h2>
+           <p>Press 'Space' or 'J' to Jump. </p>
+           <p>Press 'LeftShift' or 'D' to Duck.</p>
+          
           </div>
           <div className="game-box">
             <RexGame/>
