@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import AppGif from "../../Assets/GIF/App.gif";
 import AppImg from "../../Assets/Images/App.jpg";
 import Navbar from "./Navbar";
+import RulesCurser from "./RulesCurser";
 
 const YourComponent = () => {
   const [playedOnce, setPlayedOnce] = useState(false);
@@ -60,7 +61,7 @@ const YourComponent = () => {
           Get ready to unleash your creativity. Here's a quick guide to get
           started:
         </p>
-        <ul className="welcome-list">
+        {/* <ul className="welcome-list">
           <li>Choose your favorite colors from the vibrant palette.</li>
           <li>
             Select your magic brush size to bring your imagination to life.
@@ -70,7 +71,9 @@ const YourComponent = () => {
             Master the enchanted eraser tool to correct any artistic mishaps.
           </li>
           <li>Have a blast and conjure amazing artwork!</li>
-        </ul>
+        </ul> */}
+        <RulesCurser/>
+
       </div>
       </div>
     </div>
