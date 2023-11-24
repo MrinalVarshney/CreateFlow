@@ -21,11 +21,12 @@ const roomJoinHandler = (socket, roomCode, data) => {
 const roomDetails = serverStore.getActiveRoom(roomCode);
 
     // Emit "user-joined" to all users in the room
-      io.to(roomCode).emit("user-joined", {
-                userId: data.userId,
-          userName: data.userName,
-          socketId,
-      });
+    io.to(roomCode).emit("user-joined", {
+      userId: data.userId,
+      userName: data.userName,
+      pic: data.pic,
+      socketId,
+    });
 
     // Join the room (user who joins)
     console.log(roomDetails);

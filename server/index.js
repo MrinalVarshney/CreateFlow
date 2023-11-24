@@ -7,9 +7,8 @@ const http = require("http");
 const authRoutes = require("./routes/authRoutes");
 const cookieSession = require("cookie-session");
 const passport = require("./config/passport-config");
-const googleAuthRoutes = require("./routes/googleAuthRoutes");
-const canvasRoutes = require("./routes/canvasRoutes");
-const gameRoutes = require("./routes/gameRoutes");
+const googleAuthRoutes = require("./routes/googleAuthRoutes")
+const canvasRoutes = require("./routes/canvasRoutes")
 const userRoutes = require("./routes/userRoutes")
 
 dotenv.config();
@@ -35,10 +34,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/api/auth", authRoutes);
-app.use("/auth/google", googleAuthRoutes);
-app.use("/api/user",userRoutes);
-app.use("/api/canvas", canvasRoutes);
-app.use("/game", gameRoutes);
+app.use("/api/user",userRoutes)
+app.use("/auth/google",googleAuthRoutes)
+app.use("/api/canvas",canvasRoutes)
 
 app.get("/", (req, res) => {
   res.send("Hello World");

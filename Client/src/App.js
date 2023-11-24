@@ -11,6 +11,9 @@ import Dashboard from "../src/DashBoard/Dashboard";
 import PlayOnline from "./CanvasSelectionBoard/CreateBox/PlayOnline.jsx";
 import DrawingGallery from "./DrawingBoards/DrawingGallery.js";
 import { useUserAndChats } from "./Context/userAndChatsProvider.jsx";
+import LeaderBoard from "./shared/Components/LeaderBoard.js";
+import NetworkErrorPage from "./NetworkErrorPages/ErrorPage.js";
+import NotFound from "./NetworkErrorPages/NotFoundPage.js";
 
 function App() {
   const {Socket} = useUserAndChats();
@@ -23,7 +26,14 @@ function App() {
   },[socket])
   
   return (
-    <Routes>
+    <>
+
+     {
+        (window.navigator.onLine)===false ? <NetworkErrorPage/> :  
+       
+          
+
+      <Routes>
       <Route exact path="/canvas" Component={Canvas} />
       <Route exact path="/dashboard" Component={Dashboard} />
       <Route exact path="/" Component={Login} />
@@ -33,7 +43,14 @@ function App() {
       <Route exact path="/reset-password" Component={ResetPasswordPage} />
       <Route exact path="/playOnline" Component={PlayOnline} />
       <Route exact path="/drawingGallery" Component={DrawingGallery} />
+      <Route exact path="/leaderBoard" Component={LeaderBoard} />
+      <Route exact path="/offline" Component={NetworkErrorPage} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
+}
+
+    </>
+
   );
 }
 

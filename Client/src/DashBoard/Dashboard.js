@@ -42,6 +42,7 @@ const Dashboard = () => {
     getInvitations();
   }, []);
 
+
   return (
     loading ? <CustomBackdrop showProgress={loading} /> :
     <div className="container">

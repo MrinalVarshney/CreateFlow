@@ -1,6 +1,7 @@
 import { useContext, useState, createContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
+
 const userContext = createContext();
 
 export const useUserAndChats = () => {
@@ -13,8 +14,8 @@ export const UserAndChatsProvider = ({ children }) => {
   const navigate = useNavigate();
   const [roomDetails, setRoomDetails] = useState(null);
   const [rounds, setRounds] = useState(2);
-  const [time, setTime] = useState(30);
-  const [players, setPlayers] = useState(2);
+  const [time, setTime] = useState(10);
+  const [difficulty, setDifficulty] = useState("Easy");
   const playingGameRef = useRef(false);
   const Socket = useRef(null);
   const [showTimer,setShowTimer] = useState(false);
@@ -32,8 +33,8 @@ export const UserAndChatsProvider = ({ children }) => {
   useEffect(() => {
     if (roomDetails) {
       console.log("saving TO local");
-      const chatSessionKey = "roomDetails";
-      localStorage.setItem(chatSessionKey, JSON.stringify(roomDetails));
+      const room = "roomDetails";
+      localStorage.setItem(room, JSON.stringify(roomDetails));
     }
   }, [roomDetails]);
 
@@ -45,16 +46,28 @@ export const UserAndChatsProvider = ({ children }) => {
   }, [chats]);
 
   useEffect(() => {
-    const userDetails = JSON.parse(localStorage.getItem("user"));
-    const currentPath = window.location.pathname;
-    console.log(userDetails, "user");
-
-    if (userDetails) {
-      setUser(userDetails);
-      if (currentPath === "/" || currentPath === "/register") {
-        navigate("/dashboard");
+      if(window.navigator.onLine===false){
+        navigate("/offline")
+        return
+      } 
+      else{
+        const userDetails = JSON.parse(localStorage.getItem("user"));
+        const currentPath = window.location.pathname;
+        console.log(userDetails, "user");
+    
+        if (userDetails) {
+          setUser(userDetails);
+          if (currentPath === "/" || currentPath === "/register") {
+            navigate("/dashboard");
+          }
+        } else if (
+          currentPath === "/register" ||
+          currentPath === "/reset-password/"
+        ) {
+          // Allow access to the register page
+          return;
       }
-    } else if (
+     else if (
       currentPath === "/register" ||
       currentPath === "/reset-password/" ||
       currentPath === "/reset-password/:token"
@@ -66,7 +79,8 @@ export const UserAndChatsProvider = ({ children }) => {
       console.log(currentPath);
       navigate("/");
     }
-  }, [navigate]);
+  }
+}, [navigate]);
 
   const connectWithSocketServer = () => {
     console.log("connecting to socket server");
@@ -106,12 +120,11 @@ export const UserAndChatsProvider = ({ children }) => {
     setRounds,
     time,
     setTime,
-    players,
-    setPlayers,
-    canvasDetails,
-    setCanvasDetails,
+    difficulty,
+    setDifficulty,
     showCursorWithName,
-    setShowCursorWithName
+    setShowCursorWithName,
+    setCanvasDetails
   };
 
   return (

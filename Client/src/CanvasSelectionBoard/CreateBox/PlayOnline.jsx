@@ -1,4 +1,4 @@
-import backgroundImage from "../../Assets/Images/playonline1.jpg";
+import backgroundImage from "../../Assets/Images/playonlinebackground.jpg";
 import React, { useCallback, useEffect, useState } from "react";
 import { Paper, Button, Modal, Input } from "@mui/material";
 import { makeStyles } from "@mui/styles";
@@ -10,31 +10,34 @@ import HostInput from "../../shared/Components/HostInput";
 import ErrorToast from "../../shared/Components/ErrorToast";
 import InfoToast from "../../shared/Components/InfoToast";
 
+import "../../Canvas.css";
+import "./playOnline.css";
+import PlayOnline4 from "../../Assets/Images/playonline4.jpg";
 const useStyles = makeStyles({
-  modal: {
-    width: "auto",
-    height: "auto",
-    maxWidth: "40%",
-    minHeight: "300px",
-    margin: "7% 30%",
-  },
-  insideModal: {
-    width: 180,
-    height: 180,
-    margin: "30px 50px",
-    backgroundColor: "white",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    transition: "transform 0.2s",
-    border: "2px solid #black",
-    borderRadius: "20px",
-    "&:hover": {
-      transform: "scale(1.05)",
-      boxShadow: "0px 0px 10px 3px #888",
-    },
-  },
+  // modal: {
+  //   width: "auto",
+  //   height: "auto",
+  //   maxWidth: "40%",
+  //   minHeight: "300px",
+  //   margin: "7% 30%",
+  // },
+  // insideModal: {
+  //   width: 180,
+  //   height: 180,
+  //   margin: "30px 50px",
+  //   backgroundColor: "transparent",
+  //   display: "flex",
+  //   flexDirection: "column",
+  //   alignItems: "center",
+  //   justifyContent: "center",
+  //   transition: "transform 0.2s",
+  //   border: "2px solid #black",
+  //   borderRadius: "20px",
+  //   "&:hover": {
+  //     transform: "scale(1.05)",
+  //     boxShadow: "0px 0px 10px 3px #888",
+  //   },
+  // },
 });
 
 function PlayOnline() {
@@ -48,7 +51,7 @@ function PlayOnline() {
     connectWithSocketServer,
     setShowTimer,
     setRounds,
-    setPlayers,
+    setDifficulty,
     setTime,
   } = useUserAndChats();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,9 +63,10 @@ function PlayOnline() {
   const [infoError,setInfoError] = useState(null)
   const navigate = useNavigate();
 
-  const timeSlots = ["30", "60", "90", "120"];
-  const roundSlots = ["1", "2", "3", "4", "5", "6"];
-  const playerSlots = ["2", "3", "4", "5", "6"];
+  const timeSlots = [30, 60, 90, 120, 200];
+  const roundSlots = [1, 2, 3, 4, 5, 6];
+  const difficultySlots = ["Easy", "Medium", "Hard"];
+
   useEffect(() => {
     connectWithSocketServer();
   }, []);
@@ -85,7 +89,7 @@ function PlayOnline() {
   );
 
   const addInRandomRoom = (player) => {
-    if(player.userId === user._id) return;
+    if (player.userId === user._id) return;
     console.log("random-user-join", player);
     const roomDetails = JSON.parse(localStorage.getItem("roomDetails"));
     console.log(roomDetails?.participants);
@@ -126,9 +130,9 @@ function PlayOnline() {
       console.log("random-user-join", player);
       addInRandomRoom(player);
     });
-    return ()=>{
-      socket?.off("random-user-join")
-    }
+    return () => {
+      socket?.off("random-user-join");
+    };
   };
 
   const join = () => {
@@ -136,7 +140,7 @@ function PlayOnline() {
     joinRoom(joinRoomCode);
   };
 
-  const data = { userId: user?._id, userName: user?.username };
+  const data = { userId: user?._id, userName: user?.username, pic: user?.pic };
 
   const Openjoin = () => {
     setIsModalOpen(true);
@@ -262,19 +266,7 @@ function PlayOnline() {
       }}
     >
       <div style={{ width: "50%", position: "relative", top: "5%" }}>
-        <h1
-          style={{
-            backgroundColor: "white",
-            height: "5%",
-            width: "auto",
-            display: "flex",
-            justifyContent: "center",
-            border: "3px solid black",
-            borderRadius: "10px",
-          }}
-        >
-          PlayOnline
-        </h1>
+        <div className="PlayText">PlayOnline</div>
 
         <div
           style={{
@@ -288,21 +280,27 @@ function PlayOnline() {
             width: "100%",
           }}
         >
-          <Paper className={classes.insideModal}>
-            <Button onClick={host}>Host</Button>
-          </Paper>
-          <Paper className={classes.insideModal}>
-            <Button onClick={Openjoin}>Join</Button>
-          </Paper>
-          <Paper className={classes.insideModal}>
-            <Button onClick={playRandom}>Play Random</Button>
-          </Paper>
+          <div className="playInsideModal">
+            <Button onClick={host}>
+              <div className="playModalText">Host</div>
+            </Button>
+          </div>
+          <div className="playInsideModal">
+            <Button onClick={Openjoin}>
+              <div className="playModalText">Join</div>
+            </Button>
+          </div>
+          <div className="playInsideModal">
+            <Button onClick={playRandom}>
+              <div className="playModalText">Play Random</div>
+            </Button>
+          </div>
         </div>
       </div>
 
       {isModalOpen && (
         <Modal
-          className={classes.modal}
+          className="playModal"
           open={isModalOpen}
           onClose={(event, reason) => {
             if (reason !== "backdropClick") {
@@ -314,7 +312,10 @@ function PlayOnline() {
             {modalContent === "host" && (
               <div
                 style={{
-                  backgroundColor: "lightyellow",
+                  backgroundImage: `url(${PlayOnline4})`,
+                  backgroundSize: "cover",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center center",
                   width: "100%",
                   height: "100%",
                   display: "flex",
@@ -323,7 +324,7 @@ function PlayOnline() {
                   flexDirection: "column",
                 }}
               >
-                <h1>Host: {HostroomCode.host}</h1>
+                <div className="playHostText">Host: {HostroomCode.host}</div>
                 <h3>roomId : {HostroomCode.roomCode}</h3>
 
                 <div
@@ -343,8 +344,11 @@ function PlayOnline() {
                     <HostInput slots={timeSlots} setValue={setTime} />
                   </div>
                   <div style={{ display: "flex", width: "33%" }}>
-                    <h4>players:</h4>
-                    <HostInput slots={playerSlots} setValue={setPlayers} />
+                    <h4>Difficulty:</h4>
+                    <HostInput
+                      slots={difficultySlots}
+                      setValue={setDifficulty}
+                    />
                   </div>
                 </div>
                 <h3>Users Joined : {roomDetails?.participants.length}</h3>
@@ -354,18 +358,23 @@ function PlayOnline() {
                 />
                 <div>
                   <Button
-                    style={{ marginTop: "10px", backgroundColor: "lightBlue" }}
+                    style={{
+                      marginTop: "10px",
+                      backgroundColor: "rgb(66 157 196)",
+                    }}
                     onClick={() => {
                       start();
                     }}
                   >
-                    Start
+                    <p style={{ color: "white", padding: 0, margin: 0 }}>
+                      Start
+                    </p>
                   </Button>
                   <Button
                     style={{
                       marginLeft: "10px",
                       marginTop: "10px",
-                      backgroundColor: "lightBlue",
+                      backgroundColor: "rgb(66 157 196)",
                     }}
                     onClick={handleCloseHostModal}
                   >
@@ -377,7 +386,10 @@ function PlayOnline() {
             {modalContent === "join" && (
               <div
                 style={{
-                  backgroundColor: "lightyellow",
+                  backgroundImage: `url(${PlayOnline4})`,
+                  backgroundSize: "cover",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center center",
                   width: "100%",
                   height: "100%",
                   display: "flex",
@@ -388,20 +400,35 @@ function PlayOnline() {
               >
                 {!isUserJoined && (
                   <>
-                    <h1>Join</h1>
+                    <div
+                      className="playHostText"
+                      style={{ marginBottom: "3%" }}
+                    >
+                      Join
+                    </div>
                     <Input
                       placeholder="Enter Room Id"
                       onChange={(e) => setJoinRoomCode(e.target.value)}
                     />
                     <div>
-                      <Button onClick={join}>Join</Button>
-                      <Button onClick={handleCloseHostModal}>Close</Button>
+                      <Button onClick={join}>
+                        <p style={{ margin: 0, padding: 0, color: "blue" }}>
+                          Join
+                        </p>
+                      </Button>
+                      <Button onClick={handleCloseHostModal}>
+                        <p style={{ margin: 0, padding: 0, color: "blue" }}>
+                          Close
+                        </p>
+                      </Button>
                     </div>
                   </>
                 )}
                 {isUserJoined && (
                   <>
-                    <h1>Joined</h1>
+                    <div className="playHostText" style={{ margin: "3%" }}>
+                      Joined
+                    </div>
                     <Table
                       participants={roomDetails?.participants}
                       user={hostUser}
@@ -421,19 +448,9 @@ function PlayOnline() {
           top: "5%",
         }}
       >
-        <h1
-          style={{
-            backgroundColor: "white",
-            height: "5%",
-            width: "auto",
-            display: "flex",
-            justifyContent: "center",
-            border: "3px solid black",
-            borderRadius: "10px",
-          }}
-        >
+        <div className="PlayText" style={{ marginBottom: "5%" }}>
           How to Play
-        </h1>
+        </div>
         <div
           style={{
             display: "flex",

@@ -147,6 +147,7 @@ function DrawingCanvas() {
 
   const clearVirtualCanvas = useCallback(() => {
     const offCanvas = offCanvasRef.current;
+    if (!offCanvas) return;
     const virtualCtx = offCanvas.getContext("2d");
     virtualCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
   }, []);
@@ -160,6 +161,7 @@ function DrawingCanvas() {
 
   const redrawCanvas = useCallback((imageData) => {
     const canvas = canvasRef.current;
+    if (!canvas) return;
     const ctx = canvas.getContext("2d");
     const img = new Image();
     img.src = imageData;
@@ -254,6 +256,7 @@ function DrawingCanvas() {
       // console.log("UseEffect ", selectedTool);
       switchToMainCanvas();
       const canvas = canvasRef.current;
+      if (!canvas) return;
       const ctx = canvas.getContext("2d");
 
       if (selectedTool.current === "Eraser") {
@@ -276,6 +279,7 @@ function DrawingCanvas() {
       cursorRef.current = { x: x, y: y };
       setPositionOfCursor(cursorRef.current);
       const canvas = canvasRef.current;
+      if (!canvas) return;
       const context = canvas.getContext("2d");
       console.log("Mouse Down selectedTool", selectedTool.current);
       if (selectedTool.current === "PaintBucket") {
@@ -303,6 +307,7 @@ function DrawingCanvas() {
       setPositionOfCursor(cursorRef.current);
       if (!drawing) return;
       const canvas = canvasRef.current;
+      if (!canvas) return;
       const context = canvas.getContext("2d");
       console.log("moving");
       context.lineTo(x, y);
@@ -313,6 +318,7 @@ function DrawingCanvas() {
 
   const handleMouseUp = useCallback(() => {
     const canvas = canvasRef.current;
+    if (!canvas) return;
     const ctx = canvas.getContext("2d");
     setDrawing(false);
     ctx.closePath();
@@ -391,6 +397,7 @@ function DrawingCanvas() {
       EndRef.current = { endX: -1, endY: -1 };
       isCustomizable.current = false;
       const canvas = canvasRef.current;
+      if (!canvas) return;
       const ctx = canvas.getContext("2d");
       // ctx.strokeStyle = selectedColor;
       console.log("inside drawonMainCanvas");
@@ -432,6 +439,7 @@ function DrawingCanvas() {
         e2Y: e2Y + offsetY,
       };
       pointRef.current = { pt3X: pointRef.current.pt3X + offsetX };
+      if (!offCanvasRef.current) return;
       const virtualCtx = offCanvasRef.current.getContext("2d");
       chooseAndDrawShape(endX + offsetX, endY + offsetY, virtualCtx);
 
@@ -490,6 +498,7 @@ function DrawingCanvas() {
       cursorRef.current = { x: endX, y: endY };
       setPositionOfCursor(cursorRef.current);
       const offCanvas = offCanvasRef.current;
+      if (!offCanvas) return;
       const ctx = offCanvas.getContext("2d");
       if (isCustomizable.current) {
         if (CurrentRef.current.x !== -1) {
@@ -511,6 +520,7 @@ function DrawingCanvas() {
       setPositionOfCursor(cursorRef.current);
       setDrawing(false);
       const offCanvas = offCanvasRef.current;
+      if (!offCanvas) return;
       const virtualCtx = offCanvas.getContext("2d");
       const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
       if (isResizing.current) {
@@ -559,6 +569,7 @@ function DrawingCanvas() {
     (color) => {
       selectedColor.current = color;
       const canvas = canvasRef.current;
+      if (!canvas) return;
       const ctx = canvas.getContext("2d");
       ctx.strokeStyle = color;
     },
@@ -570,6 +581,7 @@ function DrawingCanvas() {
       const { tool, width } = data;
       selectedTool.current = tool;
       const canvas = canvasRef.current;
+      if (!canvas) return;
       const ctx = canvas.getContext("2d");
       console.log(width, "width");
       if (tool === "Eraser") {
@@ -625,6 +637,7 @@ function DrawingCanvas() {
       const x = data.x;
       const y = data.y;
       const offCanvas = offCanvasRef.current;
+      if (!offCanvas) return;
       const ctx = offCanvas.getContext("2d");
       setContext(ctx);
       handleVirtualMouseDown(x, y);
@@ -635,6 +648,7 @@ function DrawingCanvas() {
       const endX = data.endX;
       const endY = data.endY;
       const offCanvas = offCanvasRef.current;
+      if (!offCanvas) return;
       const ctx = offCanvas.getContext("2d");
       setContext(ctx);
       handleVirtualMouseMove(endX, endY);
@@ -644,6 +658,7 @@ function DrawingCanvas() {
       const endX = data.endX;
       const endY = data.endY;
       const offCanvas = offCanvasRef.current;
+      if (!offCanvas) return;
       const ctx = offCanvas.getContext("2d");
       setContext(ctx);
       handleVirtualMouseUp(endX, endY);

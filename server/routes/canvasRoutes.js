@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const canvasController = require('../controllers/Canvas/canvasController')
+const protect = require('../middlewares/auth')
 
-router.post('/addCollaborator', canvasController.addCollaborator);
-router.post('/addNewCanvas', canvasController.addNewCanvas);
-router.post('/resaveCanvas', canvasController.resaveCanvas);
-router.get('/getAllCanvas',canvasController.getAllCanvas)
+router.post('/addCollaborator',protect, canvasController.addCollaborator);
+router.post('/addNewCanvas',protect, canvasController.addNewCanvas);
+router.post('/resaveCanvas',protect, canvasController.resaveCanvas);
+router.get('/getAllCanvas',protect,canvasController.getAllCanvas)
 
 module.exports = router;

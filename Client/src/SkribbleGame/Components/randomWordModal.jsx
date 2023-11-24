@@ -3,6 +3,8 @@ import getRandomWord from "./randomWordPicker";
 import { Button, Modal, Paper } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useUserAndChats } from "../../Context/userAndChatsProvider";
+import "./randomModal.css";
+import RandomWordImg from "../../Assets/Images/randomWordmodalBackground.jpg";
 
 const useStyles = makeStyles({
   modal: {
@@ -31,8 +33,8 @@ const useStyles = makeStyles({
   },
 });
 
-const RandomWordModal = ({ show, setShow, closeRandomWordModal }) => {
-  const { Socket, roomDetails, rounds, time } = useUserAndChats();
+const RandomWordModal = ({ show, closeRandomWordModal }) => {
+  const { Socket, roomDetails, rounds, time, difficulty } = useUserAndChats();
   console.log("time in random", time);
   const socket = Socket.current;
   const classes = useStyles();
@@ -43,13 +45,15 @@ const RandomWordModal = ({ show, setShow, closeRandomWordModal }) => {
     setRandomWords([]);
     setRandomWords((prevWords) => {
       const newWords = [];
-      for (let i = 0; i < 3; i++) {
-        const word = getRandomWord();
+      let difficultyFactor =
+        difficulty === "Easy" ? 3 : difficulty === "Medium" ? 2 : 1;
+      for (let i = 0; i < difficultyFactor; i++) {
+        const word = getRandomWord(difficultyFactor);
         newWords.push(word);
       }
       return [...prevWords, ...newWords];
     });
-  }, [show]);
+  }, [show, difficulty]);
 
   console.log("Show value---->", show);
 
@@ -60,36 +64,47 @@ const RandomWordModal = ({ show, setShow, closeRandomWordModal }) => {
   };
 
   const handleclose = (word) => {
+    console.log("close clicked");
     setSelectedWord(word);
     const data = {
       word: word,
       roomCode: roomDetails?.roomCode,
     };
-
+    console.log("present1");
     socket?.emit("wordSelected", data);
     closeRandomWordModal();
 
+    let interval = setInterval(() => {
+      socket?.emit("timer", roomDetails?.roomCode);
+    }, 1000);
+    console.log("present2");
+
     setTimeout(() => {
-      const player = randomPlayer();
-      console.log("player random", player, time);
+      // it is delay so that leaderBoard can be showed
+      console.log("leader");
 
-      let roundsPlayed =
-        parseInt(localStorage.getItem("roundsPlayed"), 10) || 1;
+      socket?.emit("showLeaderBoard", roomDetails?.roomCode);
+      clearInterval(interval);
+      setTimeout(() => {
+        const player = randomPlayer();
+        console.log("player random", player, time);
 
-      console.log("roundsPlayed", roundsPlayed);
-      localStorage.setItem("roundsPlayed", roundsPlayed + 1);
-      if (roundsPlayed >= parseInt(rounds)) {
-        console.log("game finished");
-        localStorage.removeItem("roundsPlayed");
-        return;
-      }
+        let roundsPlayed =
+          parseInt(localStorage.getItem("roundsPlayed"), 10) || 1;
+        clearInterval(interval);
+        if (roundsPlayed > parseInt(rounds)) {
+          console.log("game finished", roundsPlayed);
+          return;
+        }
 
-      const data = {
-        roomCode: roomDetails?.roomCode,
-        player: player,
-      };
-      socket?.emit("reload", data);
-    }, time * 1000);
+        const data = {
+          roomCode: roomDetails?.roomCode,
+          player: player,
+        };
+        socket?.emit("reload", data);
+      }, 5000);
+    }, (time + 1) * 1000);
+    console.log("after");
     setRandomWords([]);
   };
   console.log(selectedWord);
@@ -102,7 +117,7 @@ const RandomWordModal = ({ show, setShow, closeRandomWordModal }) => {
       }}
     >
       <Modal
-        className={classes.modal}
+        className="randomModal"
         open={show}
         onClose={(event, reason) => {
           if (reason !== "backdropClick") {
@@ -112,17 +127,28 @@ const RandomWordModal = ({ show, setShow, closeRandomWordModal }) => {
       >
         <div
           style={{
-            backgroundColor: "pink",
+            backgroundImage: `url(${RandomWordImg})`,
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center center",
+            width: "100%",
+            height: "80vh",
             display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
+            justifyContent: "space-evenly",
             alignContent: "center",
+            flexDirection: "row",
+            flexWrap: "wrap",
+            position: "relative",
+            top: "2%",
           }}
         >
+          <div className="randomWords">Select a Word</div>
           {randomWords.map((word) => (
-            <Paper key={word} className={classes.insideModal}>
-              <Button onClick={() => handleclose(word)}>{word}</Button>
-            </Paper>
+            <div key={word} className="randomInsideModal">
+              <Button onClick={() => handleclose(word)}>
+                <div className="randomModalText">{word}</div>
+              </Button>
+            </div>
           ))}
         </div>
       </Modal>

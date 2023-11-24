@@ -1,0 +1,23 @@
+
+  
+  .slider-container {
+    width: 60%; /* Adjust the width as needed */
+    margin-left: 20%; /* To center it horizontally */
+    border-radius: 30px;
+  }
+  
+  /* Optional: Adjust styles for the dots or any other elements */
+  .slick-dots {
+    bottom: 20px;
+  }
+  
+  .slick-dots li button::before {
+    font-size: 12px;
+  }
+  
+  /* Optional: Add styling to the slider images */
+  .slick-slide img {
+    width: 100%;
+    height: auto;
+  }
+  

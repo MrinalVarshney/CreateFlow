@@ -83,31 +83,11 @@ const removerUserFromRandomRoom = (userId, roomCode) => {
   if (room.participants.length === 0) {
     randomRooms = randomRooms.filter((room) => room.roomCode !== roomCode);
   }
-  if (roomCodeMap.has(userId)) {
-    roomCodeMap.delete(userId);
-  }
-  if (userWarningMap.has(userId)) {
-    userWarningMap.delete(userId);
+  if(roomCodeMap.has(userId)){
+    roomCodeMap.delete(userId)
   }
   return room;
-};
-
-const removeRandomRoom = (roomCode) => {
-  const room = randomRooms.find((room) => room.roomCode === roomCode);
-  const UpdatedRandomRooms = randomRooms.filter(
-    (room) => room.roomCode !== roomCode
-  );
-  randomRooms = UpdatedRandomRooms;
-  room.participants.forEach((participant) => {
-    if (userWarningMap.has(participant.userId)) {
-      userWarningMap.delete(participant.userId);
-    }
-    if (roomCodeMap.has(participant.userId)) {
-      roomCodeMap.delete(participant.userId);
-    }
-  });
-  console.log("Game ended available random rooms", randomRooms);
-};
+}
 
 const mapUserToRoomCode = (userId, roomCode) => {
   console.log("setting roomCode", roomCode, userId);
@@ -144,6 +124,7 @@ const getSocketId = (socket, userId) => {
 const addNewActiveRoom = ({ socketId, data, roomCode }) => {
   const userId = data.userId;
   const userName = data.userName;
+  const pic = data.pic;
   if (userSocketMap.has(userId)) {
     socketId = userSocketMap.get(userId);
   }
@@ -151,12 +132,14 @@ const addNewActiveRoom = ({ socketId, data, roomCode }) => {
     roomCreator: {
       userId,
       userName,
+      pic,
       socketId,
     },
     participants: [
       {
         userId,
         userName,
+        pic,
         socketId,
       },
     ], // Initialize an empty array for participants
@@ -218,12 +201,13 @@ const removeActiveRoom = (roomCode) => {
 };
 
 const joinActiveRoom = ({ roomCode, socketId, data }) => {
-  console.log(data);
+  console.log("coming", data);
   if (isValidRoom(roomCode)) {
     const activeRoom = getActiveRoom(roomCode);
     activeRoom.participants.push({
       userName: data.userName,
       userId: data.userId,
+      pic: data.pic,
       socketId,
     });
   } else {
@@ -274,9 +258,5 @@ module.exports = {
   createNewRandomRoom,
   pushInAvailableRandomRoom,
   removerUserFromRandomRoom,
-  startRandomGame,
-  addWarningToUser,
-  getWarningCount,
-  removeRandomRoom,
-  getRandomRoom,
+  startRandomGame
 };

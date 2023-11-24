@@ -5,21 +5,23 @@ const apiClient = axios.create({
   timeout: 100000,
 });
 
-// apiClient.interceptors.request.use(
-//   (config) => {
-//     const userDetails = localStorage.getItem("user");
+apiClient.interceptors.request.use(
+  (config) => {
+    const userDetails = localStorage.getItem("user");
 
-//     if (userDetails) {
-//       const token = JSON.parse(userDetails).token;
-//       config.headers.Authorization = `Bearer ${token}`;
-//     }
+    if (userDetails) {
+      const token = JSON.parse(userDetails).token;
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
-//     return config;
-//   },
-//   (err) => {
-//     return Promise.reject(err);
-//   }
-// );
+    return config;
+  },
+  (err) => {
+    return Promise.reject(err);
+  }
+);
+
+
 
 export const login = async (data) => {
   try {
@@ -54,6 +56,14 @@ export const RecoverPassword = async (mail) => {
     };
   }
 };
+
+export const updateProfile = async(data)=>{
+  try{
+    await apiClient.post("/api/user/updateProfile",data);
+  }catch(error){
+    return {error:true, errorMessage:error.response.data}
+  }
+}
 
 export const checkExpiry = async (token) => {
   try {

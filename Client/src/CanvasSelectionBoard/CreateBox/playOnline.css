@@ -1,0 +1,70 @@
+@import url("https://fonts.googleapis.com/css2?family=Eczar&family=IBM+Plex+Mono:wght@500&family=Inter&family=Lilita+One&family=Montserrat:wght@800&family=Rubik:wght@500&family=Ubuntu&family=Work+Sans&display=swap");
+
+.playModal {
+  width: auto;
+  height: auto;
+  max-width: 40%;
+  min-height: 300px;
+  margin: 7% 30%;
+}
+
+.playHostText {
+  color: rgb(11 22 197);
+  font-size: 3vw;
+  text-align: center;
+  font-family: "Lilita One", sans-serif;
+  position: relative;
+  transition: box-shadow 0.3s ease-in-out, text-shadow 0.3s ease-in-out;
+  overflow: hidden;
+}
+.playModalText {
+  color: rgb(234 130 130);
+  font-size: 3vw;
+  text-align: center;
+  font-family: "Lilita One", sans-serif;
+  position: relative;
+  transition: box-shadow 0.3s ease-in-out, text-shadow 0.3s ease-in-out;
+  overflow: hidden;
+}
+.playInsideModal {
+  width: 180px;
+  height: 180px;
+  margin: 30px 50px;
+  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  border: 2px solid #f9f9f9; /* Use #000 for black, not #black */
+  border-radius: 20px;
+  margin: 5%;
+}
+
+.playInsideModal:hover {
+  transform: scale(1.05);
+  box-shadow: 0px 0px 10px 3px #888;
+}
+.PlayText {
+  color: rgb(203, 170, 3);
+  font-size: 4vw;
+  text-align: center;
+  font-family: "Lilita One", sans-serif;
+  position: relative;
+  transition: box-shadow 0.3s ease-in-out, text-shadow 0.3s ease-in-out;
+  overflow: hidden;
+  background-color: transparent;
+  height: 9%;
+  width: auto;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  border: 3px solid rgb(245, 243, 243);
+  border-radius: 10px;
+  width: 95%;
+  left: 3%;
+}
+.PlayText:hover {
+  transform: scale(1.01);
+  box-shadow: 0px 0px 10px 3px #888;
+}

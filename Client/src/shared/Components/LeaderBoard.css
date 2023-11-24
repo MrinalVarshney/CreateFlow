@@ -1,34 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Eczar&family=IBM+Plex+Mono:wght@500&family=Inter&family=Lilita+One&family=Montserrat:wght@800&family=Rubik:wght@500&family=Ubuntu&family=Work+Sans&display=swap');
 
+
+.leaderboard-box {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 20px;
+  margin: 0 auto;
+  background-color: #f7f7f7;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
   
-  .leaderboard-box {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 20px;
-    margin: 0 auto;
-    background-color: #f7f7f7;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: fit-content;
-  
-    /* Animation */
-    animation: scale-up 0.5s ease-in-out both;
-  
-    @keyframes scale-up {
-      0% {
-        transform: scale(0.8);
-        opacity: 0;
-      }
-      100% {
-        transform: scale(1);
-        opacity: 1;
-      }
+  /* background-image: './Animations/leaderboard-bg.jpg'; */
+  /* background-size: cover; */
+  /* background-repeat: no-repeat; */
+  /* background-position: center; */
+
+  /* height: auto; */
+
+
+  /* Animation */
+  /* animation: scale-up 0.5s ease-in-out both;
+
+  @keyframes scale-up {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
     }
-  
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  } */
 
-      /* Additional animated background */
-  background: linear-gradient(45deg, #ff9a8b, #a4b1f2, #ff9a8b, #a4b1f2);
+  /* Additional animated background */
+  /* background: linear-gradient(45deg, #ff9a8b, #a4b1f2, #ff9a8b, #a4b1f2);
   background-size: 400% 400%;
   animation: gradientBg 10s linear infinite;
 
@@ -42,17 +50,27 @@
     100% {
       background-position: 0% 50%;
     }
-  }
-  }
+  }*/
+}
+
+.overlay{
+  background: rgba(255, 255, 255, 0.5);
+  height:100%;
+  width:100%;
+  padding: 20px;
+}
+
+.header {
+  position: relative;
+  right: 27%;
+  top: 0%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-family: 'Lilita One', sans-serif;
+  margin-right: 20px;
   
-  .header {
-    position:relative;
-    right:10%;
-    top:2%;
-    display:flex;
-    flex-direction: row;
-    align-items: center;
-  }
+}
 
 /* Add this CSS in your LeaderboardBox.css or your CSS file */
 
@@ -71,6 +89,13 @@
   margin-right: 10px;
 }
 
+.table {
+  font-family: 'Inter', sans-serif;
+  forced-color-adjust: black;
+}
+
+
+
 .score-line {
   display: flex;
   flex-direction: row;
@@ -83,8 +108,7 @@
   transition: width 0.5s; /* Smooth width transition animation */
   margin-left: 30px;
   opacity: 0; /* Start with 0 opacity */
-  animation: fadeIn 1s ease-in forwards; /* Use the 'fadeIn' animation */ 
-
+  animation: fadeIn 1s ease-in forwards; /* Use the 'fadeIn' animation */
 }
 
 /* Hover effect for the score line */
@@ -95,10 +119,7 @@
 .score-value {
   padding-left: 10px; /* Add some spacing between the score value and the line */
   margin-left: 10px;
-
 }
-
-
 
 @keyframes fadeIn {
   from {
@@ -108,4 +129,3 @@
     opacity: 1;
   }
 }
-

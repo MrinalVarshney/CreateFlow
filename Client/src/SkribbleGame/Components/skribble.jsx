@@ -1,11 +1,14 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { Box, Paper, Input, Button } from "@mui/material";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { Grid, Box, Paper, Input, Button, Modal } from "@mui/material";
 import { useUserAndChats } from "../../Context/userAndChatsProvider";
 import SendIcon from "@mui/icons-material/Send";
 import { useNavigate } from "react-router-dom";
 import SkribbleCanvas from "./skribbleCanvas";
 import SharedCanvas from "./SharedCanvas";
 import CountdownTimer from "../../shared/Components/CountDownTimer";
+import LeaderBoard from "../../shared/Components/LeaderBoard";
+import PopUpMenu from "../../shared/Components/PopUpMenu";
+import ErrorToast from "../../shared/Components/ErrorToast";
 
 function Skribble() {
   const {
@@ -26,6 +29,8 @@ function Skribble() {
     setPlayers,
     showCursorWithName,
     setShowCursorWithName,
+    difficulty,
+    setDifficulty,
   } = useUserAndChats();
 
   const [selectedWord, setSelectedWord] = useState("");
@@ -33,6 +38,15 @@ function Skribble() {
   const [show, setShow] = useState(false);
   const [startTimer, setStartTimer] = useState(false);
   const [message, setMessage] = useState("");
+  const [showMessageBar, setShowMessageBar] = useState(true);
+  const [showLeaderBoard, setShowLeaderBoard] = useState(false);
+  const [error, setError] = useState(null);
+  const scoreCard = useRef(null);
+  const messageContainerRef = useRef(null);
+
+  const apiKey = "AIzaSyB58_MfvweEbHpuIinywiYxzSpLvh9U7v8";
+  const perspectiveEndpoint =
+    "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze";
 
   console.log(randomDrawer);
   const socket = Socket.current;
@@ -64,12 +78,34 @@ function Skribble() {
 
     return similarity / len;
   }
+  useEffect(() => {
+    if (messageContainerRef.current) {
+      messageContainerRef.current.scrollTop =
+        messageContainerRef.current.scrollHeight;
+    }
+  }, [chats]);
+
+  useEffect(() => {
+    const players = [];
+    roomDetails?.participants.map((participant) => {
+      const data = {
+        userName: participant.userName,
+        userId: participant.userId,
+        scores: 0,
+      };
+      players.push(data);
+    });
+    // console.log("player for scoreCard", players);
+    scoreCard.current = players;
+  }, []);
+  // console.log("scoreCard", scoreCard.current);
 
   useEffect(() => {
     if (!socket) {
       connectWithSocketServer();
     }
     const roomDetails = JSON.parse(localStorage.getItem("roomDetails"));
+    console.log("local", roomDetails);
     const chats = JSON.parse(localStorage.getItem("chats"));
     playingGameRef.current = true;
     setRoomDetails(roomDetails);
@@ -80,7 +116,7 @@ function Skribble() {
         roomCode: roomDetails?.roomCode,
         time: time,
         rounds: rounds,
-        players: players,
+        difficulty: difficulty,
       };
       if (user?._id === roomDetails?.roomCreator.userId) {
         console.log("emitted timer");
@@ -92,15 +128,72 @@ function Skribble() {
     setRandomDrawer(roomDetails?.roomCreator);
   }, []);
 
-  const handleSend = () => {
-    console.log(message, user);
+  const checkForAbusiveLanguage = async (e) => {
+    e.preventDefault();
+    console.log("inside abusive word checker");
+    const requestBody = {
+      comment: { text: message },
+      languages: ["en"],
+      requestedAttributes: { TOXICITY: {} },
+    };
 
+    try {
+      const response = await fetch(`${perspectiveEndpoint}?key=${apiKey}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const result = await response.json();
+      console.log("result", result);
+      const toxicityScore = result.attributeScores.TOXICITY.summaryScore.value;
+      console.log("toxicityScore", toxicityScore);
+      if (toxicityScore > 0.7) {
+        const data = {
+          roomCode: roomDetails?.roomCode,
+          userId: user?._id,
+        };
+        console.log("data abusive", data);
+        socket?.emit("abusive-message", data);
+        setError(
+          "Abusive language is not allowed, you will be kicked out after 3 warnings"
+        );
+        const warnings = JSON.parse(localStorage.getItem("warnings")) || 0;
+        localStorage.setItem("warnings", warnings + 1);
+        if (warnings === 2) {
+          localStorage.removeItem("warnings");
+          handleLeave("kick");
+        }
+        console.log("abusive message emitted");
+        setMessage("");
+        return;
+      } else {
+        handleSend(e);
+      }
+    } catch (error) {
+      console.error("Error checking for abusive language:", error);
+    }
+  };
+
+  const handleSend = (e) => {
+    e.preventDefault();
+    console.log(message, user);
     const data = {
       userId: user?._id,
       userName: user?.username,
       message:
         message === selectedWord ? `${user?.username} has guessed!` : message,
     };
+    if (message !== data.message) {
+      const data = {
+        userId: user?._id,
+        userName: user?.username,
+        roomCode: roomDetails?.roomCode,
+      };
+      socket?.emit("guessed", data);
+    }
     sendRoomMessage(data, roomDetails.roomCode);
     setMessage("");
   };
@@ -176,7 +269,6 @@ function Skribble() {
   useEffect(() => {
     socket?.on("new-message", (data) => {
       console.log("new-message", data);
-      console.log(chats);
       const guess_message = user.username + " has guessed!";
       var message = data.message;
       if (data.userId === user._id) {
@@ -197,7 +289,10 @@ function Skribble() {
       console.log("user-leffffffft", userData);
       const userName = userData?.userName;
       const userId = userData?.userId;
-      const message = `${userName} has left the room.`;
+      const message =
+        userData.action === "kick"
+          ? `${userName} has been kicked.`
+          : `${userName} has left the room.`;
       const data = {
         message: message,
         user: userName,
@@ -234,13 +329,14 @@ function Skribble() {
       console.log(message);
       navigate("/selectionBoard");
     });
-    socket?.on("word-Selected", (word) => {
-      console.log("wordSelected", word);
+    socket?.on("word-Selected", (data) => {
+      console.log("wordSelected", data);
       setStartTimer(true);
-      setSelectedWord(word);
+      setSelectedWord(data.word);
     });
     socket?.on("reload", (data) => {
       console.log("recieved", data);
+      setShowLeaderBoard(false);
       setShow(true);
       if (data.player.userId === randomDrawer.userId) return;
       setRandomDrawer(data.player);
@@ -250,28 +346,57 @@ function Skribble() {
       startRandomGame();
     });
     socket?.on("set-Timer", (data) => {
+      console.log("set-Timer", data);
       setTime(data.time);
       setRounds(data.rounds);
-      setPlayers(data.players);
+      setDifficulty(data.difficulty);
+      localStorage.removeItem("roundsPlayed");
+    });
+    socket?.on("showLeaderBoard", () => {
+      console.log("showLeaderBoard");
+      setShowLeaderBoard(true);
+    });
+    socket?.on("restrict", (data) => {
+      if (user._id === data.userId) {
+        console.log("restrict", data);
+        setShowMessageBar(false);
+      }
+    });
+    socket?.on("kicked", (data) => {
+      if (user._id === data.userId) {
+        console.log("kicked user");
+        handleLeave("kick");
+      }
+    });
+    socket?.on("warn", (data) => {
+      if (user._id === data.userId) {
+        console.log("warn");
+        setError("warning from host");
+      }
     });
     return () => {
       socket?.off("new-message");
       socket?.off("user-left");
       socket?.off("ended-game");
       socket?.off("join-room-error");
-      socket?.off("word-Selected");
+      // socket?.off("word-Selected");
       socket?.off("reload");
       socket?.off("game-started");
       socket?.off("set-Timer");
       socket?.off("host-left");
+      socket?.off("showLeaderBoard");
+      socket?.off("kicked");
+      socket?.off("restrict");
+      socket?.off("warn");
     };
   }, [
     setRoomDetails,
     handleFilterParticipants,
+    handleLeave,
     startRandomGame,
     setShowTimer,
     roomDetails,
-    setPlayers,
+    setDifficulty,
     selectedWord,
     setRounds,
     socket,
@@ -288,9 +413,45 @@ function Skribble() {
     // handleFilterParticpiants,
   ]);
 
+  const handleUserClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const UserId = user._id;
+    const hostId = roomDetails.roomCreator.userId;
+    if (UserId === hostId) {
+    }
+  };
+
+  const handleRestrict = (e, userId) => {
+    e.preventDefault();
+    const data = {
+      roomCode: roomDetails?.roomCode,
+      userId: userId,
+    };
+    console.log("data restr", data);
+    socket?.emit("restrict-User", data);
+  };
+  const handleKick = (e, userId) => {
+    e.preventDefault();
+    const data = {
+      userId: userId,
+      roomCode: roomDetails?.roomCode,
+    };
+    socket?.emit("kick", data);
+  };
+  const handleWarn = (e, userId) => {
+    e.preventDefault();
+    const data = {
+      userId: userId,
+      roomCode: roomDetails?.roomCode,
+    };
+    socket?.emit("warn", data);
+  };
+
   console.log("selectedWord", selectedWord);
   console.log("roomDetails", roomDetails);
   console.log(randomDrawer);
+  console.log("rounds ", rounds);
   return (
     <div style={{ height: "100vh", marginBottom: "0px" }}>
       {roomDetails &&
@@ -309,6 +470,9 @@ function Skribble() {
       ) : (
         <SharedCanvas showCursorWithName={showCursorWithName} />
       )}
+      <Modal open={showLeaderBoard} style={{ top: "50px" }}>
+        <LeaderBoard scoreCard={scoreCard} />
+      </Modal>
       <Paper
         style={{
           height: "9vh",
@@ -322,7 +486,7 @@ function Skribble() {
       >
         <Box>
           <div style={{ display: "flex" }}>
-            <CountdownTimer startTimer={startTimer} />
+            <CountdownTimer startTimer={startTimer} scoreCard={scoreCard} />
             <div style={{ width: "auto", marginLeft: "70%" }}>
               {roomDetails &&
                 user?._id !== roomDetails?.roomCreator?.userId && (
@@ -387,15 +551,32 @@ function Skribble() {
                           ? "lightgreen"
                           : "white",
                     }}
+                    onClick={handleUserClick}
                   >
                     <p
                       style={{
                         fontSize: "17px",
                         marginLeft: "10px",
                       }}
-                    >
-                      {participants.userName}
-                    </p>
+                    ></p>
+                    <img
+                      src={roomDetails.participants.pic}
+                      alt="profile"
+                      height={100}
+                      width={100}
+                    />
+                    {participants.userName}
+                    {user?._id === roomDetails?.roomCreator?.userId &&
+                      participants.userId !==
+                        roomDetails?.roomCreator?.userId && (
+                        <PopUpMenu
+                          style={{ position: "relative", right: "0" }}
+                          userId={participants.userId}
+                          handleKick={handleKick}
+                          handleRestrict={handleRestrict}
+                          handleWarn={handleWarn}
+                        />
+                      )}
                   </div>
                 ))
               : null // or another fallback if needed
@@ -417,16 +598,24 @@ function Skribble() {
         <Box p={2}>
           <Paper style={{ height: "77vh" }}>
             <div
-              style={{ height: "100%", overflowY: "auto", marginBottom: "5px" }}
+              ref={messageContainerRef}
+              style={{
+                height: "100%",
+                overflowY: "auto",
+                overflowX: "hidden",
+                marginBottom: "5px",
+              }}
             >
               {chats &&
-                chats.map((m) => (
+                chats?.map((m) => (
                   <p
                     key={m.message}
                     style={{
                       borderBottom: "0.5px solid #b8bcbd",
                       display: "flex",
                       margin: "1px",
+                      wordWrap: "break-word",
+                      overflowWrap: "break-word",
                     }}
                   >
                     <h5
@@ -453,26 +642,33 @@ function Skribble() {
           </Paper>
         </Box>
         <Box p={1}>
-          <Input
-            value={message}
-            style={{ width: "75%" }}
-            placeholder="Enter your message"
-            onChange={(e) => setMessage(e.target.value)}
-          />
-          <Button
-            style={{
-              width: "22%",
-              height: "30px",
-              fontSize: "12px",
-            }}
-            variant="contained"
-            endIcon={<SendIcon />}
-            onClick={handleSend}
-          >
-            Send
-          </Button>
+          {showMessageBar ? (
+            <div>
+              <Input
+                value={message}
+                style={{ width: "75%" }}
+                placeholder="Enter your message"
+                onChange={(e) => setMessage(e.target.value)}
+              />
+              <Button
+                style={{
+                  width: "22%",
+                  height: "30px",
+                  fontSize: "12px",
+                }}
+                variant="contained"
+                endIcon={<SendIcon />}
+                onClick={(e) => checkForAbusiveLanguage(e)}
+              >
+                Send
+              </Button>
+            </div>
+          ) : (
+            <p>you are not allowed to message</p>
+          )}
         </Box>
       </Paper>
+      {error && <ErrorToast message={error} setError={setError} />}
     </div>
   );
 }
