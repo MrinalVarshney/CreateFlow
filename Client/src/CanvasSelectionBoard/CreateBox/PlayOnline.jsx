@@ -7,6 +7,8 @@ import { useUserAndChats } from "../../Context/userAndChatsProvider";
 import Table from "../../shared/Components/Table";
 import Carousel from "../../shared/Components/Carousel";
 import HostInput from "../../shared/Components/HostInput";
+import ErrorToast from "../../shared/Components/ErrorToast";
+import InfoToast from "../../shared/Components/InfoToast";
 
 const useStyles = makeStyles({
   modal: {
@@ -54,6 +56,8 @@ function PlayOnline() {
   const [HostroomCode, setHostRoomCode] = useState({ host: "", roomCode: "" });
   const [joinRoomCode, setJoinRoomCode] = useState("");
   const [isUserJoined, setIsUserJoined] = useState(false);
+  const [error, setError] = useState(null)
+  const [infoError,setInfoError] = useState(null)
   const navigate = useNavigate();
 
   const timeSlots = ["30", "60", "90", "120"];
@@ -111,6 +115,8 @@ function PlayOnline() {
 
   const handleCloseHostModal = () => {
     setIsModalOpen(false);
+    const roomCode = HostroomCode.roomCode;
+    socket?.emit("match-cancelled",roomCode);
   };
 
   const playRandom = () => {
@@ -179,11 +185,24 @@ function PlayOnline() {
       startGame();
     });
 
+    socket?.on("match-cancelled",()=>{
+      if(user.userId === roomDetails?.roomCreator.userId) {
+        setInfoError("You cancelled the match")
+      }
+      else{
+        setInfoError("Match cancelled by host")
+        setIsModalOpen(false)
+      }
+      setRoomDetails(null)
+    })
+
+
     return () => {
       socket?.off("user-joined", handleUserJoined);
       socket?.off("game-started", startGame);
+      socket?.off("game-cancelled")
     };
-  }, [socket, handleUserJoined, navigate, playingGameRef, startGame]);
+  }, [socket, handleUserJoined, navigate, playingGameRef, startGame,setInfoError,roomDetails,user,setRoomDetails]);
 
   const joinRoom = (roomCode) => {
     console.log("joined the room");
@@ -206,6 +225,10 @@ function PlayOnline() {
 
   const start = () => {
     setIsModalOpen(false);
+    if(roomDetails.participants.length < 2){
+      setError("Minimum 2 players required to start the game")
+      return;
+    }
     const data = {
       roomCode: roomDetails.roomCode,
       player: roomDetails.roomCreator,
@@ -346,7 +369,7 @@ function PlayOnline() {
                     }}
                     onClick={handleCloseHostModal}
                   >
-                    Close
+                    Cancel
                   </Button>
                 </div>
               </div>
@@ -421,6 +444,8 @@ function PlayOnline() {
           <Carousel />
         </div>
       </div>
+      {error && <ErrorToast message={error} setError={setError}/>}
+      {infoError && <InfoToast message={infoError} setError={setInfoError}/>}
     </div>
   );
 }

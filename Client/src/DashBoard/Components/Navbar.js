@@ -3,11 +3,13 @@ import { AppBar, Toolbar, IconButton, Drawer, List, ListItem, ListItemText } fro
 import { logout } from '../../shared/utils/logout';
 import {useNavigate} from "react-router-dom"
 import {useUserAndChats} from "../../Context/userAndChatsProvider.jsx"
+import Notification from './Notification.js';
 
-const Navbar = () => {
+const Navbar = ({notifications}) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const {user} = useUserAndChats();
   const navigate = useNavigate();
+  console.log(notifications)
 
   const handleDrawerOpen = () => {
     setDrawerOpen(true);
@@ -34,9 +36,9 @@ const Navbar = () => {
     <div>
       <AppBar position="static" style={{ backgroundColor: 'transparent', boxShadow: 'none'}}>
         <Toolbar>
-
+        
           <div style={{ flex: 1 }} /> {/* Pushes the logo to the rightmost side */}
-
+          <Notification notifications={notifications}/>
           <IconButton color="inherit" onClick={handleDrawerOpen}>
             <img  alt="Logo" style={{ width: 40, height: 40, borderRadius: '50%' }} />
           </IconButton>

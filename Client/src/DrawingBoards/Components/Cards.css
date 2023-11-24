@@ -1,0 +1,39 @@
+.preMadeCard {
+  perspective: 1000px;
+  transition: transform 0.5s ease-in-out;
+}
+
+.preMadeCard:hover {
+  transform: perspective(1000px) translateY(-5px) rotateX(10deg);
+}
+
+.cardMedia:hover {
+  cursor: pointer;
+  opacity: 10;
+  background-color: rgb(208, 208, 201);
+}
+
+.cardMedia {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.favouriteIcon:hover {
+    cursor: pointer;
+}
+
+
+.cardContainer {
+  position: relative;
+  overflow: hidden;
+}
+
+.hoverText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer
+}
+
+
+

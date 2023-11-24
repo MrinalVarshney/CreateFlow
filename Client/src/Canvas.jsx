@@ -6,8 +6,11 @@ import Tools from "./ToolBar/Tools";
 import UndoRedo from "./utils/UndoRedo";
 import ShapesMenu from "./ToolBar/ShapesMenu";
 import { Box } from "@mui/system";
+import CustomBackdrop from "./shared/Components/CustomBackDrop.js";
 import FloodFill from "q-floodfill";
 import { useStyles } from "./Assets/CursorStyles";
+import "./api.jsx";
+import SuccessToast from "./shared/Components/successToast.js";
 import {
   drawRectangle,
   drawCircle,
@@ -18,10 +21,17 @@ import {
   drawDashedRectangle,
   drawLineDashedRectangle,
 } from "./utils/ShapesLogic.jsx";
+import SavingAndSocialMenu from "./ToolBar/SavingAndSocialMenu";
+import ErrorToast from "./shared/Components/ErrorToast.js";
+import { useUserAndChats } from "./Context/userAndChatsProvider.jsx";
+import * as api from "./api";
+import CanvasNameModal from "./ToolBar/Components/CanvasNameModal.js";
+import { useNavigate } from "react-router-dom";
 
 function DrawingCanvas() {
   const canvasRef = useRef(null);
   const offCanvasRef = useRef(null);
+  const {setCanvasDetails , connectWithSocketServer, Socket} = useUserAndChats();
   const {
     selectedTool,
     selectedColor,
@@ -35,6 +45,9 @@ function DrawingCanvas() {
   const [isDragging, setIsDragging] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [uploadFile, setUploadFile] = useState(null);
+  const [progress, setProgress] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState(null);
   const isCustomizable = useRef(false);
   const StartRef = useRef({ startX: 0, startY: 0 });
   const CurrentRef = useRef({ x: -1, y: -1 });
@@ -44,9 +57,117 @@ function DrawingCanvas() {
   const isResizing = useRef(false);
   const stillResizing = useRef(false);
   const classes = useStyles();
+  const [success, setSuccess] = useState(null);
+  const navigateToGallery = useRef(false)
+  const navigate = useNavigate();
+
+  /***********************************Function for handling modal   for saving canvas name ***********************/
+
+  useEffect(()=>{
+    connectWithSocketServer();
+    const socket = Socket?.current;
+    const roomCode = localStorage.getItem("roomCode");
+    const user = localStorage.getItem("user")
+    if(socket && roomCode){
+      const userId = user._id;
+      const userName = user.username;
+      const data = {
+        userId:userId,
+        userName:userName,
+        roomCode:roomCode 
+      }
+      socket.emit("create-collab-room",data);
+    }
+  },[]);
+
+  const handleOpenModal = (data) => {
+    // opening canvas save modal
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = (data) => {
+    /// For saving canvas Name
+    setIsModalOpen(false);
+    if (data) {
+      saveCanvas(data);
+    }
+  };
+
+  /**************************************Utilities ****************************************************/
+
+  /*Function to save the current canvas at server-side */
+
+  const saveCanvas = async (data) => {
+    console.log("Data to save ", data);
+    setProgress(true);
+    const response = await api.saveCanvas(data);
+    setProgress(false);
+    if (response.error) {
+      setError(response.errorMessage);
+    } else {
+      setCanvasDetails(response.data);
+      setSuccess("Canvas successfully saved");
+    }
+    if(navigateToGallery.current){
+      navigate("/drawingGallery")
+    }
+  };
+  const reSaveCanvas = async () => {
+    setProgress(true);
+    const details = JSON.parse(localStorage.getItem("canvasDetails"));
+    const canvasData = localStorage.getItem("snapShot");
+    const updates = {
+      canvasId: details._id,
+      canvasData: canvasData,
+    };
+    setProgress(true);
+    const response = await api.updateCanvas(updates);
+    setProgress(false);
+    if (response.error) {
+      setError(response.errorMessage);
+    } else {
+      setSuccess("Canvas re-saved successfully");
+    }
+    redrawCanvas(canvasData)
+  };
+
+  const downloadCanvasImage = (dataUrl) => {
+    var downloadLink = document.createElement("a");
+    downloadLink.href = dataUrl;
+    downloadLink.download = "canvasImage.png";
+    downloadLink.click();
+  };
+
+  /*********************Loading most recent canvas state on reconnection the page *******************/
 
   useEffect(() => {
-    saveCanvasState();
+    const savedDrawing = localStorage.getItem("snapShot");
+    const canvasDetails = localStorage.getItem("canvasDetails");
+    if (canvasDetails) {
+      setCanvasDetails();
+    }
+    if (!savedDrawing) {
+      console.log(
+        "Dimensions",
+        canvasRef.current.width,
+        canvasRef.current.height
+      );
+      const context = canvasRef.current.getContext("2d");
+      context.moveTo(0, 0);
+      context.lineTo(0, 0);
+      const imgData = context?.getImageData(
+        0,
+        0,
+        canvasRef.current.width,
+        canvasRef.current.height
+      );
+      const floodFill = new FloodFill(imgData);
+      floodFill.fill("rgb(255,255,255)", 20, 20, 0);
+      context.putImageData(floodFill.imageData, 0, 0);
+      saveCanvasState();
+    } else {
+      redrawCanvas(savedDrawing);
+    }
   }, []);
 
   /*********************Functionality to toggle between main and virtual canvas*****************************/
@@ -233,6 +354,7 @@ function DrawingCanvas() {
     const snapShot = canvas.toDataURL();
     console.log("State saved");
     addToHistory(snapShot);
+    localStorage.setItem("snapShot", snapShot);
   };
 
   const redrawCanvas = (imageData) => {
@@ -537,7 +659,9 @@ function DrawingCanvas() {
     }
   };
 
-  return (
+  return progress ? (
+    <CustomBackdrop showProgress={progress} />
+  ) : (
     <div style={{ cursor: "./Assets/cursor/eraser.jpg" }}>
       <Box
         sx={{
@@ -555,7 +679,13 @@ function DrawingCanvas() {
         <ColorPalette />
         <UndoRedo isOpen={isOpen} redrawCanvas={redrawCanvas} />
       </Box>
-
+      <SavingAndSocialMenu
+        handleOpenModal={handleOpenModal}
+        downloadCanvasImage={downloadCanvasImage}
+        reSaveCanvas={reSaveCanvas}
+        navigateToGallery = {navigateToGallery}
+      />
+      <CanvasNameModal open={isModalOpen} onClose={handleCloseModal} />
       <canvas
         className={classes[selectedTool]}
         ref={canvasRef}
@@ -587,6 +717,8 @@ function DrawingCanvas() {
         onMouseMove={handleVirtualMouseMove}
         onMouseUp={handleVirtualMouseUp}
       />
+      {error && <ErrorToast message={error} setError={setError} />}
+      {success && <SuccessToast message={success} setSuccess={setSuccess} />}
     </div>
   );
 }

@@ -18,6 +18,16 @@ export const UserAndChatsProvider = ({ children }) => {
   const playingGameRef = useRef(false);
   const Socket = useRef(null);
   const [showTimer,setShowTimer] = useState(false);
+  const [canvasDetails,setCanvasDetails] = useState(null);
+  const [showCursorWithName, setShowCursorWithName] = useState(true)
+
+  useEffect(()=>{
+    if(canvasDetails){
+      console.log("Saving canvas details")
+      console.log(canvasDetails)
+      localStorage.setItem("canvasDetails", JSON.stringify(canvasDetails))
+    }
+  },[canvasDetails])
 
   useEffect(() => {
     if (roomDetails) {
@@ -46,7 +56,8 @@ export const UserAndChatsProvider = ({ children }) => {
       }
     } else if (
       currentPath === "/register" ||
-      currentPath === "/reset-password/"
+      currentPath === "/reset-password/" ||
+      currentPath === "/reset-password/:token"
     ) {
       // Allow access to the register page
       return;
@@ -69,6 +80,7 @@ export const UserAndChatsProvider = ({ children }) => {
 
     /// For maintaining unique socket id for each user
     socket?.emit("connect-user", userId, (socketId) => {
+      console.log("emitting")
       console.log("socketId", socketId);
       socket.id = socketId;
     });
@@ -96,6 +108,10 @@ export const UserAndChatsProvider = ({ children }) => {
     setTime,
     players,
     setPlayers,
+    canvasDetails,
+    setCanvasDetails,
+    showCursorWithName,
+    setShowCursorWithName
   };
 
   return (

@@ -5,7 +5,7 @@ import AppGif from "../../Assets/GIF/App.gif";
 import AppImg from "../../Assets/Images/App.jpg";
 import Navbar from "./Navbar";
 
-const YourComponent = () => {
+const YourComponent = ({notifications}) => {
   const [playedOnce, setPlayedOnce] = useState(false);
   const handleLoad = () => {
     setTimeout(() => {
@@ -17,6 +17,10 @@ const YourComponent = () => {
     e.preventDefault();
     e.stopPropagation();
     navigate("/PlayOnline")
+  }
+
+  const GoToGallery = ()=>{
+    navigate("/drawingGallery")
   }
 
   return (
@@ -47,13 +51,13 @@ const YourComponent = () => {
 
         <div class="bottom-box">
           <div className="box sideBoxes">
-            <div className="playText">Drawing Boards</div>
+            <div className="playText" onClick={GoToGallery}>Drawing Boards</div>
           </div>
         </div>
       </div>
 
       <div className="right-container">
-      <Navbar />
+      <Navbar notifications={notifications}/>
       <div className="welcome-page">
         <h2 className="welcome-title">Welcome, Doodlers!</h2>
         <p className="welcome-text">

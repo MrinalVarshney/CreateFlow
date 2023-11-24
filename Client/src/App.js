@@ -1,5 +1,6 @@
 import "./App.css";
 import Canvas from "./Canvas";
+import { useEffect } from "react";
 import SkribblePage from "./SkribbleGame/SkribblePage.jsx";
 import Login from "./authPages/LoginPage/login.jsx";
 import Register from "./authPages/RegisterPage/register";
@@ -8,8 +9,19 @@ import ResetPasswordPage from "./authPages/ResetPasswordPage";
 import EmailConfirmationPage from "./authPages/EmailConfirmationPage.js";
 import Dashboard from "../src/DashBoard/Dashboard";
 import PlayOnline from "./CanvasSelectionBoard/CreateBox/PlayOnline.jsx";
+import DrawingGallery from "./DrawingBoards/DrawingGallery.js";
+import { useUserAndChats } from "./Context/userAndChatsProvider.jsx";
 
 function App() {
+  const {Socket} = useUserAndChats();
+  const socket = Socket.current;
+  useEffect(()=>{
+    socket?.on("join-invitation",(data)=>{
+      console.log("Join Invitation")
+      console.log(data)
+    })
+  },[socket])
+  
   return (
     <Routes>
       <Route exact path="/canvas" Component={Canvas} />
@@ -20,6 +32,7 @@ function App() {
       <Route exact path="/verify-email" Component={EmailConfirmationPage} />
       <Route exact path="/reset-password" Component={ResetPasswordPage} />
       <Route exact path="/playOnline" Component={PlayOnline} />
+      <Route exact path="/drawingGallery" Component={DrawingGallery} />
     </Routes>
   );
 }

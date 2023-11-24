@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Grid, Box, Paper, Input, Button } from "@mui/material";
+import { Box, Paper, Input, Button } from "@mui/material";
 import { useUserAndChats } from "../../Context/userAndChatsProvider";
 import SendIcon from "@mui/icons-material/Send";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +24,8 @@ function Skribble() {
     setRounds,
     players,
     setPlayers,
+    showCursorWithName,
+    setShowCursorWithName,
   } = useUserAndChats();
 
   const [selectedWord, setSelectedWord] = useState("");
@@ -31,6 +33,7 @@ function Skribble() {
   const [show, setShow] = useState(false);
   const [startTimer, setStartTimer] = useState(false);
   const [message, setMessage] = useState("");
+
   console.log(randomDrawer);
   const socket = Socket.current;
   if (socket) {
@@ -38,6 +41,14 @@ function Skribble() {
   }
   console.log("Reloading");
 
+  const handleCursorChange = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("handle cursor change");
+    setShowCursorWithName((showCursorWithName) => !showCursorWithName);
+  };
+
+  console.log("cursorChange", showCursorWithName);
   function closeRandomWordModal() {
     setShow(false);
   }
@@ -115,49 +126,52 @@ function Skribble() {
     setShowTimer(false);
     localStorage.removeItem("roomDetails");
     setRoomDetails(null);
-    localStorage.removeItem("chats")
+    localStorage.removeItem("chats");
     setChats([]);
     socket?.emit("leave-room", data);
     navigate("/playOnline");
   };
   const handleEnd = useCallback(() => {
     console.log("Game ended");
-    socket?.emit("end-game", user._id);
-    localStorage.removeItem("roomDetails");
-    localStorage.removeItem("chats")
+    const roomCode = roomDetails?.roomCode;
+    socket?.emit("end-game",roomCode);
+    setRoomDetails(null);
+    setChats([]);
   }, [socket]);
 
-  const handleFilterParticipants = useCallback((userId) => {
-    if(roomDetails){
-      console.log("room detailssss",roomDetails)
-      const filteredParticipants = roomDetails?.participants.filter(
-        (participants) => participants.userId !== userId
-      );
-      setRoomDetails({...roomDetails, participants: filteredParticipants });
-      console.log("roomDetails", roomDetails)
-    }
-  }, [roomDetails,setRoomDetails]);
+  const handleFilterParticipants = useCallback(
+    (userId) => {
+      if (roomDetails) {
+        console.log("room detailssss", roomDetails);
+        const filteredParticipants = roomDetails?.participants.filter(
+          (participants) => participants.userId !== userId
+        );
+        setRoomDetails({ ...roomDetails, participants: filteredParticipants });
+        console.log("roomDetails", roomDetails);
+      }
+    },
+    [roomDetails, setRoomDetails]
+  );
 
-  const startGame = ()=>{
-    if(roomDetails.participants.length === 1){
+  const startGame = () => {
+    if (roomDetails.participants.length === 1) {
       alert("Atleast 2 players are required for starting the game");
       return;
-    }
-    else if(roomDetails.isGameStarted){
+    } else if (roomDetails.isGameStarted) {
       alert("Game already started");
       return;
     }
     const roomType = roomDetails.roomType;
     const roomCode = roomDetails.roomCode;
-    const data = {roomType,roomCode};
-    socket?.emit("start-game",data);
-  }
+    const data = { roomType, roomCode };
+    socket?.emit("start-game", data);
+  };
 
-  const startRandomGame = useCallback(()=>{
-    console.log("Starting random game")
+  const startRandomGame = useCallback(() => {
+    console.log("Starting random game");
     setShowTimer(true);
-    setRoomDetails({...roomDetails,isGameStarted:true})
-  },[roomDetails,setShowTimer,setRoomDetails])
+    setRoomDetails({ ...roomDetails, isGameStarted: true });
+  }, [roomDetails, setShowTimer, setRoomDetails]);
 
   useEffect(() => {
     socket?.on("new-message", (data) => {
@@ -180,7 +194,7 @@ function Skribble() {
     });
     socket?.on("user-left", (userData) => {
       console.log("work leave", userData);
-      console.log("user-leffffffft",userData)
+      console.log("user-leffffffft", userData);
       const userName = userData?.userName;
       const userId = userData?.userId;
       const message = `${userName} has left the room.`;
@@ -188,13 +202,32 @@ function Skribble() {
         message: message,
         user: userName,
       };
-      console.log(data)
+      console.log(data);
       handleFilterParticipants(userId);
-      setChats([...chats,data]);
+      setChats([...chats, data]);
+    });
+    socket?.on("host-left", () => {
+      const data = {
+        message: "Host has left the room",
+        user: roomDetails.roomCreator.userName,
+      };
+      const hostId = roomDetails.roomCreator.userId;
+      console.log("Host has left the room");
+      const updatedParticipants = roomDetails.participants.filter(
+        (participant) => participant.userId !== hostId
+      );
+      console.log("Updated participants", updatedParticipants);
+      const newHost = updatedParticipants[0];
+      setRoomDetails({
+        ...roomDetails,
+        roomCreator: newHost,
+        participants: updatedParticipants,
+      });
+      setChats([...chats, data]);
     });
     socket?.on("game-ended", () => {
-      localStorage.removeItem("roomDetails");
-      localStorage.removeItem("chats");
+      setRoomDetails(null)
+      setChats(null)
       navigate("/playOnline");
     });
     socket?.on("join-room-error", (message) => {
@@ -212,9 +245,10 @@ function Skribble() {
       if (data.player.userId === randomDrawer.userId) return;
       setRandomDrawer(data.player);
     });
-    socket?.on("game-started",()=>{  // For starting random game
-       startRandomGame()
-    })
+    socket?.on("game-started", () => {
+      // For starting random game
+      startRandomGame();
+    });
     socket?.on("set-Timer", (data) => {
       setTime(data.time);
       setRounds(data.rounds);
@@ -227,11 +261,12 @@ function Skribble() {
       socket?.off("join-room-error");
       socket?.off("word-Selected");
       socket?.off("reload");
-      socket?.off("game-started")
+      socket?.off("game-started");
       socket?.off("set-Timer");
+      socket?.off("host-left");
     };
-
   }, [
+    setRoomDetails,
     handleFilterParticipants,
     startRandomGame,
     setShowTimer,
@@ -254,13 +289,15 @@ function Skribble() {
   ]);
 
   console.log("selectedWord", selectedWord);
-  console.log("roomDetails",roomDetails)
-  console.log(randomDrawer)
+  console.log("roomDetails", roomDetails);
+  console.log(randomDrawer);
   return (
     <div style={{ height: "100vh", marginBottom: "0px" }}>
-    {roomDetails && roomDetails.roomType === "random"  && roomDetails.isGameStarted === false ? 
-      <SharedCanvas />: 
-       randomDrawer?.userId === user?._id ? (
+      {roomDetails &&
+      roomDetails.roomType === "random" &&
+      roomDetails.isGameStarted === false ? (
+        <SharedCanvas />
+      ) : randomDrawer?.userId === user?._id ? (
         <>
           <SkribbleCanvas
             setWord={setSelectedWord}
@@ -270,7 +307,7 @@ function Skribble() {
           />
         </>
       ) : (
-        <SharedCanvas />
+        <SharedCanvas showCursorWithName={showCursorWithName} />
       )}
       <Paper
         style={{
@@ -287,27 +324,42 @@ function Skribble() {
           <div style={{ display: "flex" }}>
             <CountdownTimer startTimer={startTimer} />
             <div style={{ width: "auto", marginLeft: "70%" }}>
+              {roomDetails &&
+                user?._id !== roomDetails?.roomCreator?.userId && (
+                  <Button
+                    variant="outlined"
+                    style={{ color: "blue" }}
+                    onClick={handleCursorChange}
+                  >
+                    {showCursorWithName
+                      ? "Disable name on cursor"
+                      : "Enable name on cursor"}
+                  </Button>
+                )}
               <Button variant="outlined" color="error" onClick={handleLeave}>
                 Leave
               </Button>
-              {roomDetails && user?._id === roomDetails?.roomCreator?.userId && (
-                roomDetails.roomType === "private" ?
-                <Button
-                  style={{ marginLeft: "10px" }}
-                  variant="contained"
-                  color="success"
-                  onClick={handleEnd}
-                >
-                  End
-                </Button>:
-                <Button
-                  style={{ marginLeft: "10px" }}
-                  variant="contained"
-                  color="success"
-                  onClick={startGame}>
+              {roomDetails &&
+                user?._id === roomDetails?.roomCreator?.userId &&
+                (roomDetails.roomType === "private" ? (
+                  <Button
+                    style={{ marginLeft: "10px" }}
+                    variant="contained"
+                    color="success"
+                    onClick={handleEnd}
+                  >
+                    End
+                  </Button>
+                ) : (
+                  <Button
+                    style={{ marginLeft: "10px" }}
+                    variant="contained"
+                    color="success"
+                    onClick={startGame}
+                  >
                     Start Game
                   </Button>
-              )}
+                ))}
             </div>
           </div>
         </Box>
