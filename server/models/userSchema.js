@@ -13,6 +13,9 @@ const userSchema = mongoose.Schema(
     isUserLogin:{type:Boolean,default:false},
     createdCanvases: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Canvas' }],
     collaboratedCanvases: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Canvas' }],
+    GameHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'LeaderBoard' }],
+    favourites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Canvas' }],
+    invitations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Invitation' }],
   },
   {
     timestamps: true,

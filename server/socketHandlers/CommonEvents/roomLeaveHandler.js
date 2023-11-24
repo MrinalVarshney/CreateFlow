@@ -5,7 +5,7 @@ const roomLeaveHandler = (data) => {
   const roomCode = serverStore.getRoomCode(userId);
   const roomType = data.roomType;
   const io = serverStore.getSocketServerInstance();
-  if (roomType === "random") {
+    if (roomType === "random") {
     console.log("userID", userId, "roomCode", roomCode)
     const updatedRoom = serverStore.removerUserFromRandomRoom(userId, roomCode);
     console.log("Removed user from random room",updatedRoom);
@@ -17,9 +17,9 @@ const roomLeaveHandler = (data) => {
     }
   }
   io.to(roomCode).emit("user-left", {
-    userId: data.userId,
-    userName: data.userName,
-  });
-};
+        userId: data.userId,
+        userName: data.userName,
+      });
+    };
 
 module.exports = roomLeaveHandler;

@@ -17,15 +17,15 @@ const roomJoinHandler = (socket, roomCode, data) => {
     return;
   } else {
     serverStore.mapUserToRoomCode(data.userId, roomCode);
-    serverStore.joinActiveRoom({ roomCode, socketId, data });
-    const roomDetails = serverStore.getActiveRoom(roomCode);
+        serverStore.joinActiveRoom({ roomCode, socketId, data });
+const roomDetails = serverStore.getActiveRoom(roomCode);
 
     // Emit "user-joined" to all users in the room
-    io.to(roomCode).emit("user-joined", {
-      userId: data.userId,
-      userName: data.userName,
-      socketId,
-    });
+      io.to(roomCode).emit("user-joined", {
+                userId: data.userId,
+          userName: data.userName,
+          socketId,
+      });
 
     // Join the room (user who joins)
     console.log(roomDetails);

@@ -5,7 +5,7 @@ const handlePlayRandom = (socket,data)=>{
     console.log("player random",data)
     var roomCode;
     const io = serverStore.getSocketServerInstance();
-    if(availableRandomRoom){
+        if(availableRandomRoom){
         roomCode = availableRandomRoom.roomCode;
         console.log("Room available")
         const updatedAvailableRoom = serverStore.pushInAvailableRandomRoom(data,roomCode);
