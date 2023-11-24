@@ -9,7 +9,7 @@ import CountdownTimer from "../../shared/Components/CountDownTimer";
 import LeaderBoard from "../../shared/Components/LeaderBoard";
 import PopUpMenu from "../../shared/Components/PopUpMenu";
 import ErrorToast from "../../shared/Components/ErrorToast";
-// import x from "../../Assets/Images/";
+
 function Skribble() {
   const {
     user,

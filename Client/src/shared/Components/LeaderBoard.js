@@ -1,6 +1,6 @@
 import Lottie from "react-lottie";
 import animationData from "./Animations/trophy.json"; // Replace with the path to your Lottie animation JSON file
-
+import leaderBackground from "./Animations/leaderboard-bg.jpg"
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // import { faPaintBrush } from '@fortawesome/free-solid-svg-icons';
 
@@ -29,9 +29,10 @@ function Leaderboard({ scoreCard }) {
   const maxScore = 200 * roundsPlayed;
 
   return (
-    <div className="leaderboard-box">
+    <div className="leaderboard-box" style={{backgroundImage:`url(${leaderBackground})`,backgroundSize:"cover",backgroundRepeat:"no-repeat",backgroundPosition:"center center",height:"90%", width:"25%" }}>
+      <div className="overlay">
       <div className="header">
-        <Lottie options={defaultOptions} height={100} width={100} />
+        <Lottie options={defaultOptions}  style={{width:"auto"}} />
         <h1>Leaderboard</h1>
       </div>
 
@@ -59,7 +60,8 @@ function Leaderboard({ scoreCard }) {
                     style={{
                       width: `${((player?.scores + 1) / maxScore) * 200}px`,
                     }}
-                  ></div>
+                  >
+                  </div>
                 </div>
               </td>
               <td>{player?.scores}</td>
@@ -67,6 +69,7 @@ function Leaderboard({ scoreCard }) {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

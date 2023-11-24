@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Eczar&family=IBM+Plex+Mono:wght@500&family=Inter&family=Lilita+One&family=Montserrat:wght@800&family=Rubik:wght@500&family=Ubuntu&family=Work+Sans&display=swap');
+
+
 .leaderboard-box {
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -9,9 +12,17 @@
   flex-direction: column;
   align-items: center;
   width: fit-content;
+  
+  /* background-image: './Animations/leaderboard-bg.jpg'; */
+  /* background-size: cover; */
+  /* background-repeat: no-repeat; */
+  /* background-position: center; */
+
+  /* height: auto; */
+
 
   /* Animation */
-  animation: scale-up 0.5s ease-in-out both;
+  /* animation: scale-up 0.5s ease-in-out both;
 
   @keyframes scale-up {
     0% {
@@ -22,10 +33,10 @@
       transform: scale(1);
       opacity: 1;
     }
-  }
+  } */
 
   /* Additional animated background */
-  background: linear-gradient(45deg, #ff9a8b, #a4b1f2, #ff9a8b, #a4b1f2);
+  /* background: linear-gradient(45deg, #ff9a8b, #a4b1f2, #ff9a8b, #a4b1f2);
   background-size: 400% 400%;
   animation: gradientBg 10s linear infinite;
 
@@ -39,16 +50,25 @@
     100% {
       background-position: 0% 50%;
     }
-  }
+  }*/
+}
+
+.overlay{
+  background: rgba(255, 255, 255, 0.5);
+  height:100%;
+  width:100%;
+  padding: 20px;
 }
 
 .header {
   position: relative;
-  right: 10%;
-  top: 2%;
+  right: 27%;
+  top: 0%;
   display: flex;
   flex-direction: row;
   align-items: center;
+  font-family: 'Lilita One', sans-serif;
+  margin-right: 20px;
 }
 
 /* Add this CSS in your LeaderboardBox.css or your CSS file */
@@ -67,6 +87,13 @@
   border-radius: 50%;
   margin-right: 10px;
 }
+
+.table {
+  font-family: 'Inter', sans-serif;
+  forced-color-adjust: black;
+}
+
+
 
 .score-line {
   display: flex;
