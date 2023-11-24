@@ -9,6 +9,7 @@ import CountdownTimer from "../../shared/Components/CountDownTimer";
 import LeaderBoard from "../../shared/Components/LeaderBoard";
 import PopUpMenu from "../../shared/Components/PopUpMenu";
 import ErrorToast from "../../shared/Components/ErrorToast";
+import skribblepage from "../../Assets/Images/skribblepage.jpg";
 
 function Skribble() {
   const {
@@ -464,9 +465,24 @@ function Skribble() {
         }}
       >
         <Box>
-          <div style={{ display: "flex" }}>
-            <CountdownTimer startTimer={startTimer} scoreCard={scoreCard} />
-            <div style={{ width: "auto", marginLeft: "70%" }}>
+          <div
+            style={{
+              display: "flex",
+            }}
+          >
+            <div>
+              <CountdownTimer startTimer={startTimer} scoreCard={scoreCard} />
+            </div>
+            <div
+              style={{
+                width: "auto",
+                marginLeft: "70%",
+                position: "relative",
+                display: "flex",
+                flexWrap: "wrap",
+                alignContent: "center",
+              }}
+            >
               <Button
                 variant="outlined"
                 color="error"

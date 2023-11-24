@@ -18,6 +18,12 @@ export const UserAndChatsProvider = ({ children }) => {
   const playingGameRef = useRef(false);
   const Socket = useRef(null);
   const [showTimer, setShowTimer] = useState(false);
+  const collabUsers = useRef(new Map());
+
+  useEffect(() => {
+    if (collabUsers)
+      localStorage.setItem("collabUsers", JSON.stringify(collabUsers));
+  }, [collabUsers]);
 
   useEffect(() => {
     if (roomDetails) {
@@ -96,6 +102,7 @@ export const UserAndChatsProvider = ({ children }) => {
     setTime,
     difficulty,
     setDifficulty,
+    collabUsers,
   };
 
   return (
