@@ -1,6 +1,8 @@
 import { useContext, useState, createContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
+import NetworkErrorPage from "../NetworkErrorPages/ErrorPage";
+
 const userContext = createContext();
 
 export const useUserAndChats = () => {
@@ -35,26 +37,34 @@ export const UserAndChatsProvider = ({ children }) => {
   }, [chats]);
 
   useEffect(() => {
-    const userDetails = JSON.parse(localStorage.getItem("user"));
-    const currentPath = window.location.pathname;
-    console.log(userDetails, "user");
-
-    if (userDetails) {
-      setUser(userDetails);
-      if (currentPath === "/" || currentPath === "/register") {
-        navigate("/dashboard");
+      if(window.navigator.onLine===false){
+        navigate("/offline")
+        return
+      } 
+      else{
+        const userDetails = JSON.parse(localStorage.getItem("user"));
+        const currentPath = window.location.pathname;
+        console.log(userDetails, "user");
+    
+        if (userDetails) {
+          setUser(userDetails);
+          if (currentPath === "/" || currentPath === "/register") {
+            navigate("/dashboard");
+          }
+        } else if (
+          currentPath === "/register" ||
+          currentPath === "/reset-password/"
+        ) {
+          // Allow access to the register page
+          return;
+        } else {
+          // Redirect to the login page
+          console.log(currentPath);
+          navigate("/");
+        }
       }
-    } else if (
-      currentPath === "/register" ||
-      currentPath === "/reset-password/"
-    ) {
-      // Allow access to the register page
-      return;
-    } else {
-      // Redirect to the login page
-      console.log(currentPath);
-      navigate("/");
-    }
+
+  
   }, [navigate]);
 
   const connectWithSocketServer = () => {

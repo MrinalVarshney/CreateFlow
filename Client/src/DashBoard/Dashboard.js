@@ -7,18 +7,6 @@ import Navbar from "./Components/Navbar";
 
 const Dashboard = () => {
 
-  // useEffect(() => {
-  //   const token = getCookie("token");
-
-  //   if (token) {
-  //     const username = getCookie("username");
-  //     const email = getCookie("email");
-  //     const pic = getCookie("pic");
-  //     const verified = getCookie("verified");
-  //     const data = {username,email,pic,token,verified}
-  //     localStorage.setItem("user",JSON.stringify(data))
-  //   }
-  // }, []);
 
   return (
     <div className="container" >

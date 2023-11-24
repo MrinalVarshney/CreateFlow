@@ -2,13 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import './ErrorPage.css';
 import RexGame from './RexGame';
+import { useNavigate } from 'react-router-dom';
 
 const NetworkErrorPage = () => {
   const [isOnline, setIsOnline] = useState(window.navigator.onLine);
+  const navigate = useNavigate()
 
   useEffect(() => {
     const handleOnlineStatus = () => {
       setIsOnline(window.navigator.onLine);
+      navigate("/dashBoard")
     };
 
     window.addEventListener('online', handleOnlineStatus);
