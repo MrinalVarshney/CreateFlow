@@ -13,7 +13,7 @@ const EditModal = ({ isOpen, onRequestClose, onSave, modalContent }) => {
     if (pics === undefined) {
       return;
     }
-    console.log(pics);
+    console.log("pics", pics);
     if (pics.type === "image/jpeg" || pics.type === "image/png") {
       const data = new FormData();
       data.append("file", pics);
@@ -36,7 +36,7 @@ const EditModal = ({ isOpen, onRequestClose, onSave, modalContent }) => {
     }
   };
 
-  console.log("in editModal");
+  console.log("in editModal", pic);
   return (
     <Modal
       open={isOpen}
@@ -83,25 +83,41 @@ const EditModal = ({ isOpen, onRequestClose, onSave, modalContent }) => {
             />
             <div style={{ display: "flex", gap: "2%" }}>
               <img
-                onClick={() => postDetails(paintBoy2)}
+                onClick={() =>
+                  setPic(
+                    "http://res.cloudinary.com/dyo3vk9cy/image/upload/v1700855273/vguxbppqksvmsidlwl7y.jpg"
+                  )
+                }
                 style={{ width: "100px", height: "100px", cursor: "pointer" }}
                 src={paintBoy2}
                 alt="dog1"
               />
               <img
-                onClick={() => setPic(paintBoy1)}
+                onClick={() =>
+                  setPic(
+                    "http://res.cloudinary.com/dyo3vk9cy/image/upload/v1700855856/situurscmcffl7lpmgbh.jpg"
+                  )
+                }
                 style={{ width: "100px", height: "100px", cursor: "pointer" }}
                 src={paintBoy1}
                 alt="dog1"
               />
               <img
-                onClick={() => setPic(paintBoy3)}
+                onClick={() =>
+                  setPic(
+                    "http://res.cloudinary.com/dyo3vk9cy/image/upload/v1700855912/ugfqo6a8zo1o1fathkvp.jpg"
+                  )
+                }
                 style={{ width: "100px", height: "100px", cursor: "pointer" }}
                 src={paintBoy3}
                 alt="dog1"
               />
               <img
-                onClick={() => setPic(paintBoy4)}
+                onClick={() =>
+                  setPic(
+                    "http://res.cloudinary.com/dyo3vk9cy/image/upload/v1700855944/tntsctjdssptbooygan7.jpg"
+                  )
+                }
                 style={{ width: "100px", height: "100px", cursor: "pointer" }}
                 src={paintBoy4}
                 alt="dog1"

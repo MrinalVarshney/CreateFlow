@@ -469,9 +469,24 @@ function Skribble() {
         }}
       >
         <Box>
-          <div style={{ display: "flex" }}>
-            <CountdownTimer startTimer={startTimer} scoreCard={scoreCard} />
-            <div style={{ width: "auto", marginLeft: "70%" }}>
+          <div
+            style={{
+              display: "flex",
+            }}
+          >
+            <div>
+              <CountdownTimer startTimer={startTimer} scoreCard={scoreCard} />
+            </div>
+            <div
+              style={{
+                width: "auto",
+                marginLeft: "70%",
+                position: "relative",
+                display: "flex",
+                flexWrap: "wrap",
+                alignContent: "center",
+              }}
+            >
               <Button
                 variant="outlined"
                 color="error"

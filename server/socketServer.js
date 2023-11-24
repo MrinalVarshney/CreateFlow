@@ -8,6 +8,13 @@ const serverStore = require("./serverStore");
 const newConnectionHandler = require("./socketHandlers/CommonEvents/newConnectionHandler");
 const handlePlayRandom = require("./socketHandlers/RandomRoomSpecificEvents/handlePlayRandom");
 const { v4: uuidv4 } = require("uuid");
+const handleCollabMouseDown = require("./socketHandlers/CollaborationEvents/handleCollabMouseDown");
+const handleCollabMouseMove = require("./socketHandlers/CollaborationEvents/handleCollabMouseMove");
+const handleCollabMouseUp = require("./socketHandlers/CollaborationEvents/handleCollabMouseUp");
+const handleCollabRoomCreate = require("./socketHandlers/CollaborationEvents/handleCollabRoomCreate");
+const handleCollabRoomDelete = require("./socketHandlers/CollaborationEvents/handleCollabRoomDelete");
+const handleCollabRoomJoin = require("./socketHandlers/CollaborationEvents/handleCollabRoomJoin");
+const handleCollabRoomLeave = require("./socketHandlers/CollaborationEvents/handleCollabRoomLeave");
 
 const registerSocketServer = (server) => {
   server.listen(5002, () => {
@@ -140,6 +147,24 @@ const registerSocketServer = (server) => {
     });
     socket.on("warn", (data) => {
       io.to(data.roomCode).emit("warn", data);
+    });
+    socket.on("collab-mouse-down", (data) => {
+      handleCollabMouseDown(data);
+    });
+    socket.on("collab-mouse-move", (data) => {
+      handleCollabMouseMove(data);
+    });
+    socket.on("collab-mouse-up", (data) => {
+      handleCollabMouseUp(data);
+    });
+    socket.on("collab-room-create", (data) => {
+      handleCollabRoomCreate(socket, data);
+    });
+    socket.on("collab-room-join", (data) => {
+      handleCollabRoomJoin(socket, data);
+    });
+    socket.on("collab-room-leave", (data) => {
+      handleCollabRoomLeave(data);
     });
   });
 };
