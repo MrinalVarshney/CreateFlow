@@ -8,7 +8,6 @@ import ResetPasswordPage from "./authPages/ResetPasswordPage";
 import EmailConfirmationPage from "./authPages/EmailConfirmationPage.js";
 import Dashboard from "../src/DashBoard/Dashboard";
 import PlayOnline from "./CanvasSelectionBoard/CreateBox/PlayOnline.jsx";
-import LeaderBoard from "./shared/Components/LeaderBoard.js";
 
 function App() {
   return (
@@ -21,7 +20,6 @@ function App() {
       <Route exact path="/verify-email" Component={EmailConfirmationPage} />
       <Route exact path="/reset-password" Component={ResetPasswordPage} />
       <Route exact path="/playOnline" Component={PlayOnline} />
-      <Route exact path="/leaderBoard" Component={LeaderBoard} />
     </Routes>
   );
 }

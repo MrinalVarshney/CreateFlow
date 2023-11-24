@@ -3,6 +3,8 @@ import getRandomWord from "./randomWordPicker";
 import { Button, Modal, Paper } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useUserAndChats } from "../../Context/userAndChatsProvider";
+import "./randomModal.css";
+import RandomWordImg from "../../Assets/Images/randomWordmodalBackground.jpg";
 
 const useStyles = makeStyles({
   modal: {
@@ -115,7 +117,7 @@ const RandomWordModal = ({ show, closeRandomWordModal }) => {
       }}
     >
       <Modal
-        className={classes.modal}
+        className="randomModal"
         open={show}
         onClose={(event, reason) => {
           if (reason !== "backdropClick") {
@@ -125,17 +127,28 @@ const RandomWordModal = ({ show, closeRandomWordModal }) => {
       >
         <div
           style={{
-            backgroundColor: "pink",
+            backgroundImage: `url(${RandomWordImg})`,
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center center",
+            width: "100%",
+            height: "80vh",
             display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
+            justifyContent: "space-evenly",
             alignContent: "center",
+            flexDirection: "row",
+            flexWrap: "wrap",
+            position: "relative",
+            top: "2%",
           }}
         >
+          <div className="randomWords">Select a Word</div>
           {randomWords.map((word) => (
-            <Paper key={word} className={classes.insideModal}>
-              <Button onClick={() => handleclose(word)}>{word}</Button>
-            </Paper>
+            <div key={word} className="randomInsideModal">
+              <Button onClick={() => handleclose(word)}>
+                <div className="randomModalText">{word}</div>
+              </Button>
+            </div>
           ))}
         </div>
       </Modal>

@@ -22,8 +22,8 @@ export const UserAndChatsProvider = ({ children }) => {
   useEffect(() => {
     if (roomDetails) {
       console.log("saving TO local");
-      const chatSessionKey = "roomDetails";
-      localStorage.setItem(chatSessionKey, JSON.stringify(roomDetails));
+      const room = "roomDetails";
+      localStorage.setItem(room, JSON.stringify(roomDetails));
     }
   }, [roomDetails]);
 

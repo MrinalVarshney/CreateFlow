@@ -9,7 +9,7 @@ import CountdownTimer from "../../shared/Components/CountDownTimer";
 import LeaderBoard from "../../shared/Components/LeaderBoard";
 import PopUpMenu from "../../shared/Components/PopUpMenu";
 import ErrorToast from "../../shared/Components/ErrorToast";
-
+// import x from "../../Assets/Images/";
 function Skribble() {
   const {
     user,
@@ -34,6 +34,7 @@ function Skribble() {
   const [show, setShow] = useState(false);
   const [startTimer, setStartTimer] = useState(false);
   const [message, setMessage] = useState("");
+  const [showMessageBar, setShowMessageBar] = useState(true);
   const [showLeaderBoard, setShowLeaderBoard] = useState(false);
   const [error, setError] = useState(null);
   const scoreCard = useRef(null);
@@ -92,6 +93,7 @@ function Skribble() {
       connectWithSocketServer();
     }
     const roomDetails = JSON.parse(localStorage.getItem("roomDetails"));
+    console.log("local", roomDetails);
     const chats = JSON.parse(localStorage.getItem("chats"));
     playingGameRef.current = true;
     setRoomDetails(roomDetails);
@@ -146,6 +148,12 @@ function Skribble() {
         setError(
           "Abusive language is not allowed, you will be kicked out after 3 warnings"
         );
+        const warnings = JSON.parse(localStorage.getItem("warnings")) || 0;
+        localStorage.setItem("warnings", warnings + 1);
+        if (warnings === 2) {
+          localStorage.removeItem("warnings");
+          handleLeave("kick");
+        }
         console.log("abusive message emitted");
         setMessage("");
         return;
@@ -188,22 +196,36 @@ function Skribble() {
     [socket]
   );
   const navigate = useNavigate();
-  const handleLeave = () => {
-    console.log("leaving");
-    const data = {
-      userName: user?.username,
-      userId: user?._id,
-      roomCode: roomDetails?.roomCode,
-      roomType: roomDetails?.roomType,
-    };
-    setShowTimer(false);
-    localStorage.removeItem("roomDetails");
-    setRoomDetails(null);
-    localStorage.removeItem("chats");
-    setChats([]);
-    socket?.emit("leave-room", data);
-    navigate("/playOnline");
-  };
+  const handleLeave = useCallback(
+    (action) => {
+      console.log("leaving");
+      const data = {
+        userName: user?.username,
+        userId: user?._id,
+        roomCode: roomDetails?.roomCode,
+        roomType: roomDetails?.roomType,
+        action: action,
+      };
+      setShowTimer(false);
+      localStorage.removeItem("roomDetails");
+      setRoomDetails(null);
+      localStorage.removeItem("chats");
+      setChats([]);
+      socket?.emit("leave-room", data);
+      navigate("/playOnline");
+    },
+    [
+      navigate,
+      roomDetails?.roomCode,
+      roomDetails?.roomType,
+      setChats,
+      setRoomDetails,
+      setShowTimer,
+      socket,
+      user?._id,
+      user?.username,
+    ]
+  );
   const handleEnd = useCallback(() => {
     console.log("Game ended");
     socket?.emit("end-game", user._id);
@@ -268,7 +290,10 @@ function Skribble() {
       console.log("user-leffffffft", userData);
       const userName = userData?.userName;
       const userId = userData?.userId;
-      const message = `${userName} has left the room.`;
+      const message =
+        userData.action === "kick"
+          ? `${userName} has been kicked.`
+          : `${userName} has left the room.`;
       const data = {
         message: message,
         user: userName,
@@ -313,6 +338,24 @@ function Skribble() {
       console.log("showLeaderBoard");
       setShowLeaderBoard(true);
     });
+    socket?.on("restrict", (data) => {
+      if (user._id === data.userId) {
+        console.log("restrict", data);
+        setShowMessageBar(false);
+      }
+    });
+    socket?.on("kicked", (data) => {
+      if (user._id === data.userId) {
+        console.log("kicked user");
+        handleLeave("kick");
+      }
+    });
+    socket?.on("warn", (data) => {
+      if (user._id === data.userId) {
+        console.log("warn");
+        setError("warning from host");
+      }
+    });
     return () => {
       socket?.off("new-message");
       socket?.off("user-left");
@@ -323,9 +366,13 @@ function Skribble() {
       socket?.off("game-started");
       socket?.off("set-Timer");
       socket?.off("showLeaderBoard");
+      socket?.off("kicked");
+      socket?.off("restrict");
+      socket?.off("warn");
     };
   }, [
     handleFilterParticipants,
+    handleLeave,
     startRandomGame,
     setShowTimer,
     roomDetails,
@@ -355,9 +402,31 @@ function Skribble() {
     }
   };
 
-  const handleRestrict = (e) => {};
-  const handleKick = (e) => {};
-  const handleWarn = (e) => {};
+  const handleRestrict = (e, userId) => {
+    e.preventDefault();
+    const data = {
+      roomCode: roomDetails?.roomCode,
+      userId: userId,
+    };
+    console.log("data restr", data);
+    socket?.emit("restrict-User", data);
+  };
+  const handleKick = (e, userId) => {
+    e.preventDefault();
+    const data = {
+      userId: userId,
+      roomCode: roomDetails?.roomCode,
+    };
+    socket?.emit("kick", data);
+  };
+  const handleWarn = (e, userId) => {
+    e.preventDefault();
+    const data = {
+      userId: userId,
+      roomCode: roomDetails?.roomCode,
+    };
+    socket?.emit("warn", data);
+  };
 
   console.log("selectedWord", selectedWord);
   console.log("roomDetails", roomDetails);
@@ -398,7 +467,11 @@ function Skribble() {
           <div style={{ display: "flex" }}>
             <CountdownTimer startTimer={startTimer} scoreCard={scoreCard} />
             <div style={{ width: "auto", marginLeft: "70%" }}>
-              <Button variant="outlined" color="error" onClick={handleLeave}>
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={() => handleLeave("leave")}
+              >
                 Leave
               </Button>
               {roomDetails &&
@@ -457,13 +530,19 @@ function Skribble() {
                         marginLeft: "10px",
                       }}
                     ></p>
+                    <img
+                      src={roomDetails.participants.pic}
+                      alt="profile"
+                      height={100}
+                      width={100}
+                    />
                     {participants.userName}
                     {user?._id === roomDetails?.roomCreator?.userId &&
                       participants.userId !==
                         roomDetails?.roomCreator?.userId && (
                         <PopUpMenu
                           style={{ position: "relative", right: "0" }}
-                          userName={participants.userName}
+                          userId={participants.userId}
                           handleKick={handleKick}
                           handleRestrict={handleRestrict}
                           handleWarn={handleWarn}
@@ -499,7 +578,7 @@ function Skribble() {
               }}
             >
               {chats &&
-                chats.map((m) => (
+                chats?.map((m) => (
                   <p
                     key={m.message}
                     style={{
@@ -534,24 +613,30 @@ function Skribble() {
           </Paper>
         </Box>
         <Box p={1}>
-          <Input
-            value={message}
-            style={{ width: "75%" }}
-            placeholder="Enter your message"
-            onChange={(e) => setMessage(e.target.value)}
-          />
-          <Button
-            style={{
-              width: "22%",
-              height: "30px",
-              fontSize: "12px",
-            }}
-            variant="contained"
-            endIcon={<SendIcon />}
-            onClick={(e) => checkForAbusiveLanguage(e)}
-          >
-            Send
-          </Button>
+          {showMessageBar ? (
+            <div>
+              <Input
+                value={message}
+                style={{ width: "75%" }}
+                placeholder="Enter your message"
+                onChange={(e) => setMessage(e.target.value)}
+              />
+              <Button
+                style={{
+                  width: "22%",
+                  height: "30px",
+                  fontSize: "12px",
+                }}
+                variant="contained"
+                endIcon={<SendIcon />}
+                onClick={(e) => checkForAbusiveLanguage(e)}
+              >
+                Send
+              </Button>
+            </div>
+          ) : (
+            <p>you are not allowed to message</p>
+          )}
         </Box>
       </Paper>
       {error && <ErrorToast message={error} setError={setError} />}
