@@ -60,15 +60,20 @@
   padding: 20px;
 }
 
+.head{
+  font-size: 40px;
+}
+
 .header {
   position: relative;
-  right: 27%;
+  right: 10%;
   top: 0%;
   display: flex;
   flex-direction: row;
   align-items: center;
   font-family: 'Lilita One', sans-serif;
   margin-right: 20px;
+  /* font-size: medium; */
   
 }
 

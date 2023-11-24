@@ -2,6 +2,8 @@ import "./CountDownTimer.css";
 import React, { useState, useEffect } from "react";
 import { useUserAndChats } from "../../Context/userAndChatsProvider";
 
+
+
 function CountdownTimer({ startTimer, scoreCard }) {
   const { Socket, time, rounds, roomDetails } = useUserAndChats();
   const [timeLeft, setTimeLeft] = useState(time); // Initial time in seconds
@@ -68,6 +70,7 @@ function CountdownTimer({ startTimer, scoreCard }) {
   return (
     <div className="countdown-timer">
       <p className="time-left">Time Left: {timeLeft} seconds</p>
+  
     </div>
   );
 }
