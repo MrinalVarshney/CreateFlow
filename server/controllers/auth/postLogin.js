@@ -16,6 +16,8 @@ const postLogin = async (req, res) => {
         username: user.username,
         email: user.email,
         verified: user.verified,
+        bio: user.bio,
+        pic: user.pic,
         token: generateToken(user._id),
       });
     } else {

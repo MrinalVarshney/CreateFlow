@@ -2,14 +2,14 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const connectDB = require("./config/db");
-const socketServer = require("./socketServer")
-const http = require("http")
+const socketServer = require("./socketServer");
+const http = require("http");
 const authRoutes = require("./routes/authRoutes");
-const cookieSession = require("cookie-session")
+const cookieSession = require("cookie-session");
 const passport = require("./config/passport-config");
-const googleAuthRoutes = require("./routes/googleAuthRoutes")
-const canvasRoutes = require("./routes/canvasRoutes")
-
+const googleAuthRoutes = require("./routes/googleAuthRoutes");
+const canvasRoutes = require("./routes/canvasRoutes");
+const profileUpdate = require("./routes/profileUpdate");
 
 dotenv.config();
 const PORT = process.env.PORT;
@@ -30,12 +30,13 @@ app.use(
   })
 );
 
-app.use(passport.initialize())
-app.use(passport.session())
+app.use(passport.initialize());
+app.use(passport.session());
 
-app.use("/api/user",authRoutes)
-app.use("/auth/google",googleAuthRoutes)
-app.use("/api/canvas",canvasRoutes)
+app.use("/api/user", authRoutes);
+app.use("/auth/google", googleAuthRoutes);
+app.use("/api/canvas", canvasRoutes);
+app.use("/profileUpdate", profileUpdate);
 
 app.get("/", (req, res) => {
   res.send("Hello World");
@@ -47,4 +48,3 @@ app.listen(PORT, () => {
 
 const server = http.createServer(app);
 socketServer.registerSocketServer(server);
-

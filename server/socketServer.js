@@ -50,7 +50,7 @@ const registerSocketServer = (server) => {
     });
 
     socket.on("leave-room", (data) => {
-      console.log("USer leaving", data);
+      console.log("User leaving", data);
       roomLeaveHandler(data);
     });
 
@@ -130,6 +130,16 @@ const registerSocketServer = (server) => {
     socket.on("guessed", (data) => {
       // console.log("guessed", data);
       io.to(data.roomCode).emit("guessed", data);
+    });
+    socket.on("restrict-User", (data) => {
+      console.log("restrict", data);
+      io.to(data.roomCode).emit("restrict", data);
+    });
+    socket.on("kick", (data) => {
+      io.to(data.roomCode).emit("kicked", data);
+    });
+    socket.on("warn", (data) => {
+      io.to(data.roomCode).emit("warn", data);
     });
   });
 };

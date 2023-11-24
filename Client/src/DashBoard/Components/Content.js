@@ -17,8 +17,8 @@ const YourComponent = () => {
   const GotoGamePage = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate("/PlayOnline")
-  }
+    navigate("/PlayOnline");
+  };
 
   return (
     <div className="Inner-container">
@@ -42,7 +42,9 @@ const YourComponent = () => {
 
         <div class="middle-box">
           <div className="box sideBoxes">
-            <div className="playText" onClick={GotoGamePage}>Play Skribble</div>
+            <div className="playText" onClick={GotoGamePage}>
+              Play Skribble
+            </div>
           </div>
         </div>
 
@@ -54,14 +56,14 @@ const YourComponent = () => {
       </div>
 
       <div className="right-container">
-      <Navbar />
-      <div className="welcome-page">
-        <h2 className="welcome-title">Welcome, Doodlers!</h2>
-        <p className="welcome-text">
-          Get ready to unleash your creativity. Here's a quick guide to get
-          started:
-        </p>
-        {/* <ul className="welcome-list">
+        <Navbar />
+        <div className="welcome-page">
+          <h2 className="welcome-title">Welcome, Doodlers!</h2>
+          <p className="welcome-text">
+            Get ready to unleash your creativity. Here's a quick guide to get
+            started:
+          </p>
+          {/* <ul className="welcome-list">
           <li>Choose your favorite colors from the vibrant palette.</li>
           <li>
             Select your magic brush size to bring your imagination to life.
@@ -72,9 +74,8 @@ const YourComponent = () => {
           </li>
           <li>Have a blast and conjure amazing artwork!</li>
         </ul> */}
-        <RulesCurser/>
-
-      </div>
+          <RulesCurser />
+        </div>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import ShapesMenu from "./ToolBar/ShapesMenu";
 import { Box } from "@mui/system";
 import FloodFill from "q-floodfill";
 import { useStyles } from "./Assets/CursorStyles";
+import "./Canvas.css";
 import {
   drawRectangle,
   drawCircle,
@@ -44,7 +45,9 @@ function DrawingCanvas() {
   const isResizing = useRef(false);
   const stillResizing = useRef(false);
   const classes = useStyles();
-
+  const [points, setPoints] = useState([]);
+  const [brushStyle, setBrushStyle] = useState([]);
+  const density = 50;
   useEffect(() => {
     saveCanvasState();
   }, []);
@@ -67,7 +70,8 @@ function DrawingCanvas() {
     virtualCtx.strokeStyle = selectedColor;
     if (selectedTool === "Line")
       drawLineDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
-    else drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+    else if (selectedTool !== "UploadFiles")
+      drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
   };
 
   const isUnderCustomization = (x, y) => {
@@ -77,7 +81,7 @@ function DrawingCanvas() {
     } else if (x <= e1X && x >= e2X && y >= e1Y && y <= e2Y) return true;
     else return false;
   };
-
+  console.log("selected", selectedTool);
   const isUserDragging = (endX, endY) => {
     console.log(endX, endY);
     const { e1X, e1Y, e2X, e2Y } = ExtremumRef.current;
@@ -347,13 +351,81 @@ function DrawingCanvas() {
         ctx.lineWidth = eraserWidth;
       } else {
         ctx.strokeStyle = selectedColor;
-        ctx.lineWidth = lineWidth;
+
+        if (selectedTool === "Brush") {
+          if (brushStyle === 1) {
+            ctx.lineWidth = lineWidth;
+            ctx.lineJoin = ctx.lineCap = "round";
+            ctx.shadowBlur = lineWidth;
+            ctx.shadowColor = selectedColor;
+          } else {
+            if (brushStyle === 4) ctx.lineWidth = 5;
+            else ctx.lineWidth = 1;
+            ctx.lineJoin = ctx.lineCap = null;
+            ctx.shadowBlur = null;
+            ctx.shadowColor = null;
+          }
+        }
       }
       setContext(ctx);
     } else SwitchToVirtual();
-  }, [selectedColor, lineWidth, selectedTool, eraserWidth]);
+  }, [selectedColor, lineWidth, selectedTool, brushStyle, eraserWidth]);
 
   /************************** Main Canvas Events *****************************/
+
+  const midPointBtw = (p1, p2) => ({
+    x: p1.x + (p2.x - p1.x) / 2,
+    y: p1.y + (p2.y - p1.y) / 2,
+  });
+
+  const offsetPoints = (val) => {
+    return points.map((point) => ({
+      x: point.x + val,
+      y: point.y + val,
+    }));
+  };
+  const stroke = (points) => {
+    const ctx = canvasRef.current.getContext("2d");
+    let p1 = points[0];
+    let p2 = points[1];
+
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+
+    for (let i = 1, len = points.length; i < len; i++) {
+      const midPoint = midPointBtw(p1, p2);
+      ctx.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
+      p1 = points[i];
+      p2 = points[i + 1];
+    }
+
+    ctx.lineTo(p1.x, p1.y);
+    ctx.stroke();
+  };
+
+  const getRandomInt = (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+
+  const drawPixels = (ctx, x, y) => {
+    for (let i = -10; i < 10; i += 4) {
+      for (let j = -10; j < 10; j += 4) {
+        if (Math.random() > 0.5) {
+          ctx.fillStyle = [
+            "red",
+            "orange",
+            "yellow",
+            "green",
+            "light-blue",
+            "blue",
+            "purple",
+          ][getRandomInt(0, 6)];
+          ctx.fillRect(x + i, y + j, 4, 4);
+        }
+      }
+    }
+  };
+
   const handleMouseDown = (e) => {
     if (selectedTool === "PaintBucket") {
       const imgData = context.getImageData(
@@ -365,23 +437,70 @@ function DrawingCanvas() {
       const floodFill = new FloodFill(imgData);
       floodFill.fill(context.strokeStyle, e.clientX, e.clientY, 0);
       context.putImageData(floodFill.imageData, 0, 0);
+    } else if (selectedTool === "Brush") {
+      setDrawing(true);
+      if (brushStyle === 1 || brushStyle === 3) {
+        context.beginPath();
+        context.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+      } else if (brushStyle === 2) {
+        setPoints([{ x: e.clientX, y: e.clientY }]);
+      } else {
+        const ctx = canvasRef.current.getContext("2d");
+        ctx.fillStyle = selectedColor;
+        ctx.lineWidth = lineWidth;
+        ctx.lineJoin = ctx.lineCap = "round";
+        ctx.moveTo(e.clientX, e.clientY);
+      }
     } else {
       setDrawing(true);
       context.beginPath();
       context.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
     }
   };
-
   const handleMouseMove = (e) => {
     if (!drawing) return;
-    context.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-    context.stroke();
+    if (selectedTool === "Brush") {
+      if (brushStyle === 1) {
+        context.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+        context.stroke();
+      } else if (brushStyle === 2) {
+        setPoints([...points, { x: e.clientX, y: e.clientY }]);
+        stroke(offsetPoints(-6));
+        stroke(offsetPoints(-4));
+        stroke(offsetPoints(-2));
+        stroke(points);
+        stroke(offsetPoints(2));
+        stroke(offsetPoints(4));
+        stroke(offsetPoints(6));
+      } else if (brushStyle === 3) {
+        const ctx = canvasRef.current.getContext("2d");
+        drawPixels(ctx, e.clientX, e.clientY);
+      } else {
+        console.log("brush", context.lineWidth);
+
+        const ctx = canvasRef.current.getContext("2d");
+        for (let i = density; i--; ) {
+          const radius = 20;
+          const offsetX = getRandomInt(-radius, radius);
+          const offsetY = getRandomInt(-radius, radius);
+          ctx.fillRect(e.clientX + offsetX, e.clientY + offsetY, 1, 1);
+        }
+      }
+    } else {
+      context.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+      context.stroke();
+    }
   };
 
   const handleMouseUp = (e) => {
     setDrawing(false);
     context.closePath();
     saveCanvasState();
+    if (selectedTool === "Brush") {
+      if (brushStyle === 2) {
+        setPoints([]);
+      }
+    }
   };
 
   /************************** Virtual Canvas Events *****************************/
@@ -442,14 +561,16 @@ function DrawingCanvas() {
       stillResizing.current = false;
       if (selectedTool === "Line")
         drawLineDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
-      else drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+      else if (selectedTool !== "UploadFiles")
+        drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
     }
     if (isDragging) {
       setIsDragging(false);
       CurrentRef.current = { x: -1, y: -1 };
       if (selectedTool === "Line")
         drawLineDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
-      else drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
+      else if (selectedTool !== "UploadFiles")
+        drawDashedRectangle(e1X, e1Y, e2X, e2Y, virtualCtx);
     }
     if (isCustomizable.current) return;
     else if (drawing) {
@@ -550,21 +671,27 @@ function DrawingCanvas() {
           checkAndDrawOnMainCanvas();
         }}
       >
-        <Tools setIsOpen={setIsOpen} selectFile={selectFile} />
+        <Tools
+          setIsOpen={setIsOpen}
+          selectFile={selectFile}
+          setBrushStyle={setBrushStyle}
+        />
         <ShapesMenu SwitchToVirtual={SwitchToVirtual} />
         <ColorPalette />
         <UndoRedo isOpen={isOpen} redrawCanvas={redrawCanvas} />
       </Box>
-
-      <canvas
-        className={classes[selectedTool]}
-        ref={canvasRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        width={window.innerWidth}
-        height={window.innerHeight}
-      />
+      <div style={{ overflow: "hidden" }}>
+        <canvas
+          className={classes[selectedTool]}
+          ref={canvasRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          width={window.innerWidth}
+          height={window.innerHeight}
+          style={{ overflow: "hidden", margin: 0 }}
+        />
+      </div>
       <input
         type="file"
         id="fileInput"
@@ -582,6 +709,8 @@ function DrawingCanvas() {
           position: "absolute",
           top: 0,
           zIndex: -1,
+          overflow: "hidden",
+          margin: 0,
         }}
         onMouseDown={handleVirtualMouseDown}
         onMouseMove={handleVirtualMouseMove}

@@ -24,6 +24,7 @@ const roomJoinHandler = (socket, roomCode, data) => {
     io.to(roomCode).emit("user-joined", {
       userId: data.userId,
       userName: data.userName,
+      pic: data.pic,
       socketId,
     });
 

@@ -10,9 +10,7 @@ const uuidv4 = require("uuid").v4;
 
 const checkRandomRoomAvailable = () => {
   for (let i = 0; i < randomRooms.length; i++) {
-    if (
-      randomRooms[i].participants.length < randomRooms[i].maxParticipants
-    ) {
+    if (randomRooms[i].participants.length < randomRooms[i].maxParticipants) {
       return randomRooms[i];
     }
   }
@@ -37,7 +35,7 @@ const createNewRandomRoom = (data) => {
     maxParticipants: 5,
     rounds: 5,
     duration: 80,
-    isGameStarted: false
+    isGameStarted: false,
   };
   randomRooms.push(newRandomRoom);
   roomCodeMap.set(data.userId, roomCode);
@@ -54,17 +52,19 @@ const pushInAvailableRandomRoom = (data, roomCode) => {
   return room;
 };
 
-const removerUserFromRandomRoom = (userId,roomCode) =>{
-  const room = randomRooms.find((room)=> room.roomCode === roomCode)
-  room.participants = room.participants.filter((participant)=> participant.userId !== userId)
-  if(room.participants.length === 0){
-    randomRooms = randomRooms.filter((room)=> room.roomCode !== roomCode)
+const removerUserFromRandomRoom = (userId, roomCode) => {
+  const room = randomRooms.find((room) => room.roomCode === roomCode);
+  room.participants = room.participants.filter(
+    (participant) => participant.userId !== userId
+  );
+  if (room.participants.length === 0) {
+    randomRooms = randomRooms.filter((room) => room.roomCode !== roomCode);
   }
-  if(roomCodeMap.has(userId)){
-    roomCodeMap.delete(userId)
+  if (roomCodeMap.has(userId)) {
+    roomCodeMap.delete(userId);
   }
   return room;
-}
+};
 
 const mapUserToRoomCode = (userId, roomCode) => {
   console.log("setting roomCode", roomCode, userId);
@@ -101,6 +101,7 @@ const getSocketId = (socket, userId) => {
 const addNewActiveRoom = ({ socketId, data, roomCode }) => {
   const userId = data.userId;
   const userName = data.userName;
+  const pic = data.pic;
   if (userSocketMap.has(userId)) {
     socketId = userSocketMap.get(userId);
   }
@@ -108,12 +109,14 @@ const addNewActiveRoom = ({ socketId, data, roomCode }) => {
     roomCreator: {
       userId,
       userName,
+      pic,
       socketId,
     },
     participants: [
       {
         userId,
         userName,
+        pic,
         socketId,
       },
     ], // Initialize an empty array for participants
@@ -125,13 +128,13 @@ const addNewActiveRoom = ({ socketId, data, roomCode }) => {
   return newActiveRoom;
 };
 
-const startRandomGame = (roomCode)=>{
-  const room = randomRooms.find((room)=> room.roomCode === roomCode)
-  if(room){
-    console.log("starting random game")
+const startRandomGame = (roomCode) => {
+  const room = randomRooms.find((room) => room.roomCode === roomCode);
+  if (room) {
+    console.log("starting random game");
     room.isGameStarted = true;
   }
-}
+};
 
 const setSocketServerInstance = (ioInstance) => {
   io = ioInstance;
@@ -163,12 +166,13 @@ const removeActiveRoom = (roomCode) => {
 };
 
 const joinActiveRoom = ({ roomCode, socketId, data }) => {
-  console.log(data);
+  console.log("coming", data);
   if (isValidRoom(roomCode)) {
     const activeRoom = getActiveRoom(roomCode);
     activeRoom.participants.push({
       userName: data.userName,
       userId: data.userId,
+      pic: data.pic,
       socketId,
     });
   } else {
@@ -212,5 +216,5 @@ module.exports = {
   createNewRandomRoom,
   pushInAvailableRandomRoom,
   removerUserFromRandomRoom,
-  startRandomGame
+  startRandomGame,
 };
