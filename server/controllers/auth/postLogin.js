@@ -7,7 +7,8 @@ const postLogin = async (req, res) => {
     const user = await User.findOne({ email: mail.toLowerCase() });
     if (!user) {
       res.status(400).send("Email not registered");
-    } else if (user.isUserLogin) {
+    } 
+    else if (user.isUserLogin) {
       res.status(400).send("Account already logged in from another device");
     } else if (user && (await user.matchPassword(password))) {
       await user.updateOne({ isUserLogin: true });
