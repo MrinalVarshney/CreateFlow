@@ -9,6 +9,7 @@ import CountdownTimer from "../../shared/Components/CountDownTimer";
 import LeaderBoard from "../../shared/Components/LeaderBoard";
 import PopUpMenu from "../../shared/Components/PopUpMenu";
 import ErrorToast from "../../shared/Components/ErrorToast";
+import RightAnsSound from './RightAnsSound';
 
 function Skribble() {
   const {
@@ -40,6 +41,7 @@ function Skribble() {
   const [message, setMessage] = useState("");
   const [showMessageBar, setShowMessageBar] = useState(true);
   const [showLeaderBoard, setShowLeaderBoard] = useState(false);
+  const [guessSound,setguessSound] = useState(false);
   const [error, setError] = useState(null);
   const scoreCard = useRef(null);
   const messageContainerRef = useRef(null);
@@ -184,7 +186,8 @@ function Skribble() {
       userId: user?._id,
       userName: user?.username,
       message:
-        message === selectedWord ? `${user?.username} has guessed!` : message,
+        message === selectedWord ? `${user?.username} has guessed!`  : message ,
+        
     };
     if (message !== data.message) {
       const data = {
@@ -192,6 +195,7 @@ function Skribble() {
         userName: user?.username,
         roomCode: roomDetails?.roomCode,
       };
+      setguessSound(true);
       socket?.emit("guessed", data);
     }
     sendRoomMessage(data, roomDetails.roomCode);
@@ -454,6 +458,7 @@ function Skribble() {
   console.log("rounds ", rounds);
   return (
     <div style={{ height: "100vh", marginBottom: "0px" }}>
+      {guessSound && <RightAnsSound />}
       {roomDetails &&
       roomDetails.roomType === "random" &&
       roomDetails.isGameStarted === false ? (
@@ -487,7 +492,12 @@ function Skribble() {
         <Box>
           <div style={{ display: "flex" }}>
             <CountdownTimer startTimer={startTimer} scoreCard={scoreCard} />
-            <div style={{ width: "auto", marginLeft: "70%" }}>
+            <div style={   {            width: "auto",
+                marginLeft: "70%",
+                position: "relative",
+                display: "flex",
+                flexWrap: "wrap",
+                alignContent: "center"}}>
               {roomDetails &&
                 user?._id !== roomDetails?.roomCreator?.userId && (
                   <Button

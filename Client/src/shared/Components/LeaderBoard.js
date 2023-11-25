@@ -6,6 +6,7 @@ import leaderBackground from "./Animations/leaderboard-bg.jpg"
 
 import React, { useState } from "react";
 import "./LeaderBoard.css"; // Import the updated LeaderboardBox styles
+import WinnerSound from "./WinnerSound"
 
 function Leaderboard({ scoreCard }) {
   // const [players, setPlayers] = useState([
@@ -29,11 +30,11 @@ function Leaderboard({ scoreCard }) {
   const maxScore = 200 * roundsPlayed;
 
   return (
-    <div className="leaderboard-box" style={{backgroundImage:`url(${leaderBackground})`,backgroundSize:"cover",backgroundRepeat:"no-repeat",backgroundPosition:"center center",height:"90%", width:"25%" }}>
+    <div className="leaderboard-box" style={{backgroundImage:`url(${leaderBackground})`,backgroundSize:"cover",backgroundRepeat:"no-repeat",backgroundPosition:"center center",height:"90%", width:"30%" }}>
       <div className="overlay">
       <div className="header">
-        <Lottie options={defaultOptions}  style={{width:"auto"}} />
-        <h1>Leaderboard</h1>
+        <Lottie options={defaultOptions}  style={{width:"200px"}} />
+        <h1 className="head">Leaderboard</h1>
       </div>
 
       <table className="table">
@@ -70,6 +71,7 @@ function Leaderboard({ scoreCard }) {
         </tbody>
       </table>
       </div>
+      <WinnerSound/>
     </div>
   );
 }

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Typography, Modal, Backdrop, Fade } from '@mui/material';
+import SoundComponent from './GameStartSound';
+
 
 const Countdown = ({ onStartGame }) => {
   const [count, setCount] = useState(3);
@@ -43,6 +45,8 @@ const Countdown = ({ onStartGame }) => {
         >
           <Typography variant="h4" gutterBottom>
             Game Starting
+            <SoundComponent />
+
           </Typography>
           <Typography variant="h2">{count}</Typography>
         </div>

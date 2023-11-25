@@ -1,3 +1,5 @@
+
+
 import React from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -10,11 +12,14 @@ const ImageCarousel = () => {
     speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,
+    autoplay: true,          // Enable automatic sliding
+    autoplaySpeed: 2000,     // Set the speed of automatic sliding in milliseconds (e.g., 2000ms = 2 seconds)
   };
 
   return (
     <div className="max-w-screen-lg mx-auto mt-8" style={{ width: "85%" }}>
       <Slider {...settings}>
+        {/* ... Your slide content remains the same */}
         <div className="relative">
           <img
             src="https://placekitten.com/800/400"
@@ -37,7 +42,8 @@ const ImageCarousel = () => {
             </p>
           </div>
         </div>
-        <div className="relative">
+        {/* ... Repeat for other slides */}
+           <div className="relative">
           <img
             src="https://placekitten.com/800/401"
             className="w-full"
@@ -80,7 +86,7 @@ const ImageCarousel = () => {
               Some representative placeholder content for the first slide.
             </p>
           </div>
-        </div>
+        </div>        
       </Slider>
     </div>
   );

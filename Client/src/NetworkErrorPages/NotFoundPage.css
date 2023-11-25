@@ -38,6 +38,7 @@
     background: #39ac31;
     display: inline-block;
     text-align: center;
+    border-radius: 10px;
   }
   
   .content_box_404 {

@@ -21,7 +21,7 @@ export const UserAndChatsProvider = ({ children }) => {
   const [showTimer,setShowTimer] = useState(false);
   const [canvasDetails,setCanvasDetails] = useState(null);
   const [showCursorWithName, setShowCursorWithName] = useState(true)
-
+  const collabUsers = useRef(new Map());
   useEffect(()=>{
     if(canvasDetails){
       console.log("Saving canvas details")
@@ -29,6 +29,10 @@ export const UserAndChatsProvider = ({ children }) => {
       localStorage.setItem("canvasDetails", JSON.stringify(canvasDetails))
     }
   },[canvasDetails])
+  useEffect(() => {
+    if (collabUsers)
+      localStorage.setItem("collabUsers", JSON.stringify(collabUsers));
+  }, [collabUsers]);
 
   useEffect(() => {
     if (roomDetails) {
@@ -124,7 +128,8 @@ export const UserAndChatsProvider = ({ children }) => {
     setDifficulty,
     showCursorWithName,
     setShowCursorWithName,
-    setCanvasDetails
+    setCanvasDetails,
+    collabUsers,
   };
 
   return (
