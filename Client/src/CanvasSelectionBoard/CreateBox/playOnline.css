@@ -16,6 +16,7 @@
   position: relative;
   transition: box-shadow 0.3s ease-in-out, text-shadow 0.3s ease-in-out;
   overflow: hidden;
+  margin-bottom: 3%;
 }
 .playModalText {
   color: rgb(234 130 130);

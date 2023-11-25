@@ -174,6 +174,11 @@ function Skribble() {
       message:
         message === selectedWord ? `${user?.username} has guessed!` : message,
     };
+    if (message === selectedWord && user._id === randomDrawer.userId) {
+      setError("please don't guess your own word");
+      setMessage("");
+      return;
+    }
     if (message !== data.message) {
       const data = {
         userId: user?._id,
@@ -450,7 +455,10 @@ function Skribble() {
         <SharedCanvas />
       )}
       <Modal open={showLeaderBoard} style={{ top: "50px" }}>
-        <LeaderBoard scoreCard={scoreCard} />
+        <LeaderBoard
+          scoreCard={scoreCard}
+          setShowLeaderBoard={setShowLeaderBoard}
+        />
       </Modal>
       <Paper
         style={{
