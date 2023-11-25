@@ -2,16 +2,19 @@ const Canvas = require("../../models/Canvas/canvasSchema");
 const User = require("../../models/userSchema");
 
 const addNewCanvas = async (req, res) => {
-  const { creator, canvasName, data } = req.body;
+  const { creatorId, canvasName, canvasData } = req.body;
+  if(creatorId==="" || canvasName==="" || canvasData===""){
+    return res.status(400).send("Invalid data")
+  }
   try {
-    const user = await User.findById(creator.userId);
+    const user = await User.findById(creatorId);
     if (!user) {
       return res.status(400).send("User not found");
     }
     const canvas = await Canvas.create({
       canvasName,
-      data,
-      collaborators: [creator.userId],
+      canvasData,
+      contributors: [creatorId],
     });
 
     if (canvas) {
@@ -19,8 +22,9 @@ const addNewCanvas = async (req, res) => {
       await user.createdCanvases.push(canvas._id);
       await user.save();
       res.status(201).json({
-        success: true,
-        canvasId: canvas._id,
+        _id: canvas._id,
+        canvasName: canvas.canvasName,
+        canvasData: canvas.canvasData,
       });
     } else {
       res.status(400).send("Invalid canvas data");

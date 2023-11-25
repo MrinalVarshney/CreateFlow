@@ -1,4 +1,4 @@
-export const user = {
+const user = {
   userId: null,
   selectedTool: null,
   selectedcolor: null,
@@ -13,3 +13,5 @@ export const user = {
   lineCap: null,
   drawing: false,
 };
+
+export default user

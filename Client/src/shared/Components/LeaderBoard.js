@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import "./LeaderBoard.css"; // Import the updated LeaderboardBox styles
 import { useUserAndChats } from "../../Context/userAndChatsProvider";
+import WinnerSound from "./WinnerSound";
 
 function Leaderboard({ scoreCard, setShowLeaderBoard }) {
   const defaultOptions = {
@@ -36,13 +37,13 @@ function Leaderboard({ scoreCard, setShowLeaderBoard }) {
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center center",
         height: "90%",
-        width: "25%",
+        width: "30%",
       }}
     >
       <div className="overlay">
         <div className="header">
-          <Lottie options={defaultOptions} style={{ width: "auto" }} />
-          <h1>Leaderboard</h1>
+          <Lottie options={defaultOptions} style={{ width: "200px" }} />
+          <h1 className="head">Leaderboard</h1>
         </div>
 
         <table className="table">
@@ -81,6 +82,7 @@ function Leaderboard({ scoreCard, setShowLeaderBoard }) {
           </tbody>
         </table>
       </div>
+      <WinnerSound />
     </div>
   );
 }

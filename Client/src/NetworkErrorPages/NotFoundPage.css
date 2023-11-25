@@ -19,24 +19,24 @@
   margin-left: 20%;
 }
 
-/* h1 {
-    font-size: 80px;
-  }
-  
-  h3 {
-    font-size: 50px;
-  }
-  h2{
-    font-size: 50px;
-  } */
+h1 {
+  font-size: 80px;
+}
 
-a {
+h3 {
+  font-size: 50px;
+}
+h2 {
+  /* font-size: 50px; */
+}
+*/ a {
   color: #fff;
   text-decoration: none;
   padding: 10px 20px;
   background: #39ac31;
   display: inline-block;
   text-align: center;
+  border-radius: 10px;
 }
 
 .content_box_404 {

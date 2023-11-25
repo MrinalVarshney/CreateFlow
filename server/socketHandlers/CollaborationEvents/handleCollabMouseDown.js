@@ -3,7 +3,9 @@ const serverStore = require("../../serverStore");
 const handleCollabMouseDown = (data) => {
   const { roomCode } = data;
   collabStore.updateDownSettings(data);
-  const io = serverStore.getSocketServerInstance;
+  console.log("collab mouse down",data)
+  const io = serverStore.getSocketServerInstance();
+
   io.to(roomCode).emit("collab-mouse-down", data);
 };
 

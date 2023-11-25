@@ -1,5 +1,6 @@
 import "./App.css";
 import Canvas from "./Canvas";
+import { useEffect } from "react";
 import SkribblePage from "./SkribbleGame/SkribblePage.jsx";
 import Login from "./authPages/LoginPage/login.jsx";
 import Register from "./authPages/RegisterPage/register";
@@ -8,11 +9,22 @@ import ResetPasswordPage from "./authPages/ResetPasswordPage";
 import EmailConfirmationPage from "./authPages/EmailConfirmationPage.js";
 import Dashboard from "../src/DashBoard/Dashboard";
 import PlayOnline from "./CanvasSelectionBoard/CreateBox/PlayOnline.jsx";
+import DrawingGallery from "./DrawingBoards/DrawingGallery.js";
+import { useUserAndChats } from "./Context/userAndChatsProvider.jsx";
 import LeaderBoard from "./shared/Components/LeaderBoard.js";
 import NetworkErrorPage from "./NetworkErrorPages/ErrorPage.js";
 import NotFound from "./NetworkErrorPages/NotFoundPage.js";
 
 function App() {
+  const {Socket} = useUserAndChats();
+  const socket = Socket.current;
+  useEffect(()=>{
+    socket?.on("join-invitation",(data)=>{
+      console.log("Join Invitation")
+      console.log(data)
+    })
+  },[socket])
+  
   return (
     <>
 
@@ -30,6 +42,7 @@ function App() {
       <Route exact path="/verify-email" Component={EmailConfirmationPage} />
       <Route exact path="/reset-password" Component={ResetPasswordPage} />
       <Route exact path="/playOnline" Component={PlayOnline} />
+      <Route exact path="/drawingGallery" Component={DrawingGallery} />
       <Route exact path="/leaderBoard" Component={LeaderBoard} />
       <Route exact path="/offline" Component={NetworkErrorPage} />
       <Route path="*" element={<NotFound />} />

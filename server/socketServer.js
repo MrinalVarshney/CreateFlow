@@ -7,6 +7,7 @@ const roomLeaveHandler = require("./socketHandlers/CommonEvents/roomLeaveHandler
 const serverStore = require("./serverStore");
 const newConnectionHandler = require("./socketHandlers/CommonEvents/newConnectionHandler");
 const handlePlayRandom = require("./socketHandlers/RandomRoomSpecificEvents/handlePlayRandom");
+const matchCancelHandler = require("./socketHandlers/PrivateGameSpecificEvents/matchCancelHandler");
 const { v4: uuidv4 } = require("uuid");
 const handleCollabMouseDown = require("./socketHandlers/CollaborationEvents/handleCollabMouseDown");
 const handleCollabMouseMove = require("./socketHandlers/CollaborationEvents/handleCollabMouseMove");
@@ -37,6 +38,7 @@ const registerSocketServer = (server) => {
     console.log("new user connected with id: ", socket.id);
 
     socket.on("connect-user", (userId, callback) => {
+      console.log("request cams")
       newConnectionHandler(socket, userId, callback);
     });
 
@@ -50,7 +52,6 @@ const registerSocketServer = (server) => {
       socket.join(roomCode);
       roomCreateHandler(socket, data, roomCode);
     });
-
     socket.on("join-room", (roomCode, data) => {
       roomJoinHandler(socket, roomCode, data);
       socket.join(roomCode);
@@ -65,12 +66,17 @@ const registerSocketServer = (server) => {
       console.log("game-started");
       startGameHandler(socket, data);
     });
-    socket.on("end-game", (userId) => {
-      endGameHandler(userId);
+    socket.on("end-game", (roomCode) => {
+      endGameHandler(roomCode);
     });
+
     socket.on("send-message", (data, roomCode) => {
       io.to(roomCode).emit("new-message", data);
     });
+
+    socket.on("match-cancelled",(roomCode)=>{
+      matchCancelHandler(socket,roomCode);
+    })
 
     socket.on("mouse-down", (data) => {
       console.log("mouse-down socket", data);
@@ -128,6 +134,11 @@ const registerSocketServer = (server) => {
     socket.on("setTimer", (data) => {
       io.to(data.roomCode).emit("set-Timer", data);
     });
+
+    socket.on("collaboration-invite",(data)=>{
+      handleCollaborationInvite(socket,data);
+
+    })
     socket.on("timer", (roomCode) => {
       io.to(roomCode).emit("timer");
     });
@@ -149,15 +160,19 @@ const registerSocketServer = (server) => {
       io.to(data.roomCode).emit("warn", data);
     });
     socket.on("collab-mouse-down", (data) => {
+      console.log("mouse down event")
       handleCollabMouseDown(data);
     });
     socket.on("collab-mouse-move", (data) => {
+      // console.log("mouse move event")
       handleCollabMouseMove(data);
     });
     socket.on("collab-mouse-up", (data) => {
+      // console.log("mouse up event")
       handleCollabMouseUp(data);
     });
     socket.on("collab-room-create", (data) => {
+      console.log("room creation request",data)
       handleCollabRoomCreate(socket, data);
     });
     socket.on("collab-room-join", (data) => {

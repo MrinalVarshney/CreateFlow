@@ -7,6 +7,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import EditModal from "./EditModal";
 import axios from "axios";
 import { useUserAndChats } from "../../Context/userAndChatsProvider";
+import * as api from "../../api";
 
 const Profile = ({ showProfile, setShowProfile }) => {
   ChartJS.register(ArcElement, Tooltip, Legend);
@@ -49,10 +50,10 @@ const Profile = ({ showProfile, setShowProfile }) => {
   const onRequestClose = () => {
     setIsOpen(false);
   };
-  const onSave = (data, modalContent) => {
+  const onSave =async (data, modalContent) => {
     setIsOpen(false);
     try {
-      axios.post("http://localhost:8000/profileUpdate", {
+      await api.updateProfile({
         user: user,
         data: data,
         modalContent: modalContent,

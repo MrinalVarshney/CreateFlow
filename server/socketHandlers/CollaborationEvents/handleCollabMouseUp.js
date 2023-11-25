@@ -3,7 +3,7 @@ const serverStore = require("../../serverStore");
 const handleCollabMouseUp = (data) => {
   const { roomCode } = data;
   collabStore.updateUpSettings(data);
-  const io = serverStore.getSocketServerInstance;
+  const io =  serverStore.getSocketServerInstance();
   io.to(roomCode).emit("collab-mouse-up", data);
 };
 

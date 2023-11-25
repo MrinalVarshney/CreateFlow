@@ -14,6 +14,7 @@ import {
   drawLineDashedRectangle,
 } from "../../utils/ShapesLogic.jsx";
 
+
 function DrawingCanvas() {
   const canvasRef = useRef(null);
   const offCanvasRef = useRef(null);
@@ -21,6 +22,7 @@ function DrawingCanvas() {
   const { addToHistory, undo, redo } = useHistory();
   const [drawing, setDrawing] = useState(false);
   const [context, setContext] = useState(null);
+  const cursorCanvasRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const isCustomizable = useRef(false);
   const StartRef = useRef({ startX: 0, startY: 0 });
@@ -34,8 +36,12 @@ function DrawingCanvas() {
   const selectedColor = useRef("black");
   const lineWidth = useRef(1);
   const eraserWidth = useRef(5);
+  const cursorRef = useRef({ x: 0, y: 0 });
+  const showNameRef = useRef(true)
 
-  const { Socket } = useUserAndChats();
+
+
+  const { Socket, showCursorWithName } = useUserAndChats();
   const socket = Socket.current;
   useEffect(() => {
     saveCanvasState();
@@ -49,6 +55,46 @@ function DrawingCanvas() {
 
   const switchToMainCanvas = () => {
     offCanvasRef.current.style.zIndex = "-1";
+  };
+  console.log("Cursor changed",showCursorWithName)
+
+  useEffect(()=>{
+    const x = cursorRef.current.x;
+    const y = cursorRef.current.y;
+    showNameRef.current = showCursorWithName;
+    setPositionOfCursor({x,y})
+    
+  },[showCursorWithName])
+
+  const setPositionOfCursor = (coordinates) => {
+      const { x, y } = coordinates;
+      if (cursorCanvasRef.current) {
+        cursorCanvasRef.current.style.left = x + "px";
+        cursorCanvasRef.current.style.top = y + "px";
+
+        const cursorCanvas = cursorCanvasRef.current;
+        const context = cursorCanvas.getContext("2d");
+        context.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
+
+        const showName = showNameRef.current;
+        console.log("ShowCursorWithName", showCursorWithName)
+        if (showName) {
+          // Draw the text
+          const fontSize = 35;
+          context.font = fontSize + "px Arial";
+          context.fillStyle = "black";
+          const text = "Mrinal Varshney";
+          context.fillText(text, 30, fontSize + 15);
+        }
+
+        // Draw the glowing pointer
+        context.beginPath();
+        context.arc(20, 15, 10, 0, 2 * Math.PI);
+        context.fillStyle = "blue"; // Red with 50% opacity
+        context.shadowBlur = 20;
+        context.shadowColor = "blue";
+        context.fill();
+      }
   };
 
   /*******************Functions for Adding Customizability and Checking if user Customizing*****************/
@@ -230,6 +276,8 @@ function DrawingCanvas() {
   /************************** Main Canvas Events *****************************/
   const handleMouseDown = useCallback(
     (x, y) => {
+      cursorRef.current = { x: x, y: y };
+      setPositionOfCursor(cursorRef.current);
       const canvas = canvasRef.current;
       if (!canvas) return;
       const context = canvas.getContext("2d");
@@ -255,6 +303,8 @@ function DrawingCanvas() {
 
   const handleMouseMove = useCallback(
     (x, y) => {
+      cursorRef.current = { x: x, y: y };
+      setPositionOfCursor(cursorRef.current);
       if (!drawing) return;
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -421,6 +471,8 @@ function DrawingCanvas() {
   const handleVirtualMouseDown = useCallback(
     (x, y) => {
       console.log("XY", selectedColor.current);
+      cursorRef.current = { x: x, y: y };
+      setPositionOfCursor(cursorRef.current);
       if (isCustomizable.current) {
         const { endX, endY } = EndRef.current;
         // console.log("Customizing", endX, endY);
@@ -443,6 +495,8 @@ function DrawingCanvas() {
 
   const handleVirtualMouseMove = useCallback(
     (endX, endY) => {
+      cursorRef.current = { x: endX, y: endY };
+      setPositionOfCursor(cursorRef.current);
       const offCanvas = offCanvasRef.current;
       if (!offCanvas) return;
       const ctx = offCanvas.getContext("2d");
@@ -462,6 +516,8 @@ function DrawingCanvas() {
 
   const handleVirtualMouseUp = useCallback(
     (endX, endY) => {
+      cursorRef.current = { x: endX, y: endY };
+      setPositionOfCursor(cursorRef.current);
       setDrawing(false);
       const offCanvas = offCanvasRef.current;
       if (!offCanvas) return;
@@ -601,7 +657,6 @@ function DrawingCanvas() {
       console.log("virtual-mouse-up");
       const endX = data.endX;
       const endY = data.endY;
-
       const offCanvas = offCanvasRef.current;
       if (!offCanvas) return;
       const ctx = offCanvas.getContext("2d");
@@ -659,7 +714,7 @@ function DrawingCanvas() {
         width={window.innerWidth}
         height={window.innerHeight}
       />
-
+      <div style={{ overflow: "hidden" }}>
       <canvas
         ref={offCanvasRef}
         width={window.innerWidth}
@@ -671,6 +726,17 @@ function DrawingCanvas() {
           position: "absolute",
           top: 0,
           zIndex: -1,
+        }}
+      />
+      </div>
+      <canvas
+        ref={cursorCanvasRef}
+        style={{
+          height: "100px",
+          width: "100px",
+          backgroundColor: "transparent",
+          position: "absolute",
+          zIndex: 2,
         }}
       />
     </div>

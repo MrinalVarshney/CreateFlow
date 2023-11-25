@@ -1,4 +1,5 @@
 const rooms = new Map();
+const userCodeMap = new Map();
 const drawingSettings = {
   userId: null,
   selectedTool: null,
@@ -17,6 +18,12 @@ const drawingSettings = {
 
 const createRoom = (data) => {
   const { userId, userName, roomCode } = data;
+  if(rooms.has(roomCode) === true){
+    console.log("room already exists")
+    const room = rooms.get(roomCode);
+    return room
+  }
+  userCodeMap.set(userId,roomCode)
   const room = {
     creator: {
       userId: userId,
@@ -27,18 +34,23 @@ const createRoom = (data) => {
     ],
     roomCode: roomCode,
   };
-  rooms.map(roomCode, room);
+  rooms.set(roomCode, room);
   return room;
 };
 
 const joinRoom = (data) => {
   const { userId, userName, roomCode } = data;
-  var room = rooms.get(roomCode);
+  if(rooms.has(roomCode) === false){
+    return null;
+  }
+  userCodeMap.set(userId,roomCode)
+    var room = rooms.get(roomCode);
   const updatedCollaborators = [
     ...room.collaborators,
     { userId: userId, userName: userName, drawingSettings: drawingSettings },
   ];
   room = { ...room, collaborators: updatedCollaborators };
+  console.log("Updated room", room)
   rooms.set(roomCode, room);
   return room;
 };
@@ -72,12 +84,13 @@ const updateDownSettings = (data) => {
     shadowBlur,
     drawing,
   } = data;
+  if(!rooms.has(roomCode)){return;}
   const room = rooms.get(roomCode);
   const collaborator = room.collaborators.find(
     (collaborator) => collaborator.userId === userId
   );
   const updatedSettings = {
-    ...collaborator.drawingSetting,
+    ...collaborator.drawingSettings,
     x: x,
     y: y,
     selectedTool: selectedTool,
@@ -103,12 +116,14 @@ const updateDownSettings = (data) => {
 
 const updateMoveSettings = (data) => {
   const { roomCode, userId, x, y } = data;
+  if(!rooms.has(roomCode)){return;}
   const room = rooms.get(roomCode);
   const collaborator = room.collaborators.find(
     (collaborator) => collaborator.userId === userId
   );
+  if(!collaborator) return;
   const updatedSettings = {
-    ...collaborator.drawingSetting,
+    ...collaborator.drawingSettings,
     x: x,
     y: y,
   };
@@ -128,6 +143,7 @@ const updateMoveSettings = (data) => {
 const updateUpSettings = (data) => {
   const { roomCode, userId, drawing } = data;
   const room = rooms.get(roomCode);
+  if(!rooms.has(roomCode)){return;}
   const collaborator = room.collaborators.find(
     (collaborator) => collaborator.userId === userId
   );
@@ -148,6 +164,13 @@ const updateUpSettings = (data) => {
   rooms.set(roomCode, room);
 };
 
+const getCollabRoomCode = (userId)=>{
+  if(userCodeMap.has(userId)){
+    return userCodeMap.get(userId)
+  }
+  return null
+}
+
 module.exports = {
   createRoom,
   leaveRoom,
@@ -156,4 +179,5 @@ module.exports = {
   updateDownSettings,
   updateMoveSettings,
   updateUpSettings,
+  getCollabRoomCode
 };

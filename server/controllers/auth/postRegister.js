@@ -7,11 +7,16 @@ const postRegister = async (req, res) => {
   try {
     //Check if email already exists
     console.log(mail)
-    const user = await User.findOne({ email: mail.toLowerCase() });
+    const user1 = await User.findOne({ username: username });
+    if(user1){
+      res.status(400).send("Username already exists ! Please choose another username")
+    }
 
+    const user = await User.findOne({ email: mail.toLowerCase() });
     if (user && user.signedUpWithCustomMethod) {
       res.status(400).send("Email already exists !");
-    } else {
+    } 
+    else {
       console.log(req.body);
       const user = await User.create({
         username,

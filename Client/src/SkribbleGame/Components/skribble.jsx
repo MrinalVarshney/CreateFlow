@@ -9,6 +9,7 @@ import CountdownTimer from "../../shared/Components/CountDownTimer";
 import LeaderBoard from "../../shared/Components/LeaderBoard";
 import PopUpMenu from "../../shared/Components/PopUpMenu";
 import ErrorToast from "../../shared/Components/ErrorToast";
+import RightAnsSound from "./RightAnsSound";
 
 function Skribble() {
   const {
@@ -25,6 +26,10 @@ function Skribble() {
     setTime,
     rounds,
     setRounds,
+    players,
+    setPlayers,
+    showCursorWithName,
+    setShowCursorWithName,
     difficulty,
     setDifficulty,
   } = useUserAndChats();
@@ -36,6 +41,7 @@ function Skribble() {
   const [message, setMessage] = useState("");
   const [showMessageBar, setShowMessageBar] = useState(true);
   const [showLeaderBoard, setShowLeaderBoard] = useState(false);
+  const [guessSound, setguessSound] = useState(false);
   const [error, setError] = useState(null);
   const scoreCard = useRef(null);
   const messageContainerRef = useRef(null);
@@ -51,6 +57,14 @@ function Skribble() {
   }
   console.log("Reloading");
 
+  const handleCursorChange = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("handle cursor change");
+    setShowCursorWithName((showCursorWithName) => !showCursorWithName);
+  };
+
+  console.log("cursorChange", showCursorWithName);
   function closeRandomWordModal() {
     setShow(false);
   }
@@ -185,6 +199,7 @@ function Skribble() {
         userName: user?.username,
         roomCode: roomDetails?.roomCode,
       };
+      setguessSound(true);
       socket?.emit("guessed", data);
     }
     sendRoomMessage(data, roomDetails.roomCode);
@@ -201,41 +216,28 @@ function Skribble() {
     [socket]
   );
   const navigate = useNavigate();
-  const handleLeave = useCallback(
-    (action) => {
-      console.log("leaving");
-      const data = {
-        userName: user?.username,
-        userId: user?._id,
-        roomCode: roomDetails?.roomCode,
-        roomType: roomDetails?.roomType,
-        action: action,
-      };
-      setShowTimer(false);
-      localStorage.removeItem("roomDetails");
-      setRoomDetails(null);
-      localStorage.removeItem("chats");
-      setChats([]);
-      socket?.emit("leave-room", data);
-      navigate("/playOnline");
-    },
-    [
-      navigate,
-      roomDetails?.roomCode,
-      roomDetails?.roomType,
-      setChats,
-      setRoomDetails,
-      setShowTimer,
-      socket,
-      user?._id,
-      user?.username,
-    ]
-  );
+  const handleLeave = useCallback(() => {
+    console.log("leaving");
+    const data = {
+      userName: user?.username,
+      userId: user?._id,
+      roomCode: roomDetails?.roomCode,
+      roomType: roomDetails?.roomType,
+    };
+    setShowTimer(false);
+    localStorage.removeItem("roomDetails");
+    setRoomDetails(null);
+    localStorage.removeItem("chats");
+    setChats([]);
+    socket?.emit("leave-room", data);
+    navigate("/playOnline");
+  }, [navigate]);
   const handleEnd = useCallback(() => {
     console.log("Game ended");
-    socket?.emit("end-game", user._id);
-    localStorage.removeItem("roomDetails");
-    localStorage.removeItem("chats");
+    const roomCode = roomDetails?.roomCode;
+    socket?.emit("end-game", roomCode);
+    setRoomDetails(null);
+    setChats([]);
   }, [socket]);
 
   const handleFilterParticipants = useCallback(
@@ -307,9 +309,28 @@ function Skribble() {
       handleFilterParticipants(userId);
       setChats([...chats, data]);
     });
+    socket?.on("host-left", () => {
+      const data = {
+        message: "Host has left the room",
+        user: roomDetails.roomCreator.userName,
+      };
+      const hostId = roomDetails.roomCreator.userId;
+      console.log("Host has left the room");
+      const updatedParticipants = roomDetails.participants.filter(
+        (participant) => participant.userId !== hostId
+      );
+      console.log("Updated participants", updatedParticipants);
+      const newHost = updatedParticipants[0];
+      setRoomDetails({
+        ...roomDetails,
+        roomCreator: newHost,
+        participants: updatedParticipants,
+      });
+      setChats([...chats, data]);
+    });
     socket?.on("game-ended", () => {
-      localStorage.removeItem("roomDetails");
-      localStorage.removeItem("chats");
+      setRoomDetails(null);
+      setChats(null);
       navigate("/playOnline");
     });
     socket?.on("join-room-error", (message) => {
@@ -370,12 +391,14 @@ function Skribble() {
       socket?.off("reload");
       socket?.off("game-started");
       socket?.off("set-Timer");
+      socket?.off("host-left");
       socket?.off("showLeaderBoard");
       socket?.off("kicked");
       socket?.off("restrict");
       socket?.off("warn");
     };
   }, [
+    setRoomDetails,
     handleFilterParticipants,
     handleLeave,
     startRandomGame,
@@ -435,9 +458,11 @@ function Skribble() {
 
   console.log("selectedWord", selectedWord);
   console.log("roomDetails", roomDetails);
+  console.log(randomDrawer);
   console.log("rounds ", rounds);
   return (
     <div style={{ height: "100vh", marginBottom: "0px" }}>
+      {guessSound && <RightAnsSound />}
       {roomDetails &&
       roomDetails.roomType === "random" &&
       roomDetails.isGameStarted === false ? (
@@ -452,7 +477,7 @@ function Skribble() {
           />
         </>
       ) : (
-        <SharedCanvas />
+        <SharedCanvas showCursorWithName={showCursorWithName} />
       )}
       <Modal open={showLeaderBoard} style={{ top: "50px" }}>
         <LeaderBoard
@@ -472,14 +497,8 @@ function Skribble() {
         }}
       >
         <Box>
-          <div
-            style={{
-              display: "flex",
-            }}
-          >
-            <div>
-              <CountdownTimer startTimer={startTimer} scoreCard={scoreCard} />
-            </div>
+          <div style={{ display: "flex" }}>
+            <CountdownTimer startTimer={startTimer} scoreCard={scoreCard} />
             <div
               style={{
                 width: "auto",
@@ -490,11 +509,19 @@ function Skribble() {
                 alignContent: "center",
               }}
             >
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={() => handleLeave("leave")}
-              >
+              {roomDetails &&
+                user?._id !== roomDetails?.roomCreator?.userId && (
+                  <Button
+                    variant="outlined"
+                    style={{ color: "blue" }}
+                    onClick={handleCursorChange}
+                  >
+                    {showCursorWithName
+                      ? "Disable name on cursor"
+                      : "Enable name on cursor"}
+                  </Button>
+                )}
+              <Button variant="outlined" color="error" onClick={handleLeave}>
                 Leave
               </Button>
               {roomDetails &&

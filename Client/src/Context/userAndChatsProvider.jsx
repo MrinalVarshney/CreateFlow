@@ -1,7 +1,6 @@
 import { useContext, useState, createContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
-import NetworkErrorPage from "../NetworkErrorPages/ErrorPage";
 
 const userContext = createContext();
 
@@ -20,11 +19,26 @@ export const UserAndChatsProvider = ({ children }) => {
   const playingGameRef = useRef(false);
   const Socket = useRef(null);
   const [showTimer, setShowTimer] = useState(false);
-  const collabUsers = useRef(new Map());
+  const [canvasDetails, setCanvasDetails] = useState(null);
+  const [showCursorWithName, setShowCursorWithName] = useState(true);
+  // const collabUsers = useRef(new Map());
+  const [collabUsers, setCollabUsers] = useState(new Map());
+  const isCollaborating = useRef(false);
 
   useEffect(() => {
-    if (collabUsers)
-      localStorage.setItem("collabUsers", JSON.stringify(collabUsers));
+    if (canvasDetails) {
+      console.log("Saving canvas details");
+      console.log(canvasDetails);
+      localStorage.setItem("canvasDetails", JSON.stringify(canvasDetails));
+    }
+  }, [canvasDetails]);
+
+  useEffect(() => {
+    if (collabUsers) {
+      console.log(collabUsers, "collabUsers");
+      const collabUsersArray = Array.from(collabUsers.entries());
+      localStorage.setItem("collabUsers", JSON.stringify(collabUsersArray));
+    }
   }, [collabUsers]);
 
   useEffect(() => {
@@ -43,34 +57,38 @@ export const UserAndChatsProvider = ({ children }) => {
   }, [chats]);
 
   useEffect(() => {
-      if(window.navigator.onLine===false){
-        navigate("/offline")
-        return
-      } 
-      else{
-        const userDetails = JSON.parse(localStorage.getItem("user"));
-        const currentPath = window.location.pathname;
-        console.log(userDetails, "user");
-    
-        if (userDetails) {
-          setUser(userDetails);
-          if (currentPath === "/" || currentPath === "/register") {
-            navigate("/dashboard");
-          }
-        } else if (
-          currentPath === "/register" ||
-          currentPath === "/reset-password/"
-        ) {
-          // Allow access to the register page
-          return;
-        } else {
-          // Redirect to the login page
-          console.log(currentPath);
-          navigate("/");
-        }
-      }
+    if (window.navigator.onLine === false) {
+      navigate("/offline");
+      return;
+    } else {
+      const userDetails = JSON.parse(localStorage.getItem("user"));
+      const currentPath = window.location.pathname;
+      console.log(userDetails, "user");
 
-  
+      if (userDetails) {
+        setUser(userDetails);
+        if (currentPath === "/" || currentPath === "/register") {
+          navigate("/dashboard");
+        }
+      } else if (
+        currentPath === "/register" ||
+        currentPath === "/reset-password/"
+      ) {
+        // Allow access to the register page
+        return;
+      } else if (
+        currentPath === "/register" ||
+        currentPath === "/reset-password/" ||
+        currentPath === "/reset-password/:token"
+      ) {
+        // Allow access to the register page
+        return;
+      } else {
+        // Redirect to the login page
+        console.log(currentPath);
+        navigate("/");
+      }
+    }
   }, [navigate]);
 
   const connectWithSocketServer = () => {
@@ -85,6 +103,7 @@ export const UserAndChatsProvider = ({ children }) => {
 
     /// For maintaining unique socket id for each user
     socket?.emit("connect-user", userId, (socketId) => {
+      console.log("emitting");
       console.log("socketId", socketId);
       socket.id = socketId;
     });
@@ -112,7 +131,12 @@ export const UserAndChatsProvider = ({ children }) => {
     setTime,
     difficulty,
     setDifficulty,
+    showCursorWithName,
+    setShowCursorWithName,
+    setCanvasDetails,
     collabUsers,
+    setCollabUsers,
+    isCollaborating,
   };
 
   return (
