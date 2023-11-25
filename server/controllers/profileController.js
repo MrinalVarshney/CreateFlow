@@ -2,7 +2,7 @@ const User = require("../models/userSchema");
 
 const ProfileUpdate = async (req, res) => {
   const { user, data, modalContent } = req.body;
-  console.log("modalContent", req.body);
+  console.log("modalContent", modalContent,data);
   try {
 
     await User.findByIdAndUpdate(user._id, {modalContent:data});
