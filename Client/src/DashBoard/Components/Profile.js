@@ -100,7 +100,7 @@ const Profile = ({ showProfile, setShowProfile }) => {
                     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
                     borderBottomLeftRadius: "20px",
                     borderBottomRightRadius: "20px",
-                    height: "25vh",
+                    height: "31vh",
                   }}
                 >
                   {isOpen && (

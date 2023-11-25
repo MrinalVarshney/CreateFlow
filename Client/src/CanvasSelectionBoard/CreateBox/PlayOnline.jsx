@@ -325,7 +325,9 @@ function PlayOnline() {
                 }}
               >
                 <div className="playHostText">Host: {HostroomCode.host}</div>
-                <h3>roomId : {HostroomCode.roomCode}</h3>
+                <h3 style={{ marginBottom: "5%" }}>
+                  roomId : {HostroomCode.roomCode}
+                </h3>
 
                 <div
                   style={{
@@ -440,7 +442,6 @@ function PlayOnline() {
           </>
         </Modal>
       )}
-
       <div
         style={{
           width: "50%",
@@ -452,14 +453,34 @@ function PlayOnline() {
           How to Play
         </div>
         <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignContent: "center",
-          }}
+        // style={{
+        //   display: "flex",
+        //   justifyContent: "center",
+        //   alignContent: "center",
+        // }}
         >
-          <Carousel />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignContent: "center",
+            }}
+          >
+            <Carousel />
+          </div>
+          <Button
+            onClick={() => navigate("/dashboard")}
+            style={{
+              marginTop: "23%",
+              marginLeft: "70%",
+              backgroundColor: "rgb(66 157 196)",
+              color: "white",
+            }}
+          >
+            Go to DashBoard
+          </Button>
         </div>
+        {/* </div> */}
       </div>
       {error && <ErrorToast message={error} setError={setError}/>}
       {infoError && <InfoToast message={infoError} setError={setInfoError}/>}
