@@ -9,12 +9,7 @@ import "./LeaderBoard.css"; // Import the updated LeaderboardBox styles
 import WinnerSound from "./WinnerSound"
 
 function Leaderboard({ scoreCard }) {
-  // const [players, setPlayers] = useState([
-  //   { name: "Player 1", score: 100 },
-  //   { name: "Player 2", score: 110 },
-  //   { name: "Player 3", score: 90 },
-  //   // Add more players and scores as needed
-  // ]);
+
 
   const defaultOptions = {
     loop: true, // Set to true if you want the animation to loop
