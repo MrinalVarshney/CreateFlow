@@ -84,6 +84,7 @@ const SettingsMenu = ({
         boxShadow: "10",
         position: "absolute",
         right: "0",
+        zIndex:"5"
       }}
     >
       <IconButton onClick={handleClick} color="inherit">

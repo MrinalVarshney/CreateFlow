@@ -5,6 +5,7 @@ import {useNavigate} from "react-router-dom"
 import {useUserAndChats} from "../../Context/userAndChatsProvider.jsx"
 import Notification from './Notification.js';
 import Profile from "./Profile.js";
+import JoinButton from "./JoinButton.js"
 
 const Navbar = ({notifications}) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -34,6 +35,8 @@ const Navbar = ({notifications}) => {
     handleDrawerClose();
     navigate("/");
   };
+
+
 
   return (
     <div>
@@ -73,6 +76,9 @@ const Navbar = ({notifications}) => {
               </ListItem>
               <ListItem button onClick={handleSignOutClick}>
                 <ListItemText primary="Sign Out" style={{ color: "white" }} />
+              </ListItem>
+              <ListItem>
+                <JoinButton />
               </ListItem>
             </List>
           </Drawer>

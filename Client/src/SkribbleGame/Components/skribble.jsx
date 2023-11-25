@@ -9,7 +9,7 @@ import CountdownTimer from "../../shared/Components/CountDownTimer";
 import LeaderBoard from "../../shared/Components/LeaderBoard";
 import PopUpMenu from "../../shared/Components/PopUpMenu";
 import ErrorToast from "../../shared/Components/ErrorToast";
-import RightAnsSound from './RightAnsSound';
+import RightAnsSound from "./RightAnsSound";
 
 function Skribble() {
   const {
@@ -41,7 +41,7 @@ function Skribble() {
   const [message, setMessage] = useState("");
   const [showMessageBar, setShowMessageBar] = useState(true);
   const [showLeaderBoard, setShowLeaderBoard] = useState(false);
-  const [guessSound,setguessSound] = useState(false);
+  const [guessSound, setguessSound] = useState(false);
   const [error, setError] = useState(null);
   const scoreCard = useRef(null);
   const messageContainerRef = useRef(null);
@@ -186,8 +186,7 @@ function Skribble() {
       userId: user?._id,
       userName: user?.username,
       message:
-        message === selectedWord ? `${user?.username} has guessed!`  : message ,
-        
+        message === selectedWord ? `${user?.username} has guessed!` : message,
     };
     if (message !== data.message) {
       const data = {
@@ -212,7 +211,7 @@ function Skribble() {
     [socket]
   );
   const navigate = useNavigate();
-  const handleLeave = () => {
+  const handleLeave = useCallback(() => {
     console.log("leaving");
     const data = {
       userName: user?.username,
@@ -227,11 +226,11 @@ function Skribble() {
     setChats([]);
     socket?.emit("leave-room", data);
     navigate("/playOnline");
-  };
+  }, [navigate]);
   const handleEnd = useCallback(() => {
     console.log("Game ended");
     const roomCode = roomDetails?.roomCode;
-    socket?.emit("end-game",roomCode);
+    socket?.emit("end-game", roomCode);
     setRoomDetails(null);
     setChats([]);
   }, [socket]);
@@ -325,8 +324,8 @@ function Skribble() {
       setChats([...chats, data]);
     });
     socket?.on("game-ended", () => {
-      setRoomDetails(null)
-      setChats(null)
+      setRoomDetails(null);
+      setChats(null);
       navigate("/playOnline");
     });
     socket?.on("join-room-error", (message) => {
@@ -492,12 +491,16 @@ function Skribble() {
         <Box>
           <div style={{ display: "flex" }}>
             <CountdownTimer startTimer={startTimer} scoreCard={scoreCard} />
-            <div style={   {            width: "auto",
+            <div
+              style={{
+                width: "auto",
                 marginLeft: "70%",
                 position: "relative",
                 display: "flex",
                 flexWrap: "wrap",
-                alignContent: "center"}}>
+                alignContent: "center",
+              }}
+            >
               {roomDetails &&
                 user?._id !== roomDetails?.roomCreator?.userId && (
                   <Button

@@ -5,9 +5,11 @@ import AppGif from "../../Assets/GIF/App.gif";
 import AppImg from "../../Assets/Images/App.jpg";
 import Navbar from "./Navbar";
 import RulesCurser from "./RulesCurser";
+import CustomBackdrop from "../../shared/Components/CustomBackDrop";
 
 const YourComponent = ({notifications}) => {
   const [playedOnce, setPlayedOnce] = useState(false);
+  const [progress,setProgress] = useState(false)
   const handleLoad = () => {
     setTimeout(() => {
       if (!playedOnce) setPlayedOnce(true);
@@ -17,7 +19,11 @@ const YourComponent = ({notifications}) => {
   const GotoGamePage = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate("/PlayOnline");
+    setProgress(true);
+    setTimeout(()=>{
+      navigate("/PlayOnline");
+      setProgress(false)
+    },2000)
   };
 
   const GoToGallery = ()=>{
@@ -25,6 +31,7 @@ const YourComponent = ({notifications}) => {
   }
 
   return (
+    progress? <CustomBackdrop showProgress={progress}/> :
     <div className="Inner-container">
       <div className="left-container">
         <div class="top-box">

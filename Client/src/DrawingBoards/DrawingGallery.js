@@ -9,6 +9,8 @@ import ErrorToast from "../shared/Components/ErrorToast";
 import CustomBackdrop from "../shared/Components/CustomBackDrop";
 import { useUserAndChats } from "../Context/userAndChatsProvider";
 import SuccessToast from "../shared/Components/successToast";
+import ParticleJsBackground from "./Components/ParticleJS";
+import backgroundGallary from "./Components/backgroundImage.jpg";
 
 const DrawingGallery = () => {
   const navigate = useNavigate();
@@ -50,7 +52,19 @@ const DrawingGallery = () => {
   };
 
   return (
-    <Container sx={{ display: "flex", flexDirection: "column" }}>
+    <Container
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        backgroundImage: `url(${backgroundGallary})`,
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center center",
+        width: "100%",
+        height: "100vh",
+      }}
+    >
+      <ParticleJsBackground />
       {showProgress ? (
         <CustomBackdrop showProgress={showProgress} />
       ) : (

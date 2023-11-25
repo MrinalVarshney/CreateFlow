@@ -1,0 +1,27 @@
+.join-room-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  
+  .join-room-title {
+    margin-bottom: 16px;
+    font-weight: bold;
+    color: #2196f3; /* Material-UI primary color */
+  }
+  
+  .join-room-input {
+    margin-bottom: 8px;
+    border: 2px solid white
+  }
+  
+  .join-room-button {
+    background-color: #2196f3; /* Material-UI primary color */
+    color: #fff;
+    &:hover {
+      background-color: #1565c0; /* Darker shade for hover effect */
+    }
+  }
+  

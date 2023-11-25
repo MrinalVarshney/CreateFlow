@@ -7,6 +7,7 @@ import "./DashBoard.css";
 import * as api from "../api";
 import { useUserAndChats} from "../Context/userAndChatsProvider";
 
+
 const Dashboard = () => {
   useEffect(() => {
     const user= JSON.parse(localStorage.getItem("user"))
@@ -23,6 +24,7 @@ const Dashboard = () => {
   const { setUser,connectWithSocketServer } = useUserAndChats();
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
+
 
   useEffect(() => {
     connectWithSocketServer()
@@ -46,7 +48,7 @@ const Dashboard = () => {
   return (
     loading ? <CustomBackdrop showProgress={loading} /> :
     <div className="container">
-      <Content notifications={notifications} />
+      <Content notifications={notifications}/>
       <ParticleJsBackground />
     </div>
   );

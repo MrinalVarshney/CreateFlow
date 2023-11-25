@@ -714,7 +714,7 @@ function DrawingCanvas() {
         width={window.innerWidth}
         height={window.innerHeight}
       />
-
+      <div style={{ overflow: "hidden" }}>
       <canvas
         ref={offCanvasRef}
         width={window.innerWidth}
@@ -728,6 +728,7 @@ function DrawingCanvas() {
           zIndex: -1,
         }}
       />
+      </div>
       <canvas
         ref={cursorCanvasRef}
         style={{
