@@ -36,6 +36,13 @@ const EditModal = ({ isOpen, onRequestClose, onSave, modalContent }) => {
     }
   };
 
+  const handleSave = (e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("pic",pic)
+    onSave(pic, modalContent);
+  }
+
   console.log("in editModal", pic);
   return (
     <Modal
@@ -125,7 +132,7 @@ const EditModal = ({ isOpen, onRequestClose, onSave, modalContent }) => {
             </div>
             <button
               style={{ width: "fit-content", marginLeft: "45%" }}
-              onClick={() => onSave(pic, modalContent)}
+              onClick={handleSave}
             >
               Save
             </button>

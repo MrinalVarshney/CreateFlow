@@ -51,6 +51,7 @@ const Navbar = ({notifications}) => {
           <Notification notifications={notifications}/>
           <IconButton color="inherit" onClick={handleDrawerOpen}>
             <img
+              src={user?.pic}
               alt="Logo"
               style={{ width: 40, height: 40, borderRadius: "50%" }}
             />

@@ -51,7 +51,8 @@ const Profile = ({ showProfile, setShowProfile }) => {
     setIsOpen(false);
   };
   const onSave =async (data, modalContent) => {
-    setIsOpen(false);
+    setIsOpen(false)
+    console.log(data,"pic")
     try {
       await api.updateProfile({
         user: user,

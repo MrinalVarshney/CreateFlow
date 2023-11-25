@@ -11,6 +11,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import { useUserAndChats } from "../Context/userAndChatsProvider";
 import ShareableCodeModal from "./Components/ShareableCodeModal";
+import PicLinkModal from "./Components/PickLinkModal";
 
 const SettingsMenu = ({
   handleOpenModal,
@@ -22,6 +23,8 @@ const SettingsMenu = ({
   const [anchorEl, setAnchorEl] = useState(null);
   const [codeModalOpen, setCodeModalOpen] = useState(false);
   const navigate = useNavigate();
+  const [pic,setPic] = useState(null)
+  const [open,setOpen] = useState(false);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -73,8 +76,48 @@ const SettingsMenu = ({
   };
 
   const handleShare = async () => {
-    console.log("Sharing")
+    try {
+      const dataUrl = localStorage.getItem("snapShot");
+  
+      // Convert data URL to Blob
+      const base64String = dataUrl.split(",")[1];
+      const binaryString = atob(base64String);
+      const arrayBuffer = new ArrayBuffer(binaryString.length);
+      const uint8Array = new Uint8Array(arrayBuffer);
+      for (let i = 0; i < binaryString.length; i++) {
+        uint8Array[i] = binaryString.charCodeAt(i);
+      }
+      const blob = new Blob([uint8Array], { type: 'image/png' });
+  
+      // Create FormData and append the blob
+      const data = new FormData();
+      data.append("file", blob);
+      data.append("upload_preset", "chat-app");
+      data.append("cloud_name", "piyushproj");
+  
+      // Make the Cloudinary upload request
+      const response = await fetch("https://api.cloudinary.com/v1_1/dyo3vk9cy/image/upload", {
+        method: "POST",
+        body: data,
+      });
+  
+      const result = await response.json();
+  
+      // Handle the Cloudinary response
+      setPic(result.url.toString());
+      setOpen(true);
+      console.log(result.url.toString());
+    } catch (error) {
+      console.error("Error uploading to Cloudinary:", error);
+    }
   };
+
+  const onClose = ()=>{
+    setOpen(false)
+  }
+
+  console.log(pic)
+  
 
   return (
     <div
@@ -123,6 +166,7 @@ const SettingsMenu = ({
         </MenuItem>
       </Menu>
       <ShareableCodeModal open={codeModalOpen} onClose={handleCloseCodeModal} />
+      <PicLinkModal open={open} picUrl={pic} onClose={onClose}/>
     </div>
   );
 };
