@@ -572,12 +572,7 @@ function Skribble() {
                         marginLeft: "10px",
                       }}
                     ></p>
-                    <img
-                      src={roomDetails.participants.pic}
-                      alt="profile"
-                      height={100}
-                      width={100}
-                    />
+
                     {participants.userName}
                     {user?._id === roomDetails?.roomCreator?.userId &&
                       participants.userId !==
