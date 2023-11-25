@@ -7,7 +7,7 @@ const roomCreateHandler = (socket, data, roomCode) => {
     data,
     roomCode,
   });
-  console.log("rmDCreate", roomDetails, socketId);
+    console.log("rmDCreate", roomDetails, socketId);
   serverStore.mapUserToRoomCode(data.userId, roomCode);
   socket.emit("room-created", roomDetails);
 };

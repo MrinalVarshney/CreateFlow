@@ -636,6 +636,7 @@ function DrawingCanvas({ show, setShow, closeRandomWordModal }) {
         style={{ display: "none" }}
         onChange={handleFileSelect}
       />
+      <div style={{ overflow: "hidden" }}>
       <canvas
         ref={offCanvasRef}
         width={window.innerWidth}
@@ -652,6 +653,7 @@ function DrawingCanvas({ show, setShow, closeRandomWordModal }) {
         onMouseMove={handleVirtualMouseMove}
         onMouseUp={handleVirtualMouseUp}
       />
+      </div>
     </div>
   );
 }

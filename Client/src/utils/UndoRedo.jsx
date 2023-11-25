@@ -7,7 +7,7 @@ import "./undoRedoStyles.css";
 import { useUserAndChats } from "../Context/userAndChatsProvider";
 
 const UndoRedo = ({ redrawCanvas, isOpen }) => {
-  const { Socket, roomDetails } = useUserAndChats();
+  const { Socket, roomDetails, playingGameRef } = useUserAndChats();
   const socket = Socket.current;
   const { undo, redo } = useHistory();
   const handleUndo = () => {
@@ -15,6 +15,7 @@ const UndoRedo = ({ redrawCanvas, isOpen }) => {
     if (data) {
       console.log("undoing");
       redrawCanvas(data);
+      if(playingGameRef.current)
       socket?.emit("undo", roomDetails.roomCode);
     }
   };
@@ -23,6 +24,7 @@ const UndoRedo = ({ redrawCanvas, isOpen }) => {
     console.log("redoing");
     const data = redo();
     if (data) {
+      if(playingGameRef.current)
       socket?.emit("redo", roomDetails.roomCode);
       redrawCanvas(data);
     }

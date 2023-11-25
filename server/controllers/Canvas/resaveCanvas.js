@@ -1,13 +1,13 @@
 const Canvas = require("../../models/Canvas/canvasSchema");
 
 const resaveCanvas = async (req, res) => {
-  const { canvasId, data } = req.body;
+  const { canvasId, canvasData } = req.body;
   try {
     const canvas = await Canvas.findById(canvasId);
     if (!canvas) {
       return res.status(400).send("Canvas not found");
     }
-    canvas.data = data;
+    canvas.canvasData = canvasData;
     await canvas.save();
     res.status(201).json({
       success: true,

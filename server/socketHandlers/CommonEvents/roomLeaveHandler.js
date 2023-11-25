@@ -5,8 +5,8 @@ const roomLeaveHandler = (data) => {
   const roomCode = serverStore.getRoomCode(userId);
   const roomType = data.roomType;
   const io = serverStore.getSocketServerInstance();
-  if (roomType === "random") {
-    console.log("userID", userId, "roomCode", roomCode);
+    if (roomType === "random") {
+    console.log("userID", userId, "roomCode", roomCode)
     const updatedRoom = serverStore.removerUserFromRandomRoom(userId, roomCode);
     console.log("Removed user from random room", updatedRoom);
   } else {

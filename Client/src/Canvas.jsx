@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDrawingTools } from "./Context/DrawingToolsContext";
 import { useHistory } from "./Context/History";
 import ColorPalette from "./ToolBar/ColorPalette";
@@ -6,8 +6,11 @@ import Tools from "./ToolBar/Tools";
 import UndoRedo from "./utils/UndoRedo";
 import ShapesMenu from "./ToolBar/ShapesMenu";
 import { Box } from "@mui/system";
+import CustomBackdrop from "./shared/Components/CustomBackDrop.js";
 import FloodFill from "q-floodfill";
 import { useStyles } from "./Assets/CursorStyles";
+import "./api.jsx";
+import SuccessToast from "./shared/Components/successToast.js";
 import "./Canvas.css";
 import {
   drawRectangle,
@@ -19,10 +22,28 @@ import {
   drawDashedRectangle,
   drawLineDashedRectangle,
 } from "./utils/ShapesLogic.jsx";
+import SavingAndSocialMenu from "./ToolBar/SavingAndSocialMenu";
+import ErrorToast from "./shared/Components/ErrorToast.js";
+import { useUserAndChats } from "./Context/userAndChatsProvider.jsx";
+import * as api from "./api";
+import CanvasNameModal from "./ToolBar/Components/CanvasNameModal.js";
+import { useNavigate } from "react-router-dom";
+import userObject from "./shared/Components/usersObjects.js";
 
 function DrawingCanvas() {
   const canvasRef = useRef(null);
   const offCanvasRef = useRef(null);
+  const {
+    setCanvasDetails,
+    connectWithSocketServer,
+    Socket,
+    collabUsers,
+    setRoomDetails,
+    roomDetails,
+    user,
+    setCollabUsers,
+    isCollaborating
+  } = useUserAndChats();
   const {
     selectedTool,
     selectedColor,
@@ -36,6 +57,9 @@ function DrawingCanvas() {
   const [isDragging, setIsDragging] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [uploadFile, setUploadFile] = useState(null);
+  const [progress, setProgress] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState(null);
   const isCustomizable = useRef(false);
   const StartRef = useRef({ startX: 0, startY: 0 });
   const CurrentRef = useRef({ x: -1, y: -1 });
@@ -45,11 +69,123 @@ function DrawingCanvas() {
   const isResizing = useRef(false);
   const stillResizing = useRef(false);
   const classes = useStyles();
+  const [success, setSuccess] = useState(null);
+  const navigateToGallery = useRef(false);
+  const navigate = useNavigate();
+
+  /***********************************Function for handling modal   for saving canvas name ***********************/
+  const socket = Socket?.current;
+  useEffect(() => {
+    connectWithSocketServer();
+    const socket = Socket?.current;
+    if(isCollaborating.current) return;
+    const roomCode = localStorage.getItem("roomCode");
+    const user = JSON.parse(localStorage.getItem("user"));
+    console.log("User", user);
+    if (socket && roomCode) {
+      console.log("sending request");
+      const userId = user._id;
+      const userName = user.username;
+      const data = {
+        userId: userId,
+        userName: userName,
+        roomCode: roomCode,
+      };
+      socket.emit("collab-room-create", data);
+    }
+  }, []);
+
+  const handleOpenModal = (data) => {
+    // opening canvas save modal
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = (data) => {
+    /// For saving canvas Name
+    setIsModalOpen(false);
+    if (data) {
+      saveCanvas(data);
+    }
+  };
+
+  /**************************************Utilities ****************************************************/
+
+  /*Function to save the current canvas at server-side */
+
+  const saveCanvas = async (data) => {
+    console.log("Data to save ", data);
+    setProgress(true);
+    const response = await api.saveCanvas(data);
+    setProgress(false);
+    if (response.error) {
+      setError(response.errorMessage);
+    } else {
+      setCanvasDetails(response.data);
+      setSuccess("Canvas successfully saved");
+    }
+    if (navigateToGallery.current) {
+      navigate("/drawingGallery");
+    }
+  };
+  const reSaveCanvas = async () => {
+    setProgress(true);
+    const details = JSON.parse(localStorage.getItem("canvasDetails"));
+    const canvasData = localStorage.getItem("snapShot");
+    const updates = {
+      canvasId: details._id,
+      canvasData: canvasData,
+    };
+    setProgress(true);
+    const response = await api.updateCanvas(updates);
+    setProgress(false);
+    if (response.error) {
+      setError(response.errorMessage);
+    } else {
+      setSuccess("Canvas re-saved successfully");
+    }
+    redrawCanvas(canvasData);
+  };
+
+  const downloadCanvasImage = (dataUrl) => {
+    var downloadLink = document.createElement("a");
+    downloadLink.href = dataUrl;
+    downloadLink.download = "canvasImage.png";
+    downloadLink.click();
+  };
+
+  /*********************Loading most recent canvas state on reconnection the page *******************/
+
   const [points, setPoints] = useState([]);
   const [brushStyle, setBrushStyle] = useState([]);
   const density = 50;
   useEffect(() => {
-    saveCanvasState();
+    const savedDrawing = localStorage.getItem("snapShot");
+    const canvasDetails = localStorage.getItem("canvasDetails");
+    if (canvasDetails) {
+      setCanvasDetails();
+    }
+    if (!savedDrawing) {
+      console.log(
+        "Dimensions",
+        canvasRef.current.width,
+        canvasRef.current.height
+      );
+      const context = canvasRef.current.getContext("2d");
+      context.moveTo(0, 0);
+      context.lineTo(0, 0);
+      const imgData = context?.getImageData(
+        0,
+        0,
+        canvasRef.current.width,
+        canvasRef.current.height
+      );
+      const floodFill = new FloodFill(imgData);
+      floodFill.fill("rgb(255,255,255)", 20, 20, 0);
+      context.putImageData(floodFill.imageData, 0, 0);
+      saveCanvasState();
+    } else {
+      redrawCanvas(savedDrawing);
+    }
   }, []);
 
   /*********************Functionality to toggle between main and virtual canvas*****************************/
@@ -237,6 +373,7 @@ function DrawingCanvas() {
     const snapShot = canvas.toDataURL();
     console.log("State saved");
     addToHistory(snapShot);
+    localStorage.setItem("snapShot", snapShot);
   };
 
   const redrawCanvas = (imageData) => {
@@ -427,6 +564,20 @@ function DrawingCanvas() {
   };
 
   const handleMouseDown = (e) => {
+    const data = {
+      userId: user._id,
+      roomCode: roomDetails?.roomCode,
+      x: e.clientX,
+      y: e.clientY,
+      selectedTool: selectedTool,
+      selectedColor: selectedColor,
+      brushStyle: brushStyle,
+      lineWidth: lineWidth,
+      shadowBlur: context.shadowBlur,
+      lineJoin: context.lineJoin,
+      lineCap: context.lineCap,
+    };
+    socket?.emit("collab-mouse-down", data);
     if (selectedTool === "PaintBucket") {
       const imgData = context.getImageData(
         0,
@@ -458,6 +609,13 @@ function DrawingCanvas() {
     }
   };
   const handleMouseMove = (e) => {
+    const data = {
+      userId: user._id,
+      roomCode: roomDetails?.roomCode,
+      x: e.clientX,
+      y: e.clientY,
+    };
+    socket?.emit("collab-mouse-move", data);
     if (!drawing) return;
     if (selectedTool === "Brush") {
       if (brushStyle === 1) {
@@ -493,6 +651,8 @@ function DrawingCanvas() {
   };
 
   const handleMouseUp = (e) => {
+    const data = { userId: user._id, roomCode: roomDetails?.roomCode };
+    socket?.emit("collab-mouse-up", data);
     setDrawing(false);
     context.closePath();
     saveCanvasState();
@@ -658,7 +818,163 @@ function DrawingCanvas() {
     }
   };
 
-  return (
+  /**********************************Collab logics ***************************************/
+  const updateRoomDetails = useCallback(
+    (userDetails) => {
+      if (user._id !== userDetails.userId) {
+        setCollabUsers((prevCollabUsers) =>
+        new Map(prevCollabUsers).set(
+          userDetails.userId,
+          userDetails.drawingSettings
+        )
+      );
+      } 
+    },
+    [collabUsers, roomDetails, user,setCollabUsers]
+  );
+
+  /********************************Collaborators incoming event handlers ************* */
+  const sharedMouseDown = useCallback(
+    (data) => {
+      const {
+        userId,
+        x,
+        y,
+        selectedTool,
+        selectedColor,
+        brushStyle,
+        lineJoin,
+        lineCap,
+        shadowBlur,
+      } = data;
+
+      console.log("Data mouse down", data);
+      const object = {
+        ...userObject,
+        selectedColor: selectedColor,
+        brushStyle: brushStyle,
+        lineJoin: lineJoin,
+        lineCap: lineCap,
+        shadowBlur: shadowBlur,
+      };
+
+      collabUsers.set(userId, object);
+
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const context = canvas.getContext("2d");
+      console.log("Mouse Down selectedTool", selectedTool);
+      if (selectedTool === "PaintBucket") {
+        const imgData = context.getImageData(
+          0,
+          0,
+          canvasRef.current.width,
+          canvasRef.current.height
+        );
+        const floodFill = new FloodFill(imgData);
+        floodFill.fill(context.strokeStyle, x, y, 0);
+        context.putImageData(floodFill.imageData, 0, 0);
+      } else {
+        var user = collabUsers.get(userId);
+        user = { ...user, drawing: true };
+        collabUsers.set(userId, user);
+        context.beginPath();
+        context.moveTo(x, y);
+      }
+    },
+    [collabUsers]
+  );
+
+  const sharedMouseMove = useCallback(
+    (data) => {
+      const { userId, x, y } = data;
+      const user = collabUsers.get(userId);
+      console.log("User", user, userId);
+      console.log("collab", collabUsers);
+      const drawing = user.drawing;
+      if(drawing )console.log("drawing")
+      if (drawing === false) return;
+      console.log("drawingoiaoijpo")
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const context = canvas.getContext("2d");
+      console.log("moving");
+      context.lineTo(x, y);
+      context.stroke();
+    },
+    [collabUsers]
+  );
+
+  const sharedMouseUp = useCallback(
+    (data) => {
+      const { userId } = data;
+      const canvas = canvasRef.current;
+      console.log("Mousee up event")
+      var drawingSettings = collabUsers.get(userId);
+      drawingSettings = { ...drawingSettings, drawing: false };
+      setCollabUsers((prevCollabUsers)=>new Map(prevCollabUsers).set(userId,drawingSettings))
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      ctx.closePath();
+      console.log("Mouse up");
+      saveCanvasState();
+      console.log("Saved canvas state");
+    },
+    [collabUsers, saveCanvasState]
+  );
+
+  console.log("Mouse-up",collabUsers)
+
+  useEffect(() => {
+    socket?.on("collab-mouse-down", (data) => {
+      console.log("collab mouse down")
+      sharedMouseDown(data);
+    });
+    socket?.on("collab-mouse-move", (data) => {
+      sharedMouseMove(data);
+    });
+    socket?.on("collab-mouse-up", (data) => {
+      sharedMouseUp(data);
+    });
+    socket?.on("collab-user-joined", (userDetails) => {
+      updateRoomDetails(userDetails);
+    });
+    socket?.on("collab-room-created", (room) => {
+      console.log("User details", room);
+      setCollabUsers((prevCollabUsers) =>
+        new Map(prevCollabUsers).set(
+          user._id,
+          room.collaborators[0].drawingSettings
+        )
+      );
+    });
+    socket?.on("collab-room-leave", (data) => {
+      const updatedCollaborators = roomDetails.collaborators.filter(
+        (collaborator) => collaborator.userId !== data.userId
+      );
+      setRoomDetails([{ ...roomDetails, collaborators: updatedCollaborators }]);
+    });
+    return () => {
+      socket?.off("collab-mouse-down");
+      socket?.off("collab-mouse-move");
+      socket?.off("collab-mouse-up");
+      socket?.off("collab-room-leave");
+    };
+  }, [
+    socket,
+    sharedMouseDown,
+    sharedMouseMove,
+    sharedMouseUp,
+    setRoomDetails,
+    roomDetails,
+    setCollabUsers,
+    updateRoomDetails,
+    user
+  ]);
+
+  return progress ? (
+    <CustomBackdrop showProgress={progress} />
+  ) : (
     <div style={{ cursor: "./Assets/cursor/eraser.jpg" }}>
       <Box
         sx={{
@@ -680,42 +996,51 @@ function DrawingCanvas() {
         <ColorPalette />
         <UndoRedo isOpen={isOpen} redrawCanvas={redrawCanvas} />
       </Box>
-      <div style={{ overflow: "hidden" }}>
-        <canvas
-          className={classes[selectedTool]}
-          ref={canvasRef}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          width={window.innerWidth}
-          height={window.innerHeight}
-          style={{ overflow: "hidden", margin: 0 }}
-        />
-      </div>
+      <SavingAndSocialMenu
+        handleOpenModal={handleOpenModal}
+        downloadCanvasImage={downloadCanvasImage}
+        reSaveCanvas={reSaveCanvas}
+        navigateToGallery={navigateToGallery}
+      />
+      <CanvasNameModal open={isModalOpen} onClose={handleCloseModal} />
+      <canvas
+        className={classes[selectedTool]}
+        ref={canvasRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        width={window.innerWidth}
+        height={window.innerHeight}
+        style={{ overflow: "hidden", margin: 0 }}
+      />
       <input
         type="file"
         id="fileInput"
         style={{ display: "none" }}
         onChange={handleFileSelect}
       />
-      <canvas
-        ref={offCanvasRef}
-        width={window.innerWidth}
-        height={window.innerHeight}
-        id="offCanvas"
-        style={{
-          cursor: "crosshair",
-          backgroundColor: "transparent",
-          position: "absolute",
-          top: 0,
-          zIndex: -1,
-          overflow: "hidden",
-          margin: 0,
-        }}
-        onMouseDown={handleVirtualMouseDown}
-        onMouseMove={handleVirtualMouseMove}
-        onMouseUp={handleVirtualMouseUp}
-      />
+      <div style={{ overflow: "hidden" }}>
+        <canvas
+          ref={offCanvasRef}
+          width={window.innerWidth}
+          height={window.innerHeight}
+          id="offCanvas"
+          style={{
+            cursor: "crosshair",
+            backgroundColor: "transparent",
+            position: "absolute",
+            top: 0,
+            zIndex: -1,
+            overflowY: "hidden",
+            margin: 0,
+          }}
+          onMouseDown={handleVirtualMouseDown}
+          onMouseMove={handleVirtualMouseMove}
+          onMouseUp={handleVirtualMouseUp}
+        />
+      </div>
+      {error && <ErrorToast message={error} setError={setError} />}
+      {success && <SuccessToast message={success} setSuccess={setSuccess} />}
     </div>
   );
 }

@@ -4,6 +4,7 @@ const { generateToken } = require("../../utils/generateToken");
 const postLogin = async (req, res) => {
   const { mail, password } = req.body;
   try {
+    console.log(password)
     const user = await User.findOne({ email: mail.toLowerCase() });
     if (!user) {
       res.status(400).send("Email not registered");

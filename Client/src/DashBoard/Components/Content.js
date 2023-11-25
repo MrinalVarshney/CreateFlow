@@ -5,9 +5,11 @@ import AppGif from "../../Assets/GIF/App.gif";
 import AppImg from "../../Assets/Images/App.jpg";
 import Navbar from "./Navbar";
 import RulesCurser from "./RulesCurser";
+import CustomBackdrop from "../../shared/Components/CustomBackDrop";
 
-const YourComponent = () => {
+const YourComponent = ({notifications}) => {
   const [playedOnce, setPlayedOnce] = useState(false);
+  const [progress,setProgress] = useState(false)
   const handleLoad = () => {
     setTimeout(() => {
       if (!playedOnce) setPlayedOnce(true);
@@ -17,10 +19,19 @@ const YourComponent = () => {
   const GotoGamePage = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate("/PlayOnline");
+    setProgress(true);
+    setTimeout(()=>{
+      navigate("/PlayOnline");
+      setProgress(false)
+    },2000)
   };
 
+  const GoToGallery = ()=>{
+    navigate("/drawingGallery")
+  }
+
   return (
+    progress? <CustomBackdrop showProgress={progress}/> :
     <div className="Inner-container">
       <div className="left-container">
         <div class="top-box">
@@ -50,31 +61,20 @@ const YourComponent = () => {
 
         <div class="bottom-box">
           <div className="box sideBoxes">
-            <div className="playText">Drawing Boards</div>
+            <div className="playText" onClick={GoToGallery}>Drawing Boards</div>
           </div>
         </div>
       </div>
 
       <div className="right-container">
-        <Navbar />
-        <div className="welcome-page">
-          <h2 className="welcome-title">Welcome, Doodlers!</h2>
-          <p className="welcome-text">
-            Get ready to unleash your creativity. Here's a quick guide to get
-            started:
-          </p>
-          {/* <ul className="welcome-list">
-          <li>Choose your favorite colors from the vibrant palette.</li>
-          <li>
-            Select your magic brush size to bring your imagination to life.
-          </li>
-          <li>Embark on a doodling adventure on the mystical canvas.</li>
-          <li>
-            Master the enchanted eraser tool to correct any artistic mishaps.
-          </li>
-          <li>Have a blast and conjure amazing artwork!</li>
-        </ul> */}
-          <RulesCurser />
+      <Navbar notifications={notifications}/>
+      <div className="welcome-page">
+        <h2 className="welcome-title">Welcome, Doodlers!</h2>
+        <p className="welcome-text">
+          Get ready to unleash your creativity. Here's a quick guide to get
+          started:
+        </p>
+        <RulesCurser />
         </div>
       </div>
     </div>

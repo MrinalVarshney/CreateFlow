@@ -1,9 +1,8 @@
 const serverStore = require("../../serverStore");
 
-const endGameHandler = (userId) => {
-  const roomCode = serverStore.getRoomCode(userId);
+const endGameHandler = (roomCode) => {
   const io = serverStore.getSocketServerInstance();
-  console.log(roomCode);
+  console.log("Ending",roomCode);
   serverStore.removeActiveRoom(roomCode);
   io.to(roomCode).emit("game-ended");
 };

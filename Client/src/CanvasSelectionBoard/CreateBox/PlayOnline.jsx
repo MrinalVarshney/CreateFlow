@@ -7,6 +7,9 @@ import { useUserAndChats } from "../../Context/userAndChatsProvider";
 import Table from "../../shared/Components/Table";
 import Carousel from "../../shared/Components/Carousel";
 import HostInput from "../../shared/Components/HostInput";
+import ErrorToast from "../../shared/Components/ErrorToast";
+import InfoToast from "../../shared/Components/InfoToast";
+
 import "../../Canvas.css";
 import "./playOnline.css";
 import PlayOnline4 from "../../Assets/Images/playonline4.jpg";
@@ -56,6 +59,8 @@ function PlayOnline() {
   const [HostroomCode, setHostRoomCode] = useState({ host: "", roomCode: "" });
   const [joinRoomCode, setJoinRoomCode] = useState("");
   const [isUserJoined, setIsUserJoined] = useState(false);
+  const [error, setError] = useState(null)
+  const [infoError,setInfoError] = useState(null)
   const navigate = useNavigate();
 
   const timeSlots = [30, 60, 90, 120, 200];
@@ -114,6 +119,8 @@ function PlayOnline() {
 
   const handleCloseHostModal = () => {
     setIsModalOpen(false);
+    const roomCode = HostroomCode.roomCode;
+    socket?.emit("match-cancelled",roomCode);
   };
 
   const playRandom = () => {
@@ -182,11 +189,24 @@ function PlayOnline() {
       startGame();
     });
 
+    socket?.on("match-cancelled",()=>{
+      if(user.userId === roomDetails?.roomCreator.userId) {
+        setInfoError("You cancelled the match")
+      }
+      else{
+        setInfoError("Match cancelled by host")
+        setIsModalOpen(false)
+      }
+      setRoomDetails(null)
+    })
+
+
     return () => {
       socket?.off("user-joined", handleUserJoined);
       socket?.off("game-started", startGame);
+      socket?.off("game-cancelled")
     };
-  }, [socket, handleUserJoined, navigate, playingGameRef, startGame]);
+  }, [socket, handleUserJoined, navigate, playingGameRef, startGame,setInfoError,roomDetails,user,setRoomDetails]);
 
   const joinRoom = (roomCode) => {
     console.log("joined the room");
@@ -209,6 +229,10 @@ function PlayOnline() {
 
   const start = () => {
     setIsModalOpen(false);
+    if(roomDetails.participants.length < 2){
+      setError("Minimum 2 players required to start the game")
+      return;
+    }
     const data = {
       roomCode: roomDetails.roomCode,
       player: roomDetails.roomCreator,
@@ -301,7 +325,9 @@ function PlayOnline() {
                 }}
               >
                 <div className="playHostText">Host: {HostroomCode.host}</div>
-                <h3>roomId : {HostroomCode.roomCode}</h3>
+                <h3 style={{ marginBottom: "5%" }}>
+                  roomId : {HostroomCode.roomCode}
+                </h3>
 
                 <div
                   style={{
@@ -354,9 +380,7 @@ function PlayOnline() {
                     }}
                     onClick={handleCloseHostModal}
                   >
-                    <p style={{ color: "white", padding: 0, margin: 0 }}>
-                      Close
-                    </p>
+                    Cancel
                   </Button>
                 </div>
               </div>
@@ -418,7 +442,6 @@ function PlayOnline() {
           </>
         </Modal>
       )}
-
       <div
         style={{
           width: "50%",
@@ -430,15 +453,37 @@ function PlayOnline() {
           How to Play
         </div>
         <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignContent: "center",
-          }}
+        // style={{
+        //   display: "flex",
+        //   justifyContent: "center",
+        //   alignContent: "center",
+        // }}
         >
-          <Carousel />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignContent: "center",
+            }}
+          >
+            <Carousel />
+          </div>
+          <Button
+            onClick={() => navigate("/dashboard")}
+            style={{
+              marginTop: "23%",
+              marginLeft: "70%",
+              backgroundColor: "rgb(66 157 196)",
+              color: "white",
+            }}
+          >
+            Go to DashBoard
+          </Button>
         </div>
+        {/* </div> */}
       </div>
+      {error && <ErrorToast message={error} setError={setError}/>}
+      {infoError && <InfoToast message={infoError} setError={setInfoError}/>}
     </div>
   );
 }
