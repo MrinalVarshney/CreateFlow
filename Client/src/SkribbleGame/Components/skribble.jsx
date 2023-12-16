@@ -182,6 +182,9 @@ function Skribble() {
   const handleSend = (e) => {
     e.preventDefault();
     console.log(message, user);
+    // selectedWord = selectedWord?.toLowerCase();
+    var message = message?.toLowerCase();
+    var selectedWord = selectedWord?.toLowerCase();
     const data = {
       userId: user?._id,
       userName: user?.username,
@@ -225,9 +228,7 @@ function Skribble() {
       roomType: roomDetails?.roomType,
     };
     setShowTimer(false);
-    localStorage.removeItem("roomDetails");
     setRoomDetails(null);
-    localStorage.removeItem("chats");
     setChats([]);
     socket?.emit("leave-room", data);
     navigate("/playOnline");
@@ -238,6 +239,7 @@ function Skribble() {
     socket?.emit("end-game", roomCode);
     setRoomDetails(null);
     setChats([]);
+    playingGameRef.current = false;
   }, [socket]);
 
   const handleFilterParticipants = useCallback(
@@ -272,6 +274,7 @@ function Skribble() {
     console.log("Starting random game");
     setShowTimer(true);
     setRoomDetails({ ...roomDetails, isGameStarted: true });
+    setChats([])
   }, [roomDetails, setShowTimer, setRoomDetails]);
 
   useEffect(() => {
@@ -330,7 +333,8 @@ function Skribble() {
     });
     socket?.on("game-ended", () => {
       setRoomDetails(null);
-      setChats(null);
+      setChats([]);
+      playingGameRef.current = false;
       navigate("/playOnline");
     });
     socket?.on("join-room-error", (message) => {
@@ -477,7 +481,7 @@ function Skribble() {
           />
         </>
       ) : (
-        <SharedCanvas showCursorWithName={showCursorWithName} />
+        <SharedCanvas showCursorWithName={showCursorWithName} randomDrawer={randomDrawer}/>
       )}
       <Modal open={showLeaderBoard} style={{ top: "50px" }}>
         <LeaderBoard

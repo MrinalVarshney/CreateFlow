@@ -761,7 +761,7 @@ function DrawingCanvas() {
         e2Y: 150 + 200,
       };
       StartRef.current = { startX: 150, startY: 150 };
-      EndRef.current = { endX: 150 + 200, endY: 150 + 200 };
+      EndRef.current = { endX: 150 + 800, endY: 150 + 400 };
       SwitchToVirtual();
       const offCanvas = offCanvasRef.current;
       const virtualCtx = offCanvas.getContext("2d");
@@ -805,7 +805,7 @@ function DrawingCanvas() {
           image.src = e.target.result;
 
           image.onload = function () {
-            ctx.drawImage(image, startX, startY, 200, 200);
+            ctx.drawImage(image, startX, startY, 800, 400);
             resolve(); // Resolve the Promise when the image has loaded
           };
         };
