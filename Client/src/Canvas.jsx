@@ -42,7 +42,7 @@ function DrawingCanvas() {
     roomDetails,
     user,
     setCollabUsers,
-    isCollaborating
+    isCollaborating,
   } = useUserAndChats();
   const {
     selectedTool,
@@ -78,7 +78,7 @@ function DrawingCanvas() {
   useEffect(() => {
     connectWithSocketServer();
     const socket = Socket?.current;
-    if(isCollaborating.current) return;
+    if (isCollaborating.current) return;
     const roomCode = localStorage.getItem("roomCode");
     const user = JSON.parse(localStorage.getItem("user"));
     console.log("User", user);
@@ -486,6 +486,7 @@ function DrawingCanvas() {
       if (selectedTool === "Eraser") {
         ctx.strokeStyle = "white";
         ctx.lineWidth = eraserWidth;
+        console.log("eraser in useEffect ", eraserWidth, ctx.lineWidth);
       } else {
         ctx.strokeStyle = selectedColor;
 
@@ -573,11 +574,14 @@ function DrawingCanvas() {
       selectedColor: selectedColor,
       brushStyle: brushStyle,
       lineWidth: lineWidth,
+      eraserWidth: eraserWidth,
       shadowBlur: context.shadowBlur,
       lineJoin: context.lineJoin,
       lineCap: context.lineCap,
     };
+    console.log("Data mouse down", roomDetails);
     socket?.emit("collab-mouse-down", data);
+    // context.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     if (selectedTool === "PaintBucket") {
       const imgData = context.getImageData(
         0,
@@ -604,6 +608,7 @@ function DrawingCanvas() {
       }
     } else {
       setDrawing(true);
+      console.log("eraser", eraserWidth, context.lineWidth);
       context.beginPath();
       context.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
     }
@@ -823,43 +828,62 @@ function DrawingCanvas() {
     (userDetails) => {
       if (user._id !== userDetails.userId) {
         setCollabUsers((prevCollabUsers) =>
-        new Map(prevCollabUsers).set(
-          userDetails.userId,
-          userDetails.drawingSettings
-        )
-      );
-      } 
+          new Map(prevCollabUsers).set(
+            userDetails.userId,
+            userDetails.drawingSettings
+          )
+        );
+      }
     },
-    [collabUsers, roomDetails, user,setCollabUsers]
+    [collabUsers, roomDetails, user, setCollabUsers]
   );
 
   /********************************Collaborators incoming event handlers ************* */
   const sharedMouseDown = useCallback(
     (data) => {
-      const {
+      var {
         userId,
         x,
         y,
         selectedTool,
+        lineWidth,
+        eraserWidth,
         selectedColor,
         brushStyle,
         lineJoin,
         lineCap,
         shadowBlur,
       } = data;
-
+      if (userId === user._id) return;
+      if (selectedTool === "Eraser") {
+        selectedColor = "white";
+        lineWidth = eraserWidth;
+      }
       console.log("Data mouse down", data);
       const object = {
         ...userObject,
+        userId: userId,
+        selectedTool: selectedTool,
         selectedColor: selectedColor,
         brushStyle: brushStyle,
         lineJoin: lineJoin,
         lineCap: lineCap,
         shadowBlur: shadowBlur,
+        lineWidth: lineWidth,
+        eraserWidth: eraserWidth,
+        // drawing: true,
+        // startX: x,
+        // startY: y,
       };
 
       collabUsers.set(userId, object);
-
+      console.log(
+        "for objecting ",
+        userObject,
+        object,
+        collabUsers.get(userId)
+      );
+      // console.log("collabUsers", collabUsers);
       const canvas = canvasRef.current;
       if (!canvas) return;
       const context = canvas.getContext("2d");
@@ -872,14 +896,15 @@ function DrawingCanvas() {
           canvasRef.current.height
         );
         const floodFill = new FloodFill(imgData);
-        floodFill.fill(context.strokeStyle, x, y, 0);
+        floodFill.fill(selectedColor, x, y, 0);
         context.putImageData(floodFill.imageData, 0, 0);
       } else {
-        var user = collabUsers.get(userId);
-        user = { ...user, drawing: true };
-        collabUsers.set(userId, user);
+        var coluser = collabUsers.get(userId);
+        coluser = { ...coluser, drawing: true };
+        collabUsers.set(userId, coluser);
         context.beginPath();
         context.moveTo(x, y);
+        context.lineWidth = lineWidth;
       }
     },
     [collabUsers]
@@ -888,17 +913,18 @@ function DrawingCanvas() {
   const sharedMouseMove = useCallback(
     (data) => {
       const { userId, x, y } = data;
-      const user = collabUsers.get(userId);
-      console.log("User", user, userId);
-      console.log("collab", collabUsers);
-      const drawing = user.drawing;
-      if(drawing )console.log("drawing")
+      if (userId === user._id) return;
+      const coluser = collabUsers.get(userId);
+      // console.log("User", user, userId);
+      // console.log("collab", collabUsers);
+      const drawing = coluser.drawing;
+      // if (drawing) console.log("drawing");
       if (drawing === false) return;
-      console.log("drawingoiaoijpo")
       const canvas = canvasRef.current;
       if (!canvas) return;
       const context = canvas.getContext("2d");
-      console.log("moving");
+      // console.log("moving");
+      context.strokeStyle = coluser.selectedColor;
       context.lineTo(x, y);
       context.stroke();
     },
@@ -909,10 +935,13 @@ function DrawingCanvas() {
     (data) => {
       const { userId } = data;
       const canvas = canvasRef.current;
-      console.log("Mousee up event")
+      console.log("Mousee up event");
       var drawingSettings = collabUsers.get(userId);
+      console.log("drawingSettings in mouse up", drawingSettings);
       drawingSettings = { ...drawingSettings, drawing: false };
-      setCollabUsers((prevCollabUsers)=>new Map(prevCollabUsers).set(userId,drawingSettings))
+      setCollabUsers((prevCollabUsers) =>
+        new Map(prevCollabUsers).set(userId, drawingSettings)
+      );
       if (!canvas) return;
       const ctx = canvas.getContext("2d");
       ctx.closePath();
@@ -923,11 +952,11 @@ function DrawingCanvas() {
     [collabUsers, saveCanvasState]
   );
 
-  console.log("Mouse-up",collabUsers)
+  console.log("Mouse-up", collabUsers);
 
   useEffect(() => {
     socket?.on("collab-mouse-down", (data) => {
-      console.log("collab mouse down")
+      console.log("collab mouse down");
       sharedMouseDown(data);
     });
     socket?.on("collab-mouse-move", (data) => {
@@ -940,7 +969,8 @@ function DrawingCanvas() {
       updateRoomDetails(userDetails);
     });
     socket?.on("collab-room-created", (room) => {
-      console.log("User details", room);
+      console.log("User details room creating", room);
+      setRoomDetails(room);
       setCollabUsers((prevCollabUsers) =>
         new Map(prevCollabUsers).set(
           user._id,
@@ -969,7 +999,7 @@ function DrawingCanvas() {
     roomDetails,
     setCollabUsers,
     updateRoomDetails,
-    user
+    user,
   ]);
 
   return progress ? (
@@ -994,6 +1024,7 @@ function DrawingCanvas() {
         />
         <ShapesMenu SwitchToVirtual={SwitchToVirtual} />
         <ColorPalette />
+
         <UndoRedo isOpen={isOpen} redrawCanvas={redrawCanvas} />
       </Box>
       <SavingAndSocialMenu

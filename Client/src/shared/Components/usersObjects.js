@@ -1,12 +1,13 @@
 const user = {
   userId: null,
-  selectedTool: null,
-  selectedcolor: null,
+  selectedTool: "Pencil",
+  selectedColor: "black",
   startX: null,
   startY: null,
   endX: null,
   endY: null,
-  lineWidth: null,
+  lineWidth: 1,
+  eraserWidth: 5,
   shadowBlur: null,
   brushStyle: null,
   lineJoin: null,
@@ -14,4 +15,4 @@ const user = {
   drawing: false,
 };
 
-export default user
+export default user;

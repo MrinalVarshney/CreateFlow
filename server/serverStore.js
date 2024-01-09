@@ -83,11 +83,11 @@ const removerUserFromRandomRoom = (userId, roomCode) => {
   if (room.participants.length === 0) {
     randomRooms = randomRooms.filter((room) => room.roomCode !== roomCode);
   }
-  if(roomCodeMap.has(userId)){
-    roomCodeMap.delete(userId)
+  if (roomCodeMap.has(userId)) {
+    roomCodeMap.delete(userId);
   }
   return room;
-}
+};
 
 const mapUserToRoomCode = (userId, roomCode) => {
   console.log("setting roomCode", roomCode, userId);
@@ -258,5 +258,5 @@ module.exports = {
   createNewRandomRoom,
   pushInAvailableRandomRoom,
   removerUserFromRandomRoom,
-  startRandomGame
+  startRandomGame,
 };

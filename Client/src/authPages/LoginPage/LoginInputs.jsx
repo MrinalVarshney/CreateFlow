@@ -1,4 +1,4 @@
-import React, { useState,useRef } from "react";
+import React, { useState, useRef } from "react";
 import InputWithLabel from "../../shared/Components/InputWithLabel";
 import {
   Dialog,
@@ -9,7 +9,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { RecoverPassword } from "../../Actions/authActions";
-import {validateMail} from "../../shared/utils/FomValidator";
+import { validateMail } from "../../shared/utils/FomValidator";
 import ErrorToast from "../../shared/Components/ErrorToast";
 
 const LoginInputs = ({ mail, setMail, password, setPassword }) => {
@@ -24,26 +24,32 @@ const LoginInputs = ({ mail, setMail, password, setPassword }) => {
     setIsModalOpen(true);
   }
 
-
   const handlePasswordRecovery = async (e) => {
     console.log(recoveryEmail);
     e.preventDefault();
-    if(!validateMail(recoveryEmail)){
-      setIsModalOpen(false)
-      setError("Enter correct e-mail address")
-      return 
+    if (!validateMail(recoveryEmail)) {
+      setIsModalOpen(false);
+      setError("Enter correct e-mail address");
+      return;
     }
     setshowProgressBar(true);
     const response = await RecoverPassword(recoveryEmail);
+    console.log("response", response);
     if (response.error) {
       console.log(response.errorMessage);
       setIsModalOpen(false);
       setshowProgressBar(false);
-      setError(response.errorMessage)
+      setError(response.errorMessage);
     } else {
-      setIsVerified(true);
+      if (!response.data.verified) {
+        setIsModalOpen(false);
+        setError("Your account is not verified");
+        setshowProgressBar(false);
+        return;
+      }
+      setIsVerified(response.data.verified);
       userMail.current = response.data.email;
-      console.log(response)
+      console.log("response ", response);
     }
     setRecoveryEmail("");
   };
@@ -52,8 +58,8 @@ const LoginInputs = ({ mail, setMail, password, setPassword }) => {
     e.preventDefault();
     const response = await RecoverPassword(userMail.current);
     if (response.error) {
-      setError(response.errorMessage)
-      setIsModalOpen(false)
+      setError(response.errorMessage);
+      setIsModalOpen(false);
     } else {
       setIsVerified(true);
     }
@@ -91,17 +97,16 @@ const LoginInputs = ({ mail, setMail, password, setPassword }) => {
       <Dialog
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        maxWidth="md" 
+        maxWidth="md"
         fullWidth
       >
-        {isVerified ? (
+        {isVerified === true ? (
           <>
-
             <DialogTitle>Password Recovery</DialogTitle>
             <DialogContent>
               <p>
-                We have sent you a link to reset your password at {userMail.current}.
-                Please check your e-mail.
+                We have sent you a link to reset your password at{" "}
+                {userMail.current}. Please check your e-mail.
               </p>
             </DialogContent>
             <DialogActions>
@@ -156,7 +161,7 @@ const LoginInputs = ({ mail, setMail, password, setPassword }) => {
           </>
         )}
       </Dialog>
-      {error && <ErrorToast message={error} setError={setError}/>}
+      {error && <ErrorToast message={error} setError={setError} />}
     </>
   );
 };

@@ -84,6 +84,7 @@ export default function Tools({ setIsOpen, selectFile, setBrushStyle }) {
       if (selectedTool !== tool) {
         width = 1;
         setLineWidth(1);
+        console.log("lineWidth changed to 1");
       }
       setMax(10);
     }

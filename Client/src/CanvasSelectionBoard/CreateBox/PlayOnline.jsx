@@ -59,8 +59,8 @@ function PlayOnline() {
   const [HostroomCode, setHostRoomCode] = useState({ host: "", roomCode: "" });
   const [joinRoomCode, setJoinRoomCode] = useState("");
   const [isUserJoined, setIsUserJoined] = useState(false);
-  const [error, setError] = useState(null)
-  const [infoError,setInfoError] = useState(null)
+  const [error, setError] = useState(null);
+  const [infoError, setInfoError] = useState(null);
   const navigate = useNavigate();
 
   const timeSlots = [30, 60, 90, 120, 200];
@@ -120,7 +120,7 @@ function PlayOnline() {
   const handleCloseHostModal = () => {
     setIsModalOpen(false);
     const roomCode = HostroomCode.roomCode;
-    socket?.emit("match-cancelled",roomCode);
+    socket?.emit("match-cancelled", roomCode);
   };
 
   const playRandom = () => {
@@ -189,24 +189,32 @@ function PlayOnline() {
       startGame();
     });
 
-    socket?.on("match-cancelled",()=>{
-      if(user.userId === roomDetails?.roomCreator.userId) {
-        setInfoError("You cancelled the match")
+    socket?.on("match-cancelled", () => {
+      if (user.userId === roomDetails?.roomCreator.userId) {
+        setInfoError("You cancelled the match");
+      } else {
+        setInfoError("Match cancelled by host");
+        setIsModalOpen(false);
       }
-      else{
-        setInfoError("Match cancelled by host")
-        setIsModalOpen(false)
-      }
-      setRoomDetails(null)
-    })
-
+      setRoomDetails(null);
+    });
 
     return () => {
       socket?.off("user-joined", handleUserJoined);
       socket?.off("game-started", startGame);
-      socket?.off("game-cancelled")
+      socket?.off("game-cancelled");
     };
-  }, [socket, handleUserJoined, navigate, playingGameRef, startGame,setInfoError,roomDetails,user,setRoomDetails]);
+  }, [
+    socket,
+    handleUserJoined,
+    navigate,
+    playingGameRef,
+    startGame,
+    setInfoError,
+    roomDetails,
+    user,
+    setRoomDetails,
+  ]);
 
   const joinRoom = (roomCode) => {
     console.log("joined the room");
@@ -229,10 +237,10 @@ function PlayOnline() {
 
   const start = () => {
     setIsModalOpen(false);
-    if(roomDetails.participants.length < 2){
-      setError("Minimum 2 players required to start the game")
-      return;
-    }
+    // if(roomDetails.participants.length < 2){
+    //   setError("Minimum 2 players required to start the game")
+    //   return;
+    // }
     const data = {
       roomCode: roomDetails.roomCode,
       player: roomDetails.roomCreator,
@@ -482,8 +490,8 @@ function PlayOnline() {
         </div>
         {/* </div> */}
       </div>
-      {error && <ErrorToast message={error} setError={setError}/>}
-      {infoError && <InfoToast message={infoError} setError={setInfoError}/>}
+      {error && <ErrorToast message={error} setError={setError} />}
+      {infoError && <InfoToast message={infoError} setError={setInfoError} />}
     </div>
   );
 }

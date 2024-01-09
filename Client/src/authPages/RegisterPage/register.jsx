@@ -37,7 +37,7 @@ const Register = () => {
       setError(response.errorMessage);
       return;
     }
-    
+
     setShowVerifyMessage(true);
   };
 

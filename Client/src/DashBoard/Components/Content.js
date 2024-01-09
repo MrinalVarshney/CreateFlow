@@ -7,9 +7,9 @@ import Navbar from "./Navbar";
 import RulesCurser from "./RulesCurser";
 import CustomBackdrop from "../../shared/Components/CustomBackDrop";
 
-const YourComponent = ({notifications}) => {
+const YourComponent = ({ notifications }) => {
   const [playedOnce, setPlayedOnce] = useState(false);
-  const [progress,setProgress] = useState(false)
+  const [progress, setProgress] = useState(false);
   const handleLoad = () => {
     setTimeout(() => {
       if (!playedOnce) setPlayedOnce(true);
@@ -20,18 +20,19 @@ const YourComponent = ({notifications}) => {
     e.preventDefault();
     e.stopPropagation();
     setProgress(true);
-    setTimeout(()=>{
+    setTimeout(() => {
       navigate("/PlayOnline");
-      setProgress(false)
-    },2000)
+      setProgress(false);
+    }, 2000);
   };
 
-  const GoToGallery = ()=>{
-    navigate("/drawingGallery")
-  }
+  const GoToGallery = () => {
+    navigate("/drawingGallery");
+  };
 
-  return (
-    progress? <CustomBackdrop showProgress={progress}/> :
+  return progress ? (
+    <CustomBackdrop showProgress={progress} />
+  ) : (
     <div className="Inner-container">
       <div className="left-container">
         <div class="top-box">
@@ -39,7 +40,7 @@ const YourComponent = ({notifications}) => {
             <img
               src={AppImg}
               alt="App logo"
-              style={{ width: "100%", height: "100%" }}
+              style={{ width: "100%", height: "100%", opacity: 0.9 }}
             />
           ) : (
             <img
@@ -61,20 +62,22 @@ const YourComponent = ({notifications}) => {
 
         <div class="bottom-box">
           <div className="box sideBoxes">
-            <div className="playText" onClick={GoToGallery}>Drawing Boards</div>
+            <div className="playText" onClick={GoToGallery}>
+              Drawing Boards
+            </div>
           </div>
         </div>
       </div>
 
       <div className="right-container">
-      <Navbar notifications={notifications}/>
-      <div className="welcome-page">
-        <h2 className="welcome-title">Welcome, Doodlers!</h2>
-        <p className="welcome-text">
-          Get ready to unleash your creativity. Here's a quick guide to get
-          started:
-        </p>
-        <RulesCurser />
+        <Navbar notifications={notifications} />
+        <div className="welcome-page">
+          <h2 className="welcome-title">Welcome, Doodlers!</h2>
+          <p className="welcome-text">
+            Get ready to unleash your creativity. Here's a quick guide to get
+            started:
+          </p>
+          <RulesCurser />
         </div>
       </div>
     </div>

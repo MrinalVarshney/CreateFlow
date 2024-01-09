@@ -14,43 +14,44 @@ import { useUserAndChats } from "./Context/userAndChatsProvider.jsx";
 import LeaderBoard from "./shared/Components/LeaderBoard.js";
 import NetworkErrorPage from "./NetworkErrorPages/ErrorPage.js";
 import NotFound from "./NetworkErrorPages/NotFoundPage.js";
+import CollaborativeCanvas from "./CollaborativeCanvas.js";
 
 function App() {
-  const {Socket} = useUserAndChats();
+  const { Socket } = useUserAndChats();
   const socket = Socket.current;
-  useEffect(()=>{
-    socket?.on("join-invitation",(data)=>{
-      console.log("Join Invitation")
-      console.log(data)
-    })
-  },[socket])
-  
+  useEffect(() => {
+    socket?.on("join-invitation", (data) => {
+      console.log("Join Invitation");
+      console.log(data);
+    });
+  }, [socket]);
+
   return (
     <>
-
-     {
-        (window.navigator.onLine)===false ? <NetworkErrorPage/> :  
-       
-          
-
-      <Routes>
-      <Route exact path="/canvas" Component={Canvas} />
-      <Route exact path="/dashboard" Component={Dashboard} />
-      <Route exact path="/" Component={Login} />
-      <Route exact path="/register" Component={Register} />
-      <Route exact path="/skribble" Component={SkribblePage} />
-      <Route exact path="/verify-email" Component={EmailConfirmationPage} />
-      <Route exact path="/reset-password" Component={ResetPasswordPage} />
-      <Route exact path="/playOnline" Component={PlayOnline} />
-      <Route exact path="/drawingGallery" Component={DrawingGallery} />
-      <Route exact path="/leaderBoard" Component={LeaderBoard} />
-      <Route exact path="/offline" Component={NetworkErrorPage} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-}
-
+      {window.navigator.onLine === false ? (
+        <NetworkErrorPage />
+      ) : (
+        <Routes>
+          <Route exact path="/canvas" Component={Canvas} />
+          <Route exact path="/dashboard" Component={Dashboard} />
+          <Route exact path="/" Component={Login} />
+          <Route exact path="/register" Component={Register} />
+          <Route exact path="/skribble" Component={SkribblePage} />
+          <Route exact path="/verify-email" Component={EmailConfirmationPage} />
+          <Route exact path="/reset-password" Component={ResetPasswordPage} />
+          <Route exact path="/playOnline" Component={PlayOnline} />
+          <Route exact path="/drawingGallery" Component={DrawingGallery} />
+          <Route exact path="/leaderBoard" Component={LeaderBoard} />
+          <Route exact path="/offline" Component={NetworkErrorPage} />
+          <Route
+            exact
+            path="/collaborativeDrawing"
+            Component={CollaborativeCanvas}
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      )}
     </>
-
   );
 }
 

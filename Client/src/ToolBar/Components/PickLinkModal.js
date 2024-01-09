@@ -1,55 +1,46 @@
 // PicLinkModal.js
 
-import React from 'react';
-import {
-  Modal,
-  Backdrop,
-  Fade,
-  Typography,
-  Button,
-} from '@mui/material'
-import {makeStyles} from '@mui/styles'
+import React from "react";
+import { Modal, Button } from "@mui/material";
 
-const useStyles = makeStyles((theme) => ({
-  modal: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  paper: {
-
-    border: '2px solid #000',
-
-  },
-}));
+import FileCopyIcon from "@mui/icons-material/FileCopy";
+import TextField from "@mui/material/TextField";
 
 const PicLinkModal = ({ open, onClose, picUrl }) => {
-  const classes = useStyles();
+  const handleCopy = () => {
+    navigator.clipboard.writeText(picUrl);
+    console.log("copied");
+  };
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      className={classes.modal}
-      closeAfterTransition
-      BackdropComponent={Backdrop}
-      BackdropProps={{
-        timeout: 500,
-      }}
-    >
-      <Fade in={open}>
-        <div className={classes.paper}>
-          <Typography variant="h6" gutterBottom>
-            Pic URL:
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            {picUrl}
-          </Typography>
-          <Button variant="contained" color="primary" onClick={onClose}>
-            Close
-          </Button>
-        </div>
-      </Fade>
+    <Modal open={open} onClose={onClose}>
+      <div
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          backgroundColor: "white",
+          padding: "20px",
+          borderRadius: "8px",
+        }}
+      >
+        <h2 style={{ textAlign: "center", marginBottom: "16px" }}>
+          Copy and share your canvas snap !!
+        </h2>
+        <TextField
+          value={picUrl}
+          fullWidth
+          variant="outlined"
+          InputProps={{
+            readOnly: true,
+          }}
+          style={{ marginBottom: "16px" }}
+        />
+        <Button onClick={handleCopy} style={{ marginRight: "8px" }}>
+          <FileCopyIcon />
+        </Button>
+      </div>
     </Modal>
   );
 };

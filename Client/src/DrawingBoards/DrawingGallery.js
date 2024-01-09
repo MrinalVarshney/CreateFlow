@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import PreMadeDrawingCard from "./Components/PreMadeDrawingCard";
 import AddnewCard from "./Components/AddnewCard";
-import { Container } from "@mui/material";
+import { Button, Container } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import * as api from "../api";
 import ErrorToast from "../shared/Components/ErrorToast";
@@ -92,6 +92,19 @@ const DrawingGallery = () => {
       )}
       {error && <ErrorToast message={error} setError={setError} />}
       {success && <SuccessToast message={success} setSuccess={setSuccess} />}
+      <Button
+        onClick={() => navigate("/dashboard")}
+        style={{
+          top: "88%",
+          left: "84%",
+          width: "fit-content",
+          padding: "0.5%",
+          backgroundColor: "rgb(66 157 196)",
+          color: "white",
+        }}
+      >
+        Go to DashBoard
+      </Button>
     </Container>
   );
 };

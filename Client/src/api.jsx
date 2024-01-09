@@ -21,8 +21,6 @@ apiClient.interceptors.request.use(
   }
 );
 
-
-
 export const login = async (data) => {
   try {
     return await apiClient.post("/api/auth/login", data);
@@ -57,13 +55,14 @@ export const RecoverPassword = async (mail) => {
   }
 };
 
-export const updateProfile = async(data)=>{
-  try{
-    await apiClient.post("/api/user/updateProfile",data);
-  }catch(error){
-    return {error:true, errorMessage:error.response.data}
+export const updateProfile = async (data) => {
+  try {
+    const response = await apiClient.post("/api/user/updateProfile", data);
+    console.log("response ", response);
+  } catch (error) {
+    return { error: true, errorMessage: error.response.data };
   }
-}
+};
 
 export const checkExpiry = async (token) => {
   try {
@@ -135,55 +134,58 @@ export const userLogout = async (userId) => {
 
 export const getUsers = async (userName) => {
   const params = {
-    userName: userName
-  }
-  try{
-    return await apiClient.get("/api/user/searchUsers", {params: params});
-  }
-  catch(error){
-    return {
-      error: true,
-      errorMessage: error.response.data,
-    };
-  }
-}
-
-export const getPendingInvitations = async (userId) => {
+    userName: userName,
+  };
   try {
-    const params = {userId:userId}
-    return await apiClient.get("/api/user/getPendingInvitations",{params:params});
+    return await apiClient.get("/api/user/searchUsers", { params: params });
   } catch (error) {
     return {
       error: true,
       errorMessage: error.response.data,
     };
   }
-}
+};
 
-export const addToFavourites = async (canvasId,userId) =>{
-  const data= {canvasId,userId}
-  try{
-    return await apiClient.post("/api/user/favourites/add",data)
-  }catch(error){
+export const getPendingInvitations = async (userId) => {
+  try {
+    const params = { userId: userId };
+    return await apiClient.get("/api/user/getPendingInvitations", {
+      params: params,
+    });
+  } catch (error) {
     return {
       error: true,
-      message: error.response.data
-    }
+      errorMessage: error.response.data,
+    };
   }
-}
+};
 
-export const removeFromFavourites = async (canvasId,userId) =>{
-  console.log("CanvasId",canvasId)
-  const params = {canvasId:canvasId, userId:userId}
-  try{
-    return await apiClient.delete(`/api/user/favourites/remove`,{params:params})
-  }catch(error){
+export const addToFavourites = async (canvasId, userId) => {
+  const data = { canvasId, userId };
+  try {
+    return await apiClient.post("/api/user/favourites/add", data);
+  } catch (error) {
     return {
       error: true,
-      message: error.response.data
-    }
+      message: error.response.data,
+    };
   }
-}
+};
+
+export const removeFromFavourites = async (canvasId, userId) => {
+  console.log("CanvasId", canvasId);
+  const params = { canvasId: canvasId, userId: userId };
+  try {
+    return await apiClient.delete(`/api/user/favourites/remove`, {
+      params: params,
+    });
+  } catch (error) {
+    return {
+      error: true,
+      message: error.response.data,
+    };
+  }
+};
 
 export const getAllCanvas = async (userId) => {
   try {
@@ -208,14 +210,13 @@ export const saveCanvas = async (data) => {
   }
 };
 
-export const updateCanvas = async (updates)=>{
-  try{
-    return await apiClient.post("/api/canvas/resaveCanvas",updates);
-  }catch(error){
+export const updateCanvas = async (updates) => {
+  try {
+    return await apiClient.post("/api/canvas/resaveCanvas", updates);
+  } catch (error) {
     return {
       error: true,
-      errorMessage: error.response.data
-    }
+      errorMessage: error.response.data,
+    };
   }
-}
-
+};

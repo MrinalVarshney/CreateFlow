@@ -80,6 +80,7 @@ function Leaderboard({ scoreCard, setShowLeaderBoard }) {
               <Button onClick={() => handleFinish()}> Go to dashBoard</Button>
             )}
           </tbody>
+          9
         </table>
       </div>
       <WinnerSound />
