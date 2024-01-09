@@ -54,8 +54,7 @@
     ]
   },
   "devDependencies": {
-    "@iconify/react": "^4.1.1",
-    "autoprefixer": "^10.4.16"
+    "@iconify/react": "^4.1.1"
   },
   "overrides": {
     "react-lottie": {
