@@ -34,7 +34,7 @@ const useStyles = makeStyles({
 });
 
 const RandomWordModal = ({ show, closeRandomWordModal }) => {
-  const { Socket, roomDetails, rounds, time, difficulty } = useUserAndChats();
+  const { Socket, roomDetails, rounds, time, difficulty} = useUserAndChats();
   console.log("time in random", time);
   const socket = Socket.current;
   const classes = useStyles();
@@ -58,9 +58,13 @@ const RandomWordModal = ({ show, closeRandomWordModal }) => {
   console.log("Show value---->", show);
 
   const randomPlayer = () => {
-    const rand = Math.floor(Math.random() * roomDetails?.participants.length);
-    console.log("rand", rand);
-    return roomDetails?.participants[rand];
+    if(roomDetails?.participants.length){
+      let roundsPlayed =
+          parseInt(localStorage.getItem("roundsPlayed"), 10) || 1;
+      return roomDetails?.participants[(roundsPlayed-1)%roomDetails?.participants.length];
+    
+    }
+
   };
 
   const handleclose = (word) => {

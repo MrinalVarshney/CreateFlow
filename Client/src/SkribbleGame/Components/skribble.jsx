@@ -10,7 +10,6 @@ import LeaderBoard from "../../shared/Components/LeaderBoard";
 import PopUpMenu from "../../shared/Components/PopUpMenu";
 import ErrorToast from "../../shared/Components/ErrorToast";
 import RightAnsSound from "./RightAnsSound";
-import CollaborativeCanvas from "../../CollaborativeCanvas";
 
 function Skribble() {
   const {
@@ -183,6 +182,9 @@ function Skribble() {
   const handleSend = (e) => {
     e.preventDefault();
     console.log(message, user);
+    // selectedWord = selectedWord?.toLowerCase();
+    var message = message?.toLowerCase();
+    var selectedWord = selectedWord?.toLowerCase();
     const data = {
       userId: user?._id,
       userName: user?.username,
@@ -226,9 +228,7 @@ function Skribble() {
       roomType: roomDetails?.roomType,
     };
     setShowTimer(false);
-    localStorage.removeItem("roomDetails");
     setRoomDetails(null);
-    localStorage.removeItem("chats");
     setChats([]);
     socket?.emit("leave-room", data);
     navigate("/playOnline");
@@ -239,6 +239,7 @@ function Skribble() {
     socket?.emit("end-game", roomCode);
     setRoomDetails(null);
     setChats([]);
+    playingGameRef.current = false;
   }, [socket]);
 
   const handleFilterParticipants = useCallback(
@@ -273,6 +274,7 @@ function Skribble() {
     console.log("Starting random game");
     setShowTimer(true);
     setRoomDetails({ ...roomDetails, isGameStarted: true });
+    setChats([]);
   }, [roomDetails, setShowTimer, setRoomDetails]);
 
   useEffect(() => {
@@ -331,7 +333,8 @@ function Skribble() {
     });
     socket?.on("game-ended", () => {
       setRoomDetails(null);
-      setChats(null);
+      setChats([]);
+      playingGameRef.current = false;
       navigate("/playOnline");
     });
     socket?.on("join-room-error", (message) => {
@@ -462,247 +465,234 @@ function Skribble() {
   console.log(randomDrawer);
   console.log("rounds ", rounds);
   return (
-    <>
-      if(true)
-      {
-        <div style={{ height: "100vh", marginBottom: "0px" }}>
-          <CollaborativeCanvas />
-        </div>
-      }
-      else
-      {
-        <div style={{ height: "100vh", marginBottom: "0px" }}>
-          {guessSound && <RightAnsSound />}
-          {roomDetails &&
-          roomDetails.roomType === "random" &&
-          roomDetails.isGameStarted === false ? (
-            <SharedCanvas />
-          ) : randomDrawer?.userId === user?._id ? (
-            <>
-              <SkribbleCanvas
-                setWord={setSelectedWord}
-                show={show}
-                setShow={setShow}
-                closeRandomWordModal={closeRandomWordModal}
-              />
-            </>
-          ) : (
-            <SharedCanvas showCursorWithName={showCursorWithName} />
-          )}
-          <Modal open={showLeaderBoard} style={{ top: "50px" }}>
-            <LeaderBoard
-              scoreCard={scoreCard}
-              setShowLeaderBoard={setShowLeaderBoard}
-            />
-          </Modal>
-          <Paper
-            style={{
-              height: "9vh",
-              marginBottom: "20px",
-              top: 0,
-              width: "100%",
-              position: "absolute",
-              backgroundColor: "yellow",
-              zIndex: 2,
-            }}
-          >
-            <Box>
-              <div style={{ display: "flex" }}>
-                <CountdownTimer startTimer={startTimer} scoreCard={scoreCard} />
-                <div
-                  style={{
-                    width: "auto",
-                    marginLeft: "70%",
-                    position: "relative",
-                    display: "flex",
-                    flexWrap: "wrap",
-                    alignContent: "center",
-                  }}
-                >
-                  {roomDetails &&
-                    user?._id !== roomDetails?.roomCreator?.userId && (
-                      <Button
-                        variant="outlined"
-                        style={{ color: "blue" }}
-                        onClick={handleCursorChange}
-                      >
-                        {showCursorWithName
-                          ? "Disable name on cursor"
-                          : "Enable name on cursor"}
-                      </Button>
-                    )}
+    <div style={{ height: "100vh", marginBottom: "0px" }}>
+      {guessSound && <RightAnsSound />}
+      {roomDetails &&
+      roomDetails.roomType === "random" &&
+      roomDetails.isGameStarted === false ? (
+        <SharedCanvas />
+      ) : randomDrawer?.userId === user?._id ? (
+        <>
+          <SkribbleCanvas
+            setWord={setSelectedWord}
+            show={show}
+            setShow={setShow}
+            closeRandomWordModal={closeRandomWordModal}
+          />
+        </>
+      ) : (
+        <SharedCanvas
+          showCursorWithName={showCursorWithName}
+          randomDrawer={randomDrawer}
+        />
+      )}
+      <Modal open={showLeaderBoard} style={{ top: "50px" }}>
+        <LeaderBoard
+          scoreCard={scoreCard}
+          setShowLeaderBoard={setShowLeaderBoard}
+        />
+      </Modal>
+      <Paper
+        style={{
+          height: "9vh",
+          marginBottom: "20px",
+          top: 0,
+          width: "100%",
+          position: "absolute",
+          backgroundColor: "yellow",
+          zIndex: 2,
+        }}
+      >
+        <Box>
+          <div style={{ display: "flex" }}>
+            <CountdownTimer startTimer={startTimer} scoreCard={scoreCard} />
+            <div
+              style={{
+                width: "auto",
+                marginLeft: "70%",
+                position: "relative",
+                display: "flex",
+                flexWrap: "wrap",
+                alignContent: "center",
+              }}
+            >
+              {roomDetails &&
+                user?._id !== roomDetails?.roomCreator?.userId && (
                   <Button
                     variant="outlined"
-                    color="error"
-                    onClick={handleLeave}
+                    style={{ color: "blue" }}
+                    onClick={handleCursorChange}
                   >
-                    Leave
+                    {showCursorWithName
+                      ? "Disable name on cursor"
+                      : "Enable name on cursor"}
                   </Button>
-                  {roomDetails &&
-                    user?._id === roomDetails?.roomCreator?.userId &&
-                    (roomDetails.roomType === "private" ? (
-                      <Button
-                        style={{ marginLeft: "10px" }}
-                        variant="contained"
-                        color="success"
-                        onClick={handleEnd}
-                      >
-                        End
-                      </Button>
-                    ) : (
-                      <Button
-                        style={{ marginLeft: "10px" }}
-                        variant="contained"
-                        color="success"
-                        onClick={startGame}
-                      >
-                        Start Game
-                      </Button>
-                    ))}
-                </div>
-              </div>
-            </Box>
-          </Paper>
-          {/* First Part */}
-          <Paper
-            style={{
-              height: "91vh",
-              width: "16%",
-              position: "absolute",
-              top: 66,
-              zIndex: 2,
-            }}
-          >
-            <Box p={2}>
-              <h3>joined users</h3>
-              <hr />
-              {
-                roomDetails && roomDetails.participants
-                  ? roomDetails.participants.map((participants) => (
-                      <div
-                        style={{
-                          backgroundColor:
-                            participants?.userId ===
-                            roomDetails?.roomCreator.userId
-                              ? "lightgreen"
-                              : "white",
-                        }}
-                        onClick={handleUserClick}
-                      >
-                        <p
-                          style={{
-                            fontSize: "17px",
-                            marginLeft: "10px",
-                          }}
-                        ></p>
-
-                        {participants.userName}
-                        {user?._id === roomDetails?.roomCreator?.userId &&
-                          participants.userId !==
-                            roomDetails?.roomCreator?.userId && (
-                            <PopUpMenu
-                              style={{ position: "relative", right: "0" }}
-                              userId={participants.userId}
-                              handleKick={handleKick}
-                              handleRestrict={handleRestrict}
-                              handleWarn={handleWarn}
-                            />
-                          )}
-                      </div>
-                    ))
-                  : null // or another fallback if needed
-              }
-            </Box>
-          </Paper>
-
-          {/* Third Part */}
-          <Paper
-            style={{
-              height: "91vh",
-              width: "25%",
-              right: 0,
-              top: 66,
-              position: "absolute",
-              zIndex: 2,
-            }}
-          >
-            <Box p={2}>
-              <Paper style={{ height: "77vh" }}>
-                <div
-                  ref={messageContainerRef}
-                  style={{
-                    height: "100%",
-                    overflowY: "auto",
-                    overflowX: "hidden",
-                    marginBottom: "5px",
-                  }}
-                >
-                  {chats &&
-                    chats?.map((m) => (
-                      <p
-                        key={m.message}
-                        style={{
-                          borderBottom: "0.5px solid #b8bcbd",
-                          display: "flex",
-                          margin: "1px",
-                          wordWrap: "break-word",
-                          overflowWrap: "break-word",
-                        }}
-                      >
-                        <h5
-                          style={{
-                            margin: "0px",
-                            paddingTop: "12px",
-                            width: "auto",
-                          }}
-                        >
-                          {m.user}:
-                        </h5>
-                        <p
-                          style={{
-                            width: "auto",
-                            margin: "5px 0px",
-                            padding: "2px",
-                          }}
-                        >
-                          {m.message}
-                        </p>
-                      </p>
-                    ))}
-                </div>
-              </Paper>
-            </Box>
-            <Box p={1}>
-              {showMessageBar ? (
-                <div>
-                  <Input
-                    value={message}
-                    style={{ width: "75%" }}
-                    placeholder="Enter your message"
-                    onChange={(e) => setMessage(e.target.value)}
-                  />
+                )}
+              <Button variant="outlined" color="error" onClick={handleLeave}>
+                Leave
+              </Button>
+              {roomDetails &&
+                user?._id === roomDetails?.roomCreator?.userId &&
+                (roomDetails.roomType === "private" ? (
                   <Button
-                    style={{
-                      width: "22%",
-                      height: "30px",
-                      fontSize: "12px",
-                    }}
+                    style={{ marginLeft: "10px" }}
                     variant="contained"
-                    endIcon={<SendIcon />}
-                    onClick={(e) => checkForAbusiveLanguage(e)}
+                    color="success"
+                    onClick={handleEnd}
                   >
-                    Send
+                    End
                   </Button>
-                </div>
-              ) : (
-                <p>you are not allowed to message</p>
-              )}
-            </Box>
+                ) : (
+                  <Button
+                    style={{ marginLeft: "10px" }}
+                    variant="contained"
+                    color="success"
+                    onClick={startGame}
+                  >
+                    Start Game
+                  </Button>
+                ))}
+            </div>
+          </div>
+        </Box>
+      </Paper>
+      {/* First Part */}
+      <Paper
+        style={{
+          height: "91vh",
+          width: "16%",
+          position: "absolute",
+          top: 66,
+          zIndex: 2,
+        }}
+      >
+        <Box p={2}>
+          <h3>joined users</h3>
+          <hr />
+          {
+            roomDetails && roomDetails.participants
+              ? roomDetails.participants.map((participants) => (
+                  <div
+                    style={{
+                      backgroundColor:
+                        participants?.userId === roomDetails?.roomCreator.userId
+                          ? "lightgreen"
+                          : "white",
+                    }}
+                    onClick={handleUserClick}
+                  >
+                    <p
+                      style={{
+                        fontSize: "17px",
+                        marginLeft: "10px",
+                      }}
+                    ></p>
+
+                    {participants.userName}
+                    {user?._id === roomDetails?.roomCreator?.userId &&
+                      participants.userId !==
+                        roomDetails?.roomCreator?.userId && (
+                        <PopUpMenu
+                          style={{ position: "relative", right: "0" }}
+                          userId={participants.userId}
+                          handleKick={handleKick}
+                          handleRestrict={handleRestrict}
+                          handleWarn={handleWarn}
+                        />
+                      )}
+                  </div>
+                ))
+              : null // or another fallback if needed
+          }
+        </Box>
+      </Paper>
+
+      {/* Third Part */}
+      <Paper
+        style={{
+          height: "91vh",
+          width: "25%",
+          right: 0,
+          top: 66,
+          position: "absolute",
+          zIndex: 2,
+        }}
+      >
+        <Box p={2}>
+          <Paper style={{ height: "77vh" }}>
+            <div
+              ref={messageContainerRef}
+              style={{
+                height: "100%",
+                overflowY: "auto",
+                overflowX: "hidden",
+                marginBottom: "5px",
+              }}
+            >
+              {chats &&
+                chats?.map((m) => (
+                  <p
+                    key={m.message}
+                    style={{
+                      borderBottom: "0.5px solid #b8bcbd",
+                      display: "flex",
+                      margin: "1px",
+                      wordWrap: "break-word",
+                      overflowWrap: "break-word",
+                    }}
+                  >
+                    <h5
+                      style={{
+                        margin: "0px",
+                        paddingTop: "12px",
+                        width: "auto",
+                      }}
+                    >
+                      {m.user}:
+                    </h5>
+                    <p
+                      style={{
+                        width: "auto",
+                        margin: "5px 0px",
+                        padding: "2px",
+                      }}
+                    >
+                      {m.message}
+                    </p>
+                  </p>
+                ))}
+            </div>
           </Paper>
-          {error && <ErrorToast message={error} setError={setError} />}
-        </div>
-      }
-    </>
+        </Box>
+        <Box p={1}>
+          {showMessageBar ? (
+            <div>
+              <Input
+                value={message}
+                style={{ width: "75%" }}
+                placeholder="Enter your message"
+                onChange={(e) => setMessage(e.target.value)}
+              />
+              <Button
+                style={{
+                  width: "22%",
+                  height: "30px",
+                  fontSize: "12px",
+                }}
+                variant="contained"
+                endIcon={<SendIcon />}
+                onClick={(e) => checkForAbusiveLanguage(e)}
+              >
+                Send
+              </Button>
+            </div>
+          ) : (
+            <p>you are not allowed to message</p>
+          )}
+        </Box>
+      </Paper>
+      {error && <ErrorToast message={error} setError={setError} />}
+    </div>
   );
 }
 

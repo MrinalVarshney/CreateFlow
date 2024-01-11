@@ -9,7 +9,6 @@ import ErrorToast from "../shared/Components/ErrorToast";
 import CustomBackdrop from "../shared/Components/CustomBackDrop";
 import { useUserAndChats } from "../Context/userAndChatsProvider";
 import SuccessToast from "../shared/Components/successToast";
-import ParticleJsBackground from "./Components/ParticleJS";
 import backgroundGallary from "./Components/backgroundImage.jpg";
 
 const DrawingGallery = () => {
@@ -52,19 +51,17 @@ const DrawingGallery = () => {
   };
 
   return (
+        <div style={{width:"100%", height:"100vh",        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center center",backgroundImage: `url(https://img.freepik.com/free-vector/rectangle-frame-yellow-background-template_53876-112298.jpg?w=1060&t=st=1701493951~exp=1701494551~hmac=9fabbc25a1750d8e894b4a94cadcdba0b667d6acdc71c89434379013d83cf33b)`}}>
     <Container
       sx={{
         display: "flex",
         flexDirection: "column",
-        backgroundImage: `url(${backgroundGallary})`,
-        backgroundSize: "cover",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center center",
-        width: "100%",
+        width: "100wh",
         height: "100vh",
       }}
     >
-      <ParticleJsBackground />
       {showProgress ? (
         <CustomBackdrop showProgress={showProgress} />
       ) : (
@@ -106,6 +103,7 @@ const DrawingGallery = () => {
         Go to DashBoard
       </Button>
     </Container>
+    </div>
   );
 };
 

@@ -15,7 +15,7 @@ import {
 } from "../../utils/ShapesLogic.jsx";
 
 
-function DrawingCanvas() {
+function DrawingCanvas({randomDrawer}) {
   const canvasRef = useRef(null);
   const offCanvasRef = useRef(null);
 
@@ -75,7 +75,6 @@ function DrawingCanvas() {
         const cursorCanvas = cursorCanvasRef.current;
         const context = cursorCanvas.getContext("2d");
         context.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
-
         const showName = showNameRef.current;
         console.log("ShowCursorWithName", showCursorWithName)
         if (showName) {
@@ -83,7 +82,7 @@ function DrawingCanvas() {
           const fontSize = 35;
           context.font = fontSize + "px Arial";
           context.fillStyle = "black";
-          const text = "Mrinal Varshney";
+          const text = randomDrawer?.userName;
           context.fillText(text, 30, fontSize + 15);
         }
 

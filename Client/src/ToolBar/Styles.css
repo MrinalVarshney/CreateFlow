@@ -1,24 +1,24 @@
 .circular-icon-container {
-    position: relative;
-    left: 60px;
-    background-color: #1976D2; /* Set your desired background color */
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 5px;
-    margin-left: 2px;
-    padding: 0.7px;
-  }
-  
-  .circular-icon {
-    color: white; 
-    font-size: 28px; 
-  }
+  position: relative;
+  left: 60px;
+  background-color: #1976d2; /* Set your desired background color */
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 5px;
+  margin-left: 2px;
+  padding: 0.7px;
+}
 
-  .circular-icon-container:hover {
-    background-color: #1565C0; 
-    cursor: pointer;
-  }
+.circular-icon {
+  color: white;
+  font-size: 28px;
+}
+
+.circular-icon-container:hover {
+  background-color: #1565c0;
+  cursor: pointer;
+}

@@ -74,7 +74,7 @@ const DrawingCard = ({
 
   return (
     <Card
-      sx={{ maxWidth: 300, borderRadius: 5, boxShadow: 4, margin: 2 }}
+      sx={{ maxWidth: 300, borderRadius: 5, boxShadow: 4, margin: 2,maxHeight:300 }}
       className="preMadeCard"
     >
       <div

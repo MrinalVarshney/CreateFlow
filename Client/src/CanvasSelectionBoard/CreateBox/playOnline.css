@@ -26,6 +26,7 @@
   position: relative;
   transition: box-shadow 0.3s ease-in-out, text-shadow 0.3s ease-in-out;
   overflow: hidden;
+
 }
 .playInsideModal {
   width: 180px;
@@ -40,6 +41,7 @@
   border: 2px solid #f9f9f9; /* Use #000 for black, not #black */
   border-radius: 20px;
   margin: 5%;
+
 }
 
 .playInsideModal:hover {
